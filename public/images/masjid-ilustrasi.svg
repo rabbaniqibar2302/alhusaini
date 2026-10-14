@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="langit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05170f"/>
+      <stop offset="0.55" stop-color="#0f3b2c"/>
+      <stop offset="1" stop-color="#1c6f4f"/>
+    </linearGradient>
+    <radialGradient id="cahaya" cx="0.5" cy="0.62" r="0.45">
+      <stop offset="0" stop-color="#dcaa31" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#dcaa31" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="pola" width="80" height="80" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#dcaa31" stroke-opacity="0.07" stroke-width="1.2">
+        <path d="M40 6l10 24 24 10-24 10-10 24-10-24L6 40l24-10z"/>
+        <path d="M40 17l16 7 7 16-7 16-16 7-16-7-7-16 7-16z"/>
+      </g>
+    </pattern>
+    <mask id="sabit">
+      <rect width="1600" height="900" fill="#fff"/>
+      <circle cx="1268" cy="250" r="52" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1600" height="900" fill="url(#langit)"/>
+  <rect width="1600" height="900" fill="url(#pola)"/>
+  <rect width="1600" height="900" fill="url(#cahaya)"/>
+  <g fill="#f7edc8">
+    <circle cx="180" cy="120" r="2" opacity=".7"/><circle cx="320" cy="210" r="1.5" opacity=".5"/>
+    <circle cx="470" cy="90" r="2.2" opacity=".6"/><circle cx="640" cy="170" r="1.4" opacity=".5"/>
+    <circle cx="930" cy="110" r="1.8" opacity=".6"/><circle cx="1080" cy="230" r="1.5" opacity=".5"/>
+    <circle cx="1420" cy="260" r="2" opacity=".6"/><circle cx="1510" cy="120" r="1.6" opacity=".5"/>
+    <circle cx="760" cy="60" r="1.6" opacity=".55"/><circle cx="90" cy="300" r="1.4" opacity=".45"/>
+  </g>
+  <circle cx="1240" cy="270" r="62" fill="#e6c155" mask="url(#sabit)"/>
+
+  <g fill="#082a1e" stroke="#dcaa31" stroke-opacity=".55" stroke-width="3" stroke-linejoin="round">
+    <!-- menara kiri -->
+    <path d="M365 900V470h52v430"/>
+    <path d="M352 520h78v18h-78z"/>
+    <path d="M370 470c0-34 21-52 21-70 0 18 21 36 21 70z"/>
+    <path d="M391 400v-36"/>
+    <!-- menara kanan -->
+    <path d="M1183 900V470h52v430"/>
+    <path d="M1170 520h78v18h-78z"/>
+    <path d="M1188 470c0-34 21-52 21-70 0 18 21 36 21 70z"/>
+    <path d="M1209 400v-36"/>
+    <!-- bangunan samping -->
+    <path d="M455 900V700h170v200"/>
+    <path d="M975 900V700h170v200"/>
+    <path d="M478 700c0-46 46-70 62-96 16 26 62 50 62 96z"/>
+    <path d="M998 700c0-46 46-70 62-96 16 26 62 50 62 96z"/>
+    <!-- bangunan utama & kubah -->
+    <path d="M580 900V640h440v260"/>
+    <path d="M640 640v-26h320v26"/>
+    <path d="M650 614c-42-46-30-120 46-166 46-28 86-50 104-82 18 32 58 54 104 82 76 46 88 120 46 166z"/>
+    <path d="M800 366v-44"/>
+  </g>
+  <g fill="#e6c155">
+    <path d="M800 286a20 20 0 1 0 16 30 16 16 0 1 1-16-30z"/>
+    <path d="M391 330a13 13 0 1 0 10 20 10 10 0 1 1-10-20z"/>
+    <path d="M1209 330a13 13 0 1 0 10 20 10 10 0 1 1-10-20z"/>
+  </g>
+  <g fill="#f7edc8" opacity=".88">
+    <path d="M760 900v-90c0-26 18-44 40-56 22 12 40 30 40 56v90z"/>
+    <path d="M640 760v-46c0-14 10-24 22-30 12 6 22 16 22 30v46z"/>
+    <path d="M916 760v-46c0-14 10-24 22-30 12 6 22 16 22 30v46z"/>
+    <path d="M520 800v-40c0-12 9-21 20-26 11 5 20 14 20 26v40z"/>
+    <path d="M1040 800v-40c0-12 9-21 20-26 11 5 20 14 20 26v40z"/>
+    <path d="M383 640v-36c0-10 4-16 8-20 4 4 8 10 8 20v36z"/>
+    <path d="M1201 640v-36c0-10 4-16 8-20 4 4 8 10 8 20v36z"/>
+  </g>
+  <rect y="884" width="1600" height="16" fill="#05170f"/>
+</svg>

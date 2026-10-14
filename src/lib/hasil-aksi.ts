@@ -1,0 +1,10 @@
+/** Bentuk balasan seragam semua server action admin (dipakai useActionState). */
+export type HasilAksi = {
+  ok: boolean;
+  pesan: string;
+  galat?: Record<string, string[] | undefined>;
+  /** Penanda unik tiap balasan supaya form bisa bereaksi (mis. reset setelah sukses). */
+  kunci?: number;
+};
+
+export const HASIL_AWAL: HasilAksi = { ok: false, pesan: "" };

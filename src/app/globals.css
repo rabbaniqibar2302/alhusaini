@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-arab: var(--font-amiri), "Traditional Arabic", serif;
+
+  /* Hijau tua — warna utama */
+  --color-hijau-50: #eff8f3;
+  --color-hijau-100: #d7efe1;
+  --color-hijau-200: #b0dec6;
+  --color-hijau-300: #7fc6a4;
+  --color-hijau-400: #4ca880;
+  --color-hijau-500: #2b8b64;
+  --color-hijau-600: #1c6f4f;
+  --color-hijau-700: #165a41;
+  --color-hijau-800: #134835;
+  --color-hijau-900: #0f3b2c;
+  --color-hijau-950: #072219;
+
+  /* Emas — aksen */
+  --color-emas-50: #fcf8ea;
+  --color-emas-100: #f7edc8;
+  --color-emas-200: #efd98e;
+  --color-emas-300: #e6c155;
+  --color-emas-400: #dcaa31;
+  --color-emas-500: #c28d1f;
+  --color-emas-600: #a26e18;
+  --color-emas-700: #815217;
+  --color-emas-800: #6b4319;
+  --color-emas-900: #5b3819;
+
+  --color-krem: #fbf8f0;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-white text-stone-800 antialiased;
+  }
+
+  /* Ruang untuk header sticky saat melompat ke anchor. */
+  section[id] {
+    scroll-margin-top: 7.5rem;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-emas-400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@utility pola-islami {
+  /* Pola bintang delapan (geometri Islam), sangat tipis. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23dcaa31' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M28 4l7 17 17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3Cpath d='M28 12l11.3 4.7L44 28l-4.7 11.3L28 44l-11.3-4.7L12 28l4.7-11.3z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 56px 56px;
+}
+
+@utility angka-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+dialog::backdrop {
+  background: rgb(7 34 25 / 0.85);
+  backdrop-filter: blur(2px);
+}
