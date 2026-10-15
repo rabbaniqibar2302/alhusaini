@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { originSama } from "@/lib/origin";
+import { konfigurasiAdminLengkap } from "@/server/auth/konfigurasi";
 import { verifikasiSesiDariToken } from "@/server/auth/sesi-aktif";
 import { NAMA_COOKIE_SESI } from "@/server/auth/token";
 
@@ -12,7 +13,8 @@ import { NAMA_COOKIE_SESI } from "@/server/auth/token";
  *    langsung ditolak.
  * 3. Seluruh /admin (halaman maupun server action) wajib punya sesi yang
  *    valid (JWT bertanda tangan + sesi masih aktif di Redis), kecuali
- *    /admin/login dan /admin/logout.
+ *    /admin/login, /admin/logout, dan GET /admin/setup selama kredensial
+ *    admin belum terpasang (setup awal tanpa perlu login).
  *
  * Ini lapisan pertama saja. Setiap halaman admin dan server action tetap
  * memeriksa ulang sesi di server, jadi keamanan tidak bergantung pada proxy.
@@ -44,7 +46,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (!areaAdmin || JALUR_TANPA_SESI.has(pathname)) {
+  const setupAwal = metodeAman && pathname === "/admin/setup" && !konfigurasiAdminLengkap();
+  if (!areaAdmin || JALUR_TANPA_SESI.has(pathname) || setupAwal) {
     return NextResponse.next();
   }
 

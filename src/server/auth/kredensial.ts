@@ -3,6 +3,9 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import bcrypt from "bcryptjs";
 import * as OTPAuth from "otpauth";
 import { getRedis } from "../redis";
+import { hashPasswordAdmin, kredensialTerkonfigurasi } from "./konfigurasi";
+
+export { kredensialTerkonfigurasi };
 
 /**
  * Verifikasi kredensial satu-satunya akun admin dari environment variable:
@@ -14,14 +17,6 @@ import { getRedis } from "../redis";
 // Hash bcrypt dari string acak yang sudah dibuang; dipakai bila konfigurasi
 // belum lengkap supaya waktu proses tetap sama.
 const HASH_PENGGANTI = "$2b$12$Y00diVHNtyTL0jWt5FZ8EewlYknmOqNxV8aG5PB7o8VWMK2U59HsG";
-const POLA_BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
-
-function hashPasswordAdmin(): string | null {
-  // Toleran terhadap "\$" yang ikut tersalin dari format .env.local.
-  const hash = process.env.ADMIN_PASSWORD_HASH?.trim().replace(/\\\$/g, "$");
-  if (!hash || !POLA_BCRYPT.test(hash)) return null;
-  return hash;
-}
 
 function secretTotp(): string | null {
   const s = process.env.ADMIN_TOTP_SECRET?.replace(/\s+/g, "").toUpperCase();
@@ -32,8 +27,16 @@ export function totpAktif(): boolean {
   return secretTotp() !== null;
 }
 
-export function kredensialTerkonfigurasi(): boolean {
-  return Boolean(process.env.ADMIN_USERNAME?.trim()) && hashPasswordAdmin() !== null;
+type StatusIsian = "kosong" | "tidak-valid" | "ok";
+
+/** Status pengisian env kredensial (tanpa membocorkan nilainya) untuk halaman setup. */
+export function statusKredensial(): { username: boolean; hash: StatusIsian; totp: StatusIsian } {
+  const totp = secretTotp();
+  return {
+    username: Boolean(process.env.ADMIN_USERNAME?.trim()),
+    hash: !process.env.ADMIN_PASSWORD_HASH?.trim() ? "kosong" : hashPasswordAdmin() ? "ok" : "tidak-valid",
+    totp: !totp ? "kosong" : /^[A-Z2-7]{16,}=*$/.test(totp) ? "ok" : "tidak-valid",
+  };
 }
 
 function samaWaktuKonstan(a: string, b: string): boolean {

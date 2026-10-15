@@ -33,7 +33,7 @@ export default async function Dasbor() {
     {
       label: "Verifikasi dua langkah (2FA)",
       ok: totpAktif(),
-      ket: totpAktif() ? "Aktif" : "Belum aktif — sangat disarankan (lihat README)",
+      ket: totpAktif() ? "Aktif" : "Belum aktif — sangat disarankan (lewat tombol Ganti password / 2FA)",
     },
   ];
 
@@ -63,7 +63,17 @@ export default async function Dasbor() {
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Kartu judul="Status sistem">
+        <Kartu
+          judul="Status sistem"
+          aksi={
+            <Link
+              href="/admin/setup"
+              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+            >
+              Ganti password / 2FA
+            </Link>
+          }
+        >
           <ul className="space-y-2.5">
             {status.map((s) => (
               <li key={s.label} className="flex items-start gap-2.5 text-sm">
