@@ -19,8 +19,7 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 
 **Panel admin (`/admin`)**
 
-- Hanya ada satu akun admin dan tidak ada halaman pendaftaran. Kredensialnya dibuat lewat halaman
-  `/admin/setup` (di browser, tanpa install apa pun) dan disimpan sebagai Environment Variables di Vercel.
+- Hanya ada satu akun admin dan tidak ada halaman pendaftaran.
 - Tambah, edit, dan hapus keempat jadwal. Ada juga tombol untuk membersihkan jadwal yang sudah lewat.
 - Menetapkan tanggal 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah sesuai sidang isbat, plus koreksi kalender Hijriah ±2 hari.
 - Upload/ganti foto masjid, foto bukti registrasi Kemenag & DMI, dan foto kegiatan ambulans.
@@ -42,8 +41,6 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 
 ## Deploy ke Vercel (langkah demi langkah)
 
-Tidak perlu meng-install apa pun di komputer Anda.
-
 1. **Import proyek.** Di [vercel.com](https://vercel.com) pilih *Add New → Project*, lalu import repositori ini.
    Framework Next.js terdeteksi otomatis.
 2. **Hubungkan Upstash Redis.** Buka *Project → Storage → Create Database → Upstash for Redis*.
@@ -51,31 +48,27 @@ Tidak perlu meng-install apa pun di komputer Anda.
    Variabel `KV_REST_API_URL` dan `KV_REST_API_TOKEN` akan terisi otomatis.
 3. **Hubungkan Vercel Blob.** Buka *Project → Storage → Create → Blob*, pilih akses **Public**, lalu hubungkan ke proyek.
    Variabel `BLOB_READ_WRITE_TOKEN` akan terisi otomatis.
-4. **Deploy.** Website langsung tampil dengan data contoh. Login admin memang belum bisa dipakai pada tahap ini.
-5. **Buat kredensial admin di website Anda sendiri** dengan membuka `https://domain-anda/admin/setup`:
-   - isi username dan password (min. 12 karakter), lalu centang verifikasi dua langkah bila ingin;
-   - klik **Buat kredensial**. Hash bcrypt, `SESSION_SECRET`, dan kunci 2FA dibuat **di browser Anda**,
-     jadi password tidak dikirim ke server dan tidak disimpan di mana pun;
-   - buka *Project → Settings → Environment Variables*, klik **Salin semua** di halaman setup, lalu tempel ke kolom
-     *Key* (Vercel otomatis memecahnya menjadi beberapa variabel, environment **Production**);
-   - bila 2FA dicentang, pindai QR dengan Google Authenticator lalu uji kodenya di halaman yang sama.
-6. **Redeploy** lewat *Deployments → ⋯ (deployment teratas) → Redeploy*. Perubahan environment variable baru berlaku setelah redeploy.
-7. Buka `https://domain-anda/admin/login` dan masuk.
+4. **Buat kredensial admin** di komputer yang memiliki Node.js 20.9 atau lebih baru:
+   ```bash
+   npm install
+   npm run hash-password      # ketik password admin (min. 12 karakter) → keluar hash bcrypt
+   npm run generate-secret    # → SESSION_SECRET acak
+   npm run totp-setup         # opsional: 2FA Google Authenticator (pindai QR di terminal)
+   ```
+   Paket `bcrypt` tidak perlu dipasang terpisah: proyek ini memakai `bcryptjs` (JavaScript murni) yang ikut
+   terpasang lewat `npm install`. Tidak punya Node.js? Buka repositori ini di GitHub → *Code → Codespaces →
+   Create codespace*, lalu jalankan perintah di atas di terminal yang muncul di browser.
+5. **Isi Environment Variables** di *Project → Settings → Environment Variables* (Production):
 
-Halaman `/admin/setup` hanya terbuka untuk umum selama kredensial admin belum terpasang. Setelah itu,
-halaman ini hanya bisa dibuka admin yang sudah login, misalnya untuk mengganti password atau mengaktifkan 2FA.
-Halaman ini juga menampilkan status koneksi Upstash Redis, Vercel Blob, dan setiap variabel.
+   | Nama | Isi |
+   | --- | --- |
+   | `ADMIN_USERNAME` | username admin, mis. `admin` |
+   | `ADMIN_PASSWORD_HASH` | hash dari `npm run hash-password`, **disalin apa adanya** (tanpa `\`) |
+   | `SESSION_SECRET` | hasil `npm run generate-secret` (min. 32 karakter) |
+   | `ADMIN_TOTP_SECRET` | opsional, hasil `npm run totp-setup` |
 
-| Variabel | Isi |
-| --- | --- |
-| `ADMIN_USERNAME` | username admin, mis. `admin` |
-| `ADMIN_PASSWORD_HASH` | hash bcrypt dari password admin (bukan password asli) |
-| `SESSION_SECRET` | kunci acak min. 32 karakter |
-| `ADMIN_TOTP_SECRET` | opsional, kunci 2FA Google Authenticator |
-
-> **Alternatif lewat terminal** (Node.js 20.9+): `npm install`, lalu `npm run hash-password`,
-> `npm run generate-secret`, dan `npm run totp-setup` (opsional). Paket `bcrypt` tidak perlu dipasang terpisah,
-> karena proyek ini memakai `bcryptjs` (JavaScript murni) yang ikut terpasang lewat `npm install`.
+6. **Deploy** (atau *Redeploy* bila proyek sudah ter-deploy). Setiap perubahan environment variable baru berlaku setelah redeploy.
+7. Buka `https://domain-anda/admin` dan login.
 
 > `vercel.json` menempatkan fungsi server di region Singapura (`sin1`), yang terdekat dengan Jakarta.
 > Region Upstash sebaiknya juga Singapura agar akses database cepat.
@@ -122,7 +115,7 @@ Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*
 
 | Ketentuan | Implementasi |
 | --- | --- |
-| Kredensial di env | `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` (bcrypt cost 12). Hash dibuat di browser lewat `/admin/setup` atau di terminal lewat `npm run hash-password`; password asli tidak pernah dikirim ke server. Halaman setup hanya publik selama kredensial belum terpasang. Username dibandingkan dengan waktu konstan, dan bcrypt tetap dijalankan walau username salah. |
+| Kredensial di env | `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` (bcrypt cost 12). Script `npm run hash-password` menerima input tersembunyi. Username dibandingkan dengan waktu konstan, dan bcrypt tetap dijalankan walau username salah. |
 | Sesi | JWT HS256 (`jose`) ditandatangani `SESSION_SECRET`, cookie `__Host-` dengan httpOnly, Secure, SameSite=Strict, berlaku 8 jam. Sesi juga dicatat di Redis sehingga logout benar-benar mencabutnya. Sesi dirotasi saat login. Mengganti username/hash/secret otomatis membatalkan semua sesi lama. |
 | Rate limit | `@upstash/ratelimit`: 5 percobaan per 15 menit per IP, lalu terkunci sementara. Ada pengaman tambahan 30 percobaan per 15 menit untuk seluruh IP. Bila Redis tidak tersedia, login ditolak (*fail closed*). Pesan error dibuat umum. |
 | 2FA (opsional) | TOTP (Google Authenticator) via `ADMIN_TOTP_SECRET`, dengan proteksi agar kode yang sama tidak bisa dipakai ulang. |
@@ -200,11 +193,7 @@ tests/                 unit test (node:test)
   `ADMIN_PASSWORD_HASH`, `SESSION_SECRET` (min. 32 karakter), dan koneksi Upstash, lalu redeploy.
 - **Password benar tetapi ditolak saat lokal**: pastikan `$` pada hash di `.env.local` ditulis `\$`.
 - **"Terlalu banyak percobaan login"**: tunggu sesuai waktu yang tertera (maks. 15 menit).
-- **Lupa password**: hapus variabel `ADMIN_PASSWORD_HASH` di Vercel lalu redeploy. Halaman `/admin/setup`
-  akan terbuka lagi untuk membuat password baru. Hanya pemilik akun Vercel yang bisa melakukan ini.
-- **Ponsel 2FA hilang**: hapus variabel `ADMIN_TOTP_SECRET` di Vercel lalu redeploy, sehingga login cukup dengan password.
-  Setelah itu aktifkan lagi 2FA lewat *Dasbor → Ganti password / 2FA*.
-- **Hash yang ditempel ke Vercel ditolak** (status "Format tidak valid" di `/admin/setup`): pastikan disalin utuh
-  tanpa tanda kutip atau spasi. Di Vercel, tanda `$` ditulis apa adanya; escape `\$` hanya diperlukan di `.env.local`.
+- **Lupa password**: buat hash baru dengan `npm run hash-password`, ganti `ADMIN_PASSWORD_HASH` di Vercel, lalu redeploy.
+- **Ponsel 2FA hilang**: kosongkan atau ganti `ADMIN_TOTP_SECRET` (`npm run totp-setup`), lalu redeploy.
 - **Upload gagal "Penyimpanan foto belum dikonfigurasi"**: hubungkan Blob store ke proyek.
   Pastikan aksesnya *Public*, karena foto ditampilkan ke publik.

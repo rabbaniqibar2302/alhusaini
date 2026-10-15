@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IkonGembok, IkonMasjid } from "@/components/ikon";
 import { SITE } from "@/lib/site";
-import { konfigurasiAdminLengkap } from "@/server/auth/konfigurasi";
 import { totpAktif } from "@/server/auth/kredensial";
 import { bacaSesi } from "@/server/auth/sesi";
 import { FormLogin } from "./form-login";
@@ -40,22 +39,7 @@ export default async function HalamanLogin({ searchParams }: PageProps<"/admin/l
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-6">
           {info && <p className="mb-4 rounded-xl bg-hijau-50 px-3 py-2.5 text-sm text-hijau-800 ring-1 ring-hijau-200">{info}</p>}
-          {konfigurasiAdminLengkap() ? (
-            <FormLogin totpAktif={totpAktif()} />
-          ) : (
-            <div className="space-y-4 text-sm text-stone-700">
-              <p>
-                Akun admin belum disiapkan. Buat username &amp; password admin lewat halaman setup — tidak perlu
-                install apa pun di komputer.
-              </p>
-              <Link
-                href="/admin/setup"
-                className="block rounded-xl bg-hijau-800 px-4 py-2.5 text-center font-semibold text-white hover:bg-hijau-700"
-              >
-                Buka Setup Admin
-              </Link>
-            </div>
-          )}
+          <FormLogin totpAktif={totpAktif()} />
         </div>
         <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-stone-500">
           <IkonGembok className="size-3.5" /> Hanya untuk pengurus masjid.
