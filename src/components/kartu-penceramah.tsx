@@ -17,6 +17,7 @@ export function PanggungPenceramah({
   className = "",
   kelasInisial = "text-6xl",
   prioritas,
+  diKartu = false,
   children,
 }: {
   foto: FotoPenceramah | null;
@@ -25,6 +26,8 @@ export function PanggungPenceramah({
   className?: string;
   kelasInisial?: string;
   prioritas?: boolean;
+  /** Ada ubin tanggal di pojok kanan atas: foto digeser ke kiri bawah supaya kepala tidak tertutup. */
+  diKartu?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -38,7 +41,7 @@ export function PanggungPenceramah({
         foto.latarDihapus ? (
           // Selalu setinggi area (dengan ruang di atas kepala); foto setengah badan
           // yang lebar terpotong di kiri-kanan, bukan mengecil.
-          <div className="absolute inset-x-0 top-[9%] bottom-0">
+          <div className={`absolute inset-x-0 ${diKartu ? "top-[16%] -bottom-[5%]" : "top-[9%] bottom-0"}`}>
             <Image
               src={foto.url}
               alt={`Foto ${nama}`}
@@ -46,7 +49,9 @@ export function PanggungPenceramah({
               height={foto.tinggi}
               sizes={sizes}
               priority={prioritas}
-              className="absolute bottom-0 left-1/2 h-full w-auto max-w-none -translate-x-1/2 drop-shadow-[0_12px_24px_rgb(7_34_25/0.45)]"
+              className={`absolute bottom-0 h-full w-auto max-w-none -translate-x-1/2 drop-shadow-[0_12px_24px_rgb(7_34_25/0.45)] ${
+                diKartu ? "left-[40%]" : "left-1/2"
+              }`}
             />
           </div>
         ) : (
@@ -138,7 +143,7 @@ export function KartuPenceramah({
         hariIni ? "ring-2 ring-emas-400" : "ring-stone-200/80"
       }`}
     >
-      <PanggungPenceramah foto={foto} nama={nama} sizes={sizes} className="aspect-[4/5] rounded-[1.4rem]">
+      <PanggungPenceramah foto={foto} nama={nama} sizes={sizes} diKartu className="aspect-[4/5] rounded-[1.4rem]">
         <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
           <p className="flex min-w-0 items-center gap-1.5 rounded-full bg-hijau-950/45 px-2.5 py-1 text-[0.65rem] font-semibold tracking-wider text-white uppercase ring-1 ring-white/15 backdrop-blur-sm">
             {ikonKategori}

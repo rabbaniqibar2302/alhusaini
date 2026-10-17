@@ -84,6 +84,7 @@ function KartuKajianTv({ k, hariIni }: { k: KejadianKajian & { foto: FotoPencera
         nama={k.ustadz}
         sizes="600px"
         kelasInisial="w-[36%]! text-[3.8rem]"
+        diKartu
         className="min-h-0 flex-1"
       >
         <div className="absolute inset-x-5 top-5 flex items-start justify-between gap-3">
