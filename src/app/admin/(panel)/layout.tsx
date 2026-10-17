@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { NavAdmin } from "@/components/admin/nav-admin";
 import { IkonKeluar, IkonMasjid, IkonTautanLuar } from "@/components/ikon";
-import { SITE } from "@/lib/site";
 import { wajibAdminHalaman } from "@/server/auth/penjaga";
+import { bacaIdentitas } from "@/server/identitas";
 
 export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
   const sesi = await wajibAdminHalaman();
+  const { nama } = await bacaIdentitas();
 
   return (
     <>
@@ -18,7 +19,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-bold">Panel Admin</span>
               <span className="block truncate text-xs text-hijau-100">
-                {SITE.nama} · {sesi.username}
+                {nama} · {sesi.username}
               </span>
             </span>
           </Link>

@@ -18,6 +18,7 @@ export const MENU_ADMIN = [
       { href: "/admin/pengajian-rabu", label: "Pengajian Rabu" },
       { href: "/admin/kuliah-subuh", label: "Kuliah Subuh" },
       { href: "/admin/pengajian-ibu", label: "Pengajian Ibu" },
+      { href: "/admin/penceramah", label: "Foto Penceramah" },
       { href: "/admin/hitung-mundur", label: "Hitung Mundur" },
     ],
   },
@@ -34,6 +35,7 @@ export const MENU_ADMIN = [
   {
     grup: "Pengaturan",
     item: [
+      { href: "/admin/identitas", label: "Identitas Masjid" },
       { href: "/admin/tv", label: "Layar TV" },
       { href: "/admin/kontak", label: "Kontak" },
     ],

@@ -19,10 +19,14 @@ const apiBlob = process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL
  * membutuhkan 'unsafe-inline' untuk skrip hidrasi inline milik Next.js.
  * Perlindungan XSS utama tetap: React meng-escape semua output, tidak ada
  * dangerouslySetInnerHTML, dan seluruh input divalidasi dengan zod.
+ *
+ * 'wasm-unsafe-eval' hanya mengizinkan kompilasi WebAssembly (bukan eval
+ * JavaScript); dibutuhkan penghapus latar foto penceramah di panel admin.
+ * Berlaku global karena Web Worker memakai CSP dari file skripnya sendiri.
  */
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
   "font-src 'self'",

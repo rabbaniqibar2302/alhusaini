@@ -1,5 +1,6 @@
 import { SETELAN_TV_BAWAAN } from "./layar-tv";
 import type { KajianItem, Konten } from "./schemas";
+import { IDENTITAS_BAWAAN } from "./site";
 import { tanggalBerikutnya } from "./time";
 
 /**
@@ -134,5 +135,8 @@ export function dataContoh(hariIni: string): Konten {
     logo: null,
     tv: SETELAN_TV_BAWAAN,
     adzan: { umum: null, subuh: null },
+    identitas: IDENTITAS_BAWAAN,
+    // Foto orang sungguhan tidak boleh dikarang; kartu memakai inisial nama.
+    penceramah: [],
   };
 }

@@ -1,15 +1,15 @@
 import Image from "next/image";
 import { IkonJam, IkonPin, IkonTautanLuar } from "@/components/ikon";
-import type { Foto } from "@/lib/schemas";
-import { MAPS_URL, SITE } from "@/lib/site";
+import type { Foto, Identitas } from "@/lib/schemas";
+import { urlMaps } from "@/lib/site";
 
-export function Hero({ foto }: { foto: Foto | null }) {
+export function Hero({ foto, identitas }: { foto: Foto | null; identitas: Identitas }) {
   return (
     <section id="beranda" className="relative isolate overflow-hidden bg-hijau-950 text-white">
       {foto ? (
         <Image
           src={foto.url}
-          alt={`Foto ${SITE.nama}`}
+          alt={`Foto ${identitas.nama}`}
           fill
           priority
           sizes="100vw"
@@ -31,13 +31,15 @@ export function Hero({ foto }: { foto: Foto | null }) {
       />
 
       <div className="mx-auto flex min-h-[72svh] max-w-6xl flex-col justify-end px-4 pt-20 pb-10 sm:min-h-[560px] sm:pb-14">
-        <p lang="ar" dir="rtl" className="self-start font-arab text-3xl text-emas-300 sm:text-4xl">
-          {SITE.namaArab}
-        </p>
-        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-balance sm:text-6xl">{SITE.nama}</h1>
+        {identitas.namaArab && (
+          <p lang="ar" dir="rtl" className="mb-2 self-start font-arab text-3xl text-emas-300 sm:text-4xl">
+            {identitas.namaArab}
+          </p>
+        )}
+        <h1 className="text-4xl font-extrabold tracking-tight text-balance sm:text-6xl">{identitas.nama}</h1>
         <p className="mt-4 flex max-w-2xl items-start gap-2 text-sm leading-relaxed text-hijau-50 sm:text-base">
           <IkonPin className="mt-0.5 size-5 shrink-0 text-emas-300" />
-          <span>{SITE.alamat}</span>
+          <span>{identitas.alamat}</span>
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
@@ -47,7 +49,7 @@ export function Hero({ foto }: { foto: Foto | null }) {
             <IkonJam className="size-5" /> Jadwal Sholat
           </a>
           <a
-            href={MAPS_URL}
+            href={urlMaps(identitas)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 font-semibold text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-white/20"

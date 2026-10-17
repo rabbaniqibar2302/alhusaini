@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { IkonJam } from "@/components/ikon";
 import { useSekarang } from "@/hooks/use-sekarang";
 import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
-import { SITE } from "@/lib/site";
+import { LOKASI_SHOLAT } from "@/lib/site";
 import { epochWIB, formatTanggal, hariKe, tambahHari, tanggalWIB } from "@/lib/time";
 
 type KunciWaktu = "imsak" | "subuh" | "terbit" | "dzuhur" | "ashar" | "maghrib" | "isya";
@@ -78,7 +78,7 @@ export function JadwalSholatLangsung({
         <p className="mt-0.5 text-sm text-hijau-100">
           {hijriah[jadwal.tanggal] ?? ""}
           <span className="mx-1.5 text-emas-300">•</span>
-          Wilayah {SITE.kotaJadwalSholat}
+          Wilayah {LOKASI_SHOLAT.kota}
         </p>
 
         <div className="mt-5 flex flex-col gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15 sm:flex-row sm:items-center sm:justify-between sm:p-5">

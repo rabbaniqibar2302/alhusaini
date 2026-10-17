@@ -1,0 +1,36 @@
+Penghapus latar foto penceramah (panel admin) memakai komponen pihak ketiga berikut,
+disalin apa adanya tanpa perubahan.
+
+1. modnet.onnx
+   MODNet: Trimap-Free Portrait Matting in Real Time
+   Copyright (c) 2020 Zhanghan Ke dkk. — https://github.com/ZHKKKe/MODNet
+   Versi ONNX dari https://huggingface.co/Xenova/modnet (onnx/model.onnx)
+   Lisensi: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+
+2. ort.wasm.bundle.min.mjs, ort-wasm-simd-threaded.wasm
+   ONNX Runtime Web 1.30.0 (paket npm onnxruntime-web)
+   Copyright (c) Microsoft Corporation. — https://github.com/microsoft/onnxruntime
+   Lisensi: MIT
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+SHA-256:
+07c308cf0fc7e6e8b2065a12ed7fc07e1de8febb7dc7839d7b7f15dd66584df9  modnet.onnx
+3398c10d07d229bd91b364548e130e0e51a8e5704b88c7c083ebbeb78842dee2  ort-wasm-simd-threaded.wasm
+11e64bd8ffe11bd1a2a2f0d6275fdfbbba7262f0b76b99b53d228a8a22ef3d90  ort.wasm.bundle.min.mjs

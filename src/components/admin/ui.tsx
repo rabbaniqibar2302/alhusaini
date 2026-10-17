@@ -96,9 +96,17 @@ export function Bidang({
   name,
   galat,
   petunjuk,
+  inputClassName = "",
   id: idKustom,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & { label: string; name: string; galat?: string[]; petunjuk?: string }) {
+}: InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  name: string;
+  galat?: string[];
+  petunjuk?: string;
+  /** Kelas tambahan untuk elemen input (mis. huruf Arab). */
+  inputClassName?: string;
+}) {
   const id = idKustom ?? `bidang-${name}`;
   return (
     <div>
@@ -111,7 +119,7 @@ export function Bidang({
         name={name}
         aria-invalid={galat?.length ? true : undefined}
         aria-describedby={galat?.length ? `${id}-galat` : petunjuk ? `${id}-petunjuk` : undefined}
-        className={gayaInput}
+        className={`${gayaInput} ${inputClassName}`}
         {...props}
       />
       {petunjuk && !galat?.length && (

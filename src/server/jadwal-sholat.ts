@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { hitungJadwalLokal, jadwalPerhitungan, type WaktuSholat } from "@/lib/hitung-sholat";
-import { SITE } from "@/lib/site";
+import { LOKASI_SHOLAT } from "@/lib/site";
 import { JAM_REGEX } from "@/lib/time";
 import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
 import { getRedis } from "./redis";
@@ -124,7 +124,7 @@ export function uraikanJadwal(json: unknown, tanggal: string): { waktu: WaktuSho
 
 async function cariKota(versi: "v3" | "v2"): Promise<{ id: string; lokasi: string } | null> {
   if (versi === "v3" && process.env.MYQURAN_KOTA_ID) {
-    return { id: process.env.MYQURAN_KOTA_ID, lokasi: SITE.kotaJadwalSholat };
+    return { id: process.env.MYQURAN_KOTA_ID, lokasi: LOKASI_SHOLAT.kota };
   }
   const redis = getRedis();
   const kunciCache = `cache:jadwal-sholat:kota:${versi}`;

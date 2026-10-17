@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Runtime ONNX pihak ketiga (sudah di-minify) untuk penghapus latar foto.
+    "public/hapus-latar/**",
   ]),
 ]);
 

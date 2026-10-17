@@ -6,7 +6,9 @@ import type { HasilAksi } from "@/lib/hasil-aksi";
 import { JENIS_JADWAL, MAKS_JADWAL, inputJadwal, type JenisJadwal } from "@/lib/schemas";
 import { HARI_PEKAN, tanggalWIB } from "@/lib/time";
 import { hasilValidasiGagal, jalankanAksiAdmin, segarkanHalamanPublik } from "@/server/auth/penjaga";
+import { pasangFotoPenceramah, unggahFotoPenceramah } from "@/server/penceramah";
 import { ubahKonten } from "@/server/store";
+import { hapusFoto } from "@/server/unggah-foto";
 
 const jenisSchema = z.enum(JENIS_JADWAL);
 const idSchema = z.uuid();
@@ -42,6 +44,11 @@ function teksForm(formData: FormData, nama: string): string {
   return typeof v === "string" ? v : "";
 }
 
+function adaFile(formData: FormData, nama: string): boolean {
+  const f = formData.get(nama);
+  return f instanceof File && f.size > 0;
+}
+
 export async function simpanJadwal(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
     const jenis = jenisSchema.safeParse(formData.get("jenis"));
@@ -55,6 +62,10 @@ export async function simpanJadwal(_sebelumnya: HasilAksi, formData: FormData): 
       Object.fromEntries(FIELD_JADWAL[jenis.data].map((f) => [f, teksForm(formData, f)])),
     );
     if (!masukan.success) return hasilValidasiGagal(masukan.error);
+    const namaPenceramah = "khotib" in masukan.data ? masukan.data.khotib : masukan.data.ustadz;
+
+    // Foto penceramah (opsional) divalidasi & diunggah dulu, sebelum jadwal disimpan.
+    const fotoBaru = adaFile(formData, "foto") ? await unggahFotoPenceramah(formData.get("foto")) : null;
 
     let hasil: HasilAksi = { ok: true, pesan: id ? "Perubahan jadwal disimpan." : "Jadwal ditambahkan." };
     await ubahDaftar(jenis.data, (lama) => {
@@ -72,9 +83,28 @@ export async function simpanJadwal(_sebelumnya: HasilAksi, formData: FormData): 
         return lama;
       }
       return [...lama, { ...masukan.data, id: randomUUID() }];
+    }).catch(async (err) => {
+      await hapusFoto(fotoBaru);
+      throw err;
     });
+    if (!hasil.ok) {
+      await hapusFoto(fotoBaru);
+      return hasil;
+    }
 
-    if (hasil.ok) segarkanHalamanPublik();
+    if (fotoBaru) {
+      try {
+        await pasangFotoPenceramah(namaPenceramah, fotoBaru, formData.get("latarDihapus") === "1");
+        hasil = { ok: true, pesan: `${hasil.pesan} Foto ${namaPenceramah} ikut disimpan.` };
+      } catch (err) {
+        console.error("[jadwal] Foto penceramah gagal disimpan:", err);
+        hasil = {
+          ok: true,
+          pesan: "Jadwal disimpan, tetapi foto penceramah gagal disimpan. Unggah ulang lewat menu Foto Penceramah.",
+        };
+      }
+    }
+    segarkanHalamanPublik();
     return hasil;
   });
 }

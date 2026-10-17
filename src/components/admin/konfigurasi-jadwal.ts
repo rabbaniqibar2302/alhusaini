@@ -10,6 +10,8 @@ export type FieldJadwal = {
   wajib: boolean;
   maks?: number;
   placeholder?: string;
+  /** Nama penceramah: diberi saran nama & pilihan foto. */
+  penceramah?: boolean;
 };
 
 export type ItemJadwalUmum = { id: string; contoh?: boolean } & Record<string, string | boolean | undefined>;
@@ -52,6 +54,7 @@ function fieldKajian(jenis: JenisKajian): FieldJadwal[] {
       label: "Nama ustadz/ustadzah",
       tipe: "text",
       wajib: true,
+      penceramah: true,
       maks: 100,
       placeholder: "Ust. ... / Ustadzah ...",
     },
@@ -78,7 +81,7 @@ export const KONFIGURASI_JADWAL: Record<JenisJadwal, Konfigurasi> = {
     deskripsi: "Tanggal, nama khotib, imam, dan tema khutbah sholat Jumat.",
     field: [
       { nama: "tanggal", label: "Tanggal (hari Jumat)", tipe: "date", wajib: true },
-      { nama: "khotib", label: "Nama khotib", tipe: "text", wajib: true, maks: 100, placeholder: "Ust. ..." },
+      { nama: "khotib", label: "Nama khotib", tipe: "text", wajib: true, maks: 100, placeholder: "Ust. ...", penceramah: true },
       { nama: "imam", label: "Nama imam", tipe: "text", wajib: false, maks: 100, placeholder: "Boleh dikosongkan" },
       { nama: "tema", label: "Tema khutbah", tipe: "text", wajib: false, maks: 150, placeholder: "Boleh dikosongkan" },
     ],

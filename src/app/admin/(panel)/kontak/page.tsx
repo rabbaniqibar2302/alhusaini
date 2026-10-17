@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FormKontak } from "@/components/admin/form-kontak";
 import { JudulHalaman } from "@/components/admin/judul-halaman";
 import { Kartu } from "@/components/admin/ui";
-import { SITE } from "@/lib/site";
 import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
 
@@ -11,7 +11,7 @@ export const instant = false;
 
 export default async function HalamanKontak() {
   await wajibAdminHalaman();
-  const kontak = await bacaKonten("kontak");
+  const [kontak, identitas] = await Promise.all([bacaKonten("kontak"), bacaKonten("identitas")]);
 
   return (
     <>
@@ -20,8 +20,20 @@ export default async function HalamanKontak() {
         <Kartu judul="Kontak pengurus">
           <FormKontak kontak={kontak} />
         </Kartu>
-        <Kartu judul="Alamat (tetap)" deskripsi="Alamat dan nama masjid diatur di kode (src/lib/site.ts).">
-          <p className="text-sm text-stone-700">{SITE.alamat}</p>
+        <Kartu
+          judul="Nama & alamat"
+          deskripsi={
+            <>
+              Diubah di menu{" "}
+              <Link href="/admin/identitas" className="font-semibold text-hijau-800 underline-offset-2 hover:underline">
+                Identitas Masjid
+              </Link>
+              .
+            </>
+          }
+        >
+          <p className="text-sm font-semibold text-stone-800">{identitas.nama}</p>
+          <p className="mt-1 text-sm text-stone-700">{identitas.alamat}</p>
         </Kartu>
       </div>
     </>

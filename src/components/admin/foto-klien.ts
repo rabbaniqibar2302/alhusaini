@@ -36,9 +36,9 @@ async function perkecilFoto(file: File): Promise<File> {
 export type HasilSiapkan = { file: File; info?: string } | { galat: string };
 
 /** Cek tipe & ukuran, lalu perkecil foto di atas 4 MB. */
-export async function siapkanFoto(file: File): Promise<HasilSiapkan> {
+export async function siapkanFoto(file: File, ukuranMaks = UKURAN_MAKS): Promise<HasilSiapkan> {
   if (!TIPE_DIIZINKAN.includes(file.type)) return { galat: "File harus berupa foto JPG, PNG, atau WEBP." };
-  if (file.size > UKURAN_MAKS) return { galat: `Ukuran foto ${mb(file.size)} melebihi batas 5 MB.` };
+  if (file.size > ukuranMaks) return { galat: `Ukuran foto ${mb(file.size)} melebihi batas ${Math.round(ukuranMaks / 1048576)} MB.` };
   if (file.size <= BATAS_KIRIM) return { file };
   try {
     const kecil = await perkecilFoto(file);

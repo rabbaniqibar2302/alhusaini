@@ -1,5 +1,5 @@
 import { CalculationParameters, Coordinates, Madhab, PrayerTimes, Rounding } from "adhan";
-import { SITE } from "./site";
+import { LOKASI_SHOLAT } from "./site";
 import { WIB_OFFSET_MS } from "./time";
 import type { JadwalHarian } from "./tipe-jadwal-sholat";
 
@@ -22,7 +22,8 @@ export function hitungJadwalLokal(tanggal: string): WaktuSholat {
   p.rounding = Rounding.Up;
   p.adjustments = { fajr: 0, sunrise: -2, dhuhr: 1, asr: 0, maghrib: 1, isha: 0 };
   // adhan membaca komponen tanggal lokal, jadi bentuk Date lokal y/m/d.
-  const w = new PrayerTimes(new Coordinates(SITE.koordinat.lat, SITE.koordinat.lng), new Date(y, m - 1, d), p);
+  const { lat, lng } = LOKASI_SHOLAT.koordinat;
+  const w = new PrayerTimes(new Coordinates(lat, lng), new Date(y, m - 1, d), p);
   return {
     imsak: jamWIB(new Date(w.fajr.getTime() - 10 * 60 * 1000)),
     subuh: jamWIB(w.fajr),
@@ -35,5 +36,5 @@ export function hitungJadwalLokal(tanggal: string): WaktuSholat {
 }
 
 export function jadwalPerhitungan(tanggal: string): JadwalHarian {
-  return { tanggal, ...hitungJadwalLokal(tanggal), sumber: "perhitungan", lokasi: SITE.kotaJadwalSholat };
+  return { tanggal, ...hitungJadwalLokal(tanggal), sumber: "perhitungan", lokasi: LOKASI_SHOLAT.kota };
 }

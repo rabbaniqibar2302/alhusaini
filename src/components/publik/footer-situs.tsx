@@ -3,10 +3,20 @@ import type { ReactNode } from "react";
 import { IkonEmail, IkonInstagram, IkonPin, IkonTautanLuar, IkonTelepon, IkonWhatsApp } from "@/components/ikon";
 import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
 import { tautanWhatsApp } from "@/lib/kontak";
-import type { Kontak } from "@/lib/schemas";
-import { MAPS_URL, SITE } from "@/lib/site";
+import type { Identitas, Kontak } from "@/lib/schemas";
+import { urlMaps } from "@/lib/site";
 
-export function FooterSitus({ kontak, tahun, logo }: { kontak: Kontak; tahun: number; logo: LogoTampil | null }) {
+export function FooterSitus({
+  identitas,
+  kontak,
+  tahun,
+  logo,
+}: {
+  identitas: Identitas;
+  kontak: Kontak;
+  tahun: number;
+  logo: LogoTampil | null;
+}) {
   const daftar: { ikon: ReactNode; label: string; href: string }[] = [];
   if (kontak.telepon) {
     daftar.push({
@@ -39,21 +49,23 @@ export function FooterSitus({ kontak, tahun, logo }: { kontak: Kontak; tahun: nu
       <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:py-14 md:grid-cols-[1.3fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <LogoMasjid logo={logo} className="size-12" ikonClassName="size-6" />
+            <LogoMasjid logo={logo} nama={identitas.nama} className="size-12" ikonClassName="size-6" />
             <div>
-              <p className="text-lg font-bold text-white">{SITE.nama}</p>
-              <p lang="ar" dir="rtl" className="w-fit font-arab text-emas-300">
-                {SITE.namaArab}
-              </p>
+              <p className="text-lg font-bold text-white">{identitas.nama}</p>
+              {identitas.namaArab && (
+                <p lang="ar" dir="rtl" className="w-fit font-arab text-emas-300">
+                  {identitas.namaArab}
+                </p>
+              )}
             </div>
           </div>
           <h2 className="mt-6 text-sm font-semibold tracking-wider text-emas-300 uppercase">Alamat</h2>
           <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed">
             <IkonPin className="mt-0.5 size-5 shrink-0 text-emas-300" />
-            {SITE.alamat}
+            {identitas.alamat}
           </p>
           <a
-            href={MAPS_URL}
+            href={urlMaps(identitas)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-emas-400 px-4 py-2 text-sm font-semibold text-hijau-950 transition hover:bg-emas-300"
@@ -89,7 +101,7 @@ export function FooterSitus({ kontak, tahun, logo }: { kontak: Kontak; tahun: nu
       <div className="relative border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-hijau-100/80 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {tahun} {SITE.nama}. Jadwal sholat bersumber dari Kemenag RI melalui API myQuran.
+            © {tahun} {identitas.nama}. Jadwal sholat bersumber dari Kemenag RI melalui API myQuran.
           </p>
           <Link href="/admin" prefetch={false} className="underline-offset-2 hover:text-white hover:underline">
             Login pengurus

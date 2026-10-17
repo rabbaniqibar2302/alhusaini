@@ -6,15 +6,19 @@ import { GaleriFoto } from "@/components/publik/galeri-foto";
 import { HeaderSitus } from "@/components/publik/header-situs";
 import { JudulHalamanPublik } from "@/components/publik/judul-halaman-publik";
 import { NarasiSejarah, fotoSejarahTampil, paragrafSejarah } from "@/components/publik/sejarah";
-import { SITE } from "@/lib/site";
+import { alamatPendek, namaDenganWilayah } from "@/lib/site";
 import { tanggalWIB } from "@/lib/time";
+import { bacaIdentitas } from "@/server/identitas";
 import { bacaKontenPublik } from "@/server/konten-publik";
 import { TAG_KONTEN } from "@/server/store";
 
-export const metadata: Metadata = {
-  title: "Sejarah Masjid",
-  description: `Sejarah berdirinya ${SITE.nama}, Johar Baru, Jakarta Pusat.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const identitas = await bacaIdentitas();
+  return {
+    title: "Sejarah Masjid",
+    description: `Sejarah berdirinya ${namaDenganWilayah(identitas)}.`,
+  };
+}
 
 export default async function HalamanSejarah() {
   "use cache";
@@ -25,17 +29,19 @@ export default async function HalamanSejarah() {
   if (gagal) cacheLife("minutes");
   else cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
 
+  const { identitas } = konten;
   const paragraf = paragrafSejarah(konten.sejarah.narasi);
-  const foto = fotoSejarahTampil(konten.sejarah.foto);
+  const foto = fotoSejarahTampil(konten.sejarah.foto, identitas.nama);
 
   return (
     <>
       <HeaderSitus
+        identitas={identitas}
         logo={konten.logo}
         ada={{ kegiatan: konten.kegiatan.length > 0, sejarah: paragraf.length > 0 || foto.length > 0 }}
       />
       <main className="flex-1 bg-white">
-        <JudulHalamanPublik kicker="Sejarah" judul={`Sejarah ${SITE.nama}`} subjudul={SITE.alamatSingkat} />
+        <JudulHalamanPublik kicker="Sejarah" judul={`Sejarah ${identitas.nama}`} subjudul={alamatPendek(identitas)} />
         <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
           {paragraf.length === 0 && foto.length === 0 ? (
             <InfoKosong
@@ -60,7 +66,7 @@ export default async function HalamanSejarah() {
           )}
         </div>
       </main>
-      <FooterSitus kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
+      <FooterSitus identitas={identitas} kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
     </>
   );
 }

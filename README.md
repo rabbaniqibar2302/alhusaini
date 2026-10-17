@@ -14,8 +14,10 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
   melalui API myQuran untuk wilayah Jakarta Pusat. Sholat berikutnya disorot, lengkap dengan hitung mundur.
 - Pengumuman (yang ditandai admin untuk website).
 - Hitung mundur (hari, jam, menit, detik) menuju 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah.
-- Jadwal Khotib Jumat, Pengajian Rabu, Kuliah Subuh, dan Pengajian Kaum Ibu. Setiap kajian bisa dijadwalkan
-  pada **tanggal tertentu** atau **rutin setiap pekan**, dengan pengisi ustadz maupun ustadzah.
+- Jadwal Khotib Jumat, Pengajian Rabu, Kuliah Subuh, dan Pengajian Kaum Ibu dalam bentuk **kartu penceramah**:
+  foto khotib/ustadz/ustadzah (latar belakang sudah dihapus), nama, tanggal atau hari rutin, jam, serta materi/tema.
+  Di HP kartu bisa digeser ke samping. Penceramah yang belum punya foto ditampilkan dengan inisial namanya.
+  Setiap kajian bisa dijadwalkan pada **tanggal tertentu** atau **rutin setiap pekan**.
 - Kegiatan masjid: kartu kegiatan terbaru (foto, tanggal, keterangan) dan halaman `/kegiatan` berisi semua kegiatan.
 - Sejarah masjid: cuplikan di halaman depan dan halaman `/sejarah` berisi narasi lengkap beserta foto.
 - Legalitas: kartu bukti registrasi Kemenag (SIMAS) dan DMI beserta nomornya. Foto bisa diperbesar.
@@ -27,7 +29,11 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 **Panel admin (`/admin`)**
 
 - Hanya ada satu akun admin dan tidak ada halaman pendaftaran.
+- Identitas masjid: nama, nama Arab, wilayah, alamat lengkap, dan alamat singkat (lihat
+  [Mengubah identitas masjid](#mengubah-identitas-masjid)), sehingga website ini bisa dipakai masjid lain.
 - Tambah, edit, dan hapus keempat jadwal. Ada juga tombol untuk membersihkan jadwal yang sudah lewat.
+- Foto penceramah: cukup unggah foto orangnya, **latar belakang dihapus otomatis** (lihat
+  [Foto penceramah](#foto-penceramah)). Bisa langsung dari form jadwal atau dari menu *Foto Penceramah*.
 - Pengumuman dengan periode tampil (mulai/sampai), opsional tampil juga di website.
 - Kegiatan masjid: nama, tanggal, keterangan, dan hingga 12 foto per kegiatan (bisa pilih beberapa foto sekaligus).
 - Sejarah masjid: narasi beberapa paragraf dan hingga 30 foto berketerangan yang urutannya bisa diatur.
@@ -123,10 +129,12 @@ Kunci Redis yang dipakai (nilai disimpan sebagai JSON):
 | `setting:kontak` | telepon, WhatsApp, email, Instagram |
 | `setting:legalitas` | nomor & foto registrasi Kemenag dan DMI |
 | `setting:tv` | pengaturan layar TV (iqomah, durasi) |
+| `setting:identitas` | nama, nama Arab, wilayah, dan alamat masjid |
 | `media:logo` | logo masjid |
 | `media:hero` | foto masjid |
 | `media:galeri-ambulans` | galeri kegiatan ambulans |
 | `media:adzan` | file suara adzan (umum & Subuh) |
+| `media:penceramah` | foto khotib & ustadz/ustadzah (dicocokkan dengan nama di jadwal) |
 
 Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`,
 dan `cadangan:*` (salinan otomatis bila data lama di Redis tidak lolos validasi saat akan ditimpa, disimpan 180 hari).
@@ -161,6 +169,9 @@ Catatan teknis:
 - **Suara adzan** (bisa lebih dari 4,5 MB) tidak lewat fungsi Vercel, melainkan diunggah langsung dari browser ke
   Vercel Blob. Karena itu CSP `connect-src` mengizinkan `https://vercel.com` (API unggah Blob), dan `media-src`
   mengizinkan domain `*.public.blob.vercel-storage.com`.
+- **Penghapus latar foto** memakai WebAssembly, karena itu `script-src` juga memuat `'wasm-unsafe-eval'`.
+  Izin ini hanya untuk kompilasi WebAssembly, bukan `eval` JavaScript. Izin ini berlaku global karena Web Worker
+  mengikuti CSP dari file skripnya sendiri.
 - **IP untuk rate limit** diambil dari header `x-real-ip`/`x-forwarded-for` yang ditetapkan Vercel. Bila di-host
   di luar Vercel, pastikan reverse proxy menimpa header tersebut.
 
@@ -187,13 +198,16 @@ Catatan teknis:
 
 Halaman `/tv` dirancang untuk TV di dalam masjid (16:9, Full HD, dan otomatis menyesuaikan ukuran layar):
 
-- logo, nama, dan alamat masjid; tanggal Masehi & Hijriah; jam analog dan digital (WIB);
+- logo, nama (Latin & Arab), dan alamat masjid; tanggal Masehi & Hijriah; jam analog dan digital (WIB).
+  Nama yang panjang otomatis diperkecil, dan nama Arab pindah ke baris alamat bila tidak muat;
 - jadwal sholat dengan sorotan waktu berikutnya dan hitung mundur menuju adzan
   (10 menit terakhir berkedip, 5 menit terakhir tampil besar);
 - setelah adzan: **hitung mundur iqomah**, lalu layar diredupkan selama **sholat berlangsung**;
   hari Jumat: layar **khutbah Jumat** sejak masuk waktu Dzuhur;
-- tampilan bergantian: foto masjid, pengumuman, jadwal kajian 7 hari ke depan, khotib Jumat,
-  hitung mundur hari besar, dan foto kegiatan terbaru;
+- tampilan bergantian: foto masjid, pengumuman, jadwal kajian 7 hari ke depan (3 kartu penceramah per tampilan,
+  berisi foto, nama, materi, tanggal, dan jam), khotib Jumat (foto besar, imam, tema, dan khotib Jumat berikutnya),
+  hitung mundur hari besar, dan foto kegiatan terbaru.
+  Garis kemajuan di bagian bawah menunjukkan urutan tampilan dan sisa waktu tampilan yang sedang tampil;
 - teks berjalan berisi semua pengumuman yang aktif.
 
 Cara memasang:
@@ -230,10 +244,54 @@ Data contoh jadwal (khotib & kajian) tidak ditampilkan di TV. Jeda iqomah dan du
   `chrome --kiosk --autoplay-policy=no-user-gesture-required https://domain-anda/tv`.
 - Tombol **Tes suara adzan** (muncul di pojok kanan atas saat mouse/remote digerakkan) untuk memeriksa volume.
 
+## Foto penceramah
+
+Foto dipasang **per orang**, bukan per jadwal. Cukup unggah sekali, dan foto itu otomatis dipakai di semua jadwal
+(khotib, Pengajian Rabu, Kuliah Subuh, Pengajian Ibu) dengan nama yang sama, di website maupun layar TV.
+Pencocokan nama mengabaikan huruf besar/kecil, titik, sapaan, dan gelar: `Ust. H. Ahmad Fauzi, Lc.`,
+`Ustadz Ahmad Fauzi`, dan `KH. Ahmad Fauzi` dianggap orang yang sama. Sapaan yang diabaikan antara lain
+Ust./Ustadz/Ustadzah, H./Hj., KH., Dr., Prof., Buya, dan Syekh. Gelar setelah koma juga diabaikan.
+
+Cara mengunggah:
+
+- dari form jadwal: isi nama, lalu pilih foto di kotak **Foto penceramah**; atau
+- dari menu **Foto Penceramah**: menampilkan semua penceramah di jadwal (yang belum punya foto paling atas),
+  dengan tombol *Unggah*, *Ganti*, dan *Hapus*.
+
+Latar belakang dihapus **di browser admin**. Foto tidak dikirim ke layanan pihak ketiga, dan fitur ini tidak
+memerlukan API key maupun biaya. Prosesnya memakai model *portrait matting* MODNet (Apache-2.0) di ONNX Runtime
+Web 1.30 (MIT). File keduanya ada di `public/hapus-latar/` dan hanya diunduh saat admin memilih foto
+(±38 MB sekali, lalu disimpan cache browser). Hasilnya dipotong rapi mengikuti badan orang. Bercak sisa latar
+yang terpisah dari badan ikut dibuang. Setelah itu admin bisa membandingkan **Tanpa latar** dengan **Foto asli**
+sebelum menyimpan. Server tetap memvalidasi dan meng-encode ulang foto seperti foto lain (folder Blob
+`masjid/penceramah/`), dengan transparansi dipertahankan.
+
+Tips: pakai foto setengah badan yang menghadap kamera, terang, dan tidak buram. Latar polos memberi hasil paling rapi.
+Bila browser tidak mendukung (misalnya Safari lama), foto asli yang dipakai.
+
 ## Mengubah identitas masjid
 
-Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal sholat) ada di
-`src/lib/site.ts`. Logo, kontak, dan legalitas diubah lewat panel admin.
+Nama, nama Arab, wilayah, alamat lengkap, dan alamat singkat diubah lewat *Panel admin → Identitas Masjid*.
+Perubahan langsung dipakai header, halaman depan, footer, judul tab, dan deskripsi untuk Google; layar TV
+menyesuaikan dalam beberapa menit. Logo, kontak, dan legalitas juga diubah lewat panel admin.
+
+| Isian | Tampil di |
+| --- | --- |
+| Nama masjid | header, halaman depan, footer, layar TV, judul halaman |
+| Nama Arab (opsional, harus berhuruf Arab) | halaman depan, footer, layar TV |
+| Wilayah (opsional), mis. `Johar Baru, Jakarta Pusat` | di bawah nama pada header, judul & deskripsi halaman |
+| Alamat lengkap | halaman depan dan footer |
+| Alamat singkat (opsional) | layar TV dan tombol Google Maps; bila kosong memakai alamat lengkap |
+
+Nilai bawaan (dipakai sebelum admin mengubahnya, atau saat database tidak dapat dibaca) ada di
+`IDENTITAS_BAWAAN` dalam `src/lib/site.ts`.
+
+**Memakai website ini untuk masjid lain.** Deploy salinan baru (Redis, Blob, dan kredensial admin sendiri),
+lalu isi menu *Identitas Masjid*. Ganti juga `IDENTITAS_BAWAAN` supaya nama yang benar tetap tampil saat
+database sedang bermasalah. Lokasi jadwal sholat **tidak** ikut berubah dari panel admin: kota
+(`LOKASI_SHOLAT` di `src/lib/site.ts`, kata kunci pencarian kota di `src/server/jadwal-sholat.ts`, atau
+`MYQURAN_KOTA_ID`) dan koordinat untuk perhitungan cadangan perlu disesuaikan di kode. Seluruh waktu memakai
+WIB, jadi masjid di zona WITA/WIT butuh penyesuaian lebih lanjut.
 
 ## Perintah
 
@@ -241,7 +299,7 @@ Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, validasi) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
@@ -272,6 +330,8 @@ tests/                 unit test (node:test)
 - **Ponsel 2FA hilang**: kosongkan atau ganti `ADMIN_TOTP_SECRET` (`npm run totp-setup`), lalu redeploy.
 - **Upload gagal "Penyimpanan foto belum dikonfigurasi"**: hubungkan Blob store ke proyek.
   Pastikan aksesnya *Public*, karena foto ditampilkan ke publik.
+- **Latar foto penceramah tidak terhapus rapi**: coba foto lain dengan latar lebih polos, atau pilih *Foto asli*.
+  Bila muncul "tidak bisa dihapus otomatis", perbarui browser (Chrome/Edge/Firefox terbaru).
 - **Layar TV tampil kecil/terpotong**: pastikan zoom browser 100% dan gunakan mode layar penuh.
   Pada layar yang rasionya bukan 16:9, tampilan diberi pinggiran hitam supaya tidak terpotong.
 - **Layar TV belum menampilkan perubahan**: tunggu hingga 5 menit, atau muat ulang halaman `/tv`.

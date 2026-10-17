@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Amiri, Plus_Jakarta_Sans } from "next/font/google";
-import { SITE } from "@/lib/site";
+import { deskripsiSitus, namaDenganWilayah } from "@/lib/site";
+import { bacaIdentitas } from "@/server/identitas";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -22,23 +23,30 @@ function urlSitus(): URL {
   return new URL(dariEnv.startsWith("http") ? dariEnv : `https://${dariEnv}`);
 }
 
-export const metadata: Metadata = {
-  metadataBase: urlSitus(),
-  title: {
-    default: `${SITE.nama} — Johar Baru, Jakarta Pusat`,
-    template: `%s | ${SITE.nama}`,
-  },
-  description: SITE.deskripsi,
-  applicationName: SITE.nama,
-  openGraph: {
-    type: "website",
-    locale: "id_ID",
-    siteName: SITE.nama,
-    title: SITE.nama,
-    description: SITE.deskripsi,
-  },
-  formatDetection: { telephone: false },
-};
+const URL_SITUS = urlSitus();
+
+/** Nama & deskripsi mengikuti identitas masjid yang diatur admin (di-cache, diperbarui saat disimpan). */
+export async function generateMetadata(): Promise<Metadata> {
+  const identitas = await bacaIdentitas();
+  const deskripsi = deskripsiSitus(identitas);
+  return {
+    metadataBase: URL_SITUS,
+    title: {
+      default: namaDenganWilayah(identitas, " — "),
+      template: `%s | ${identitas.nama}`,
+    },
+    description: deskripsi,
+    applicationName: identitas.nama,
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      siteName: identitas.nama,
+      title: identitas.nama,
+      description: deskripsi,
+    },
+    formatDetection: { telephone: false },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#0f3b2c",

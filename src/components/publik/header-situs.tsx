@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
-import { SITE } from "@/lib/site";
+import type { Identitas } from "@/lib/schemas";
 
 export type BagianOpsional = { kegiatan?: boolean; sejarah?: boolean };
 
@@ -19,15 +19,23 @@ function navigasi(ada: BagianOpsional): [string, string][] {
   return daftar.filter(([, , tampil]) => tampil !== false).map(([href, label]) => [href, label]);
 }
 
-export function HeaderSitus({ logo, ada = {} }: { logo: LogoTampil | null; ada?: BagianOpsional }) {
+export function HeaderSitus({
+  identitas,
+  logo,
+  ada = {},
+}: {
+  identitas: Pick<Identitas, "nama" | "wilayah">;
+  logo: LogoTampil | null;
+  ada?: BagianOpsional;
+}) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-hijau-950/95 text-white backdrop-blur supports-[backdrop-filter]:bg-hijau-950/85">
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pt-3 pb-2 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-3">
         <Link href="/#beranda" className="flex shrink-0 items-center gap-2.5">
-          <LogoMasjid logo={logo} priority />
+          <LogoMasjid logo={logo} nama={identitas.nama} priority />
           <span className="leading-tight">
-            <span className="block font-bold">{SITE.nama}</span>
-            <span className="block text-xs text-hijau-100">Johar Baru, Jakarta Pusat</span>
+            <span className="block font-bold">{identitas.nama}</span>
+            {identitas.wilayah && <span className="block text-xs text-hijau-100">{identitas.wilayah}</span>}
           </span>
         </Link>
         <nav aria-label="Navigasi bagian halaman" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0">

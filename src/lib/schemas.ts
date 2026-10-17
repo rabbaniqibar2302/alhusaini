@@ -8,6 +8,7 @@ import {
   MAKS_KETERANGAN_KEGIATAN,
   MAKS_NARASI,
   MAKS_PENETAPAN,
+  MAKS_PENCERAMAH,
   MAKS_PENGUMUMAN,
 } from "./batas";
 import { POLA_PATHNAME_AUDIO, UKURAN_MAKS_AUDIO } from "./audio";
@@ -27,6 +28,7 @@ export {
   MAKS_KEGIATAN,
   MAKS_KETERANGAN_KEGIATAN,
   MAKS_NARASI,
+  MAKS_PENCERAMAH,
   MAKS_PENETAPAN,
   MAKS_PENGUMUMAN,
 };
@@ -212,10 +214,32 @@ export const kontakSchema = z.object({
 
 export type Kontak = z.infer<typeof kontakSchema>;
 
+/* ---------------------------- Identitas masjid ---------------------------- */
+
+// Huruf Arab, termasuk huruf tambahan (Jawi/Pegon) dan bentuk presentasi.
+const HURUF_ARAB = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+export const identitasSchema = z.object({
+  nama: teks("Nama masjid", { min: 3, max: 60 }),
+  namaArab: teks("Nama Arab", { max: 60 }).refine(
+    (v) => v === "" || HURUF_ARAB.test(v),
+    "Nama Arab harus ditulis dengan huruf Arab, atau kosongkan",
+  ),
+  wilayah: teks("Wilayah", { max: 60 }),
+  // Diketik di kolom beberapa baris; baris baru digabung menjadi spasi.
+  alamat: z
+    .string({ error: "Alamat lengkap wajib diisi" })
+    .transform((v) => v.replace(/\s*[\r\n]+\s*/g, " "))
+    .pipe(teks("Alamat lengkap", { min: 10, max: 250 })),
+  alamatSingkat: teks("Alamat singkat", { max: 100 }),
+});
+
+export type Identitas = z.infer<typeof identitasSchema>;
+
 /* -------------------------------- Foto -------------------------------- */
 
 /** Folder di Vercel Blob (`masjid/<folder>/<uuid>.webp`). */
-export const FOLDER_FOTO = ["hero", "legalitas", "galeri", "logo", "kegiatan", "sejarah"] as const;
+export const FOLDER_FOTO = ["hero", "legalitas", "galeri", "logo", "kegiatan", "sejarah", "penceramah"] as const;
 export type FolderFoto = (typeof FOLDER_FOTO)[number];
 
 const POLA_URL_LOKAL = /^\/images\/[a-z0-9-]+\.svg$/;
@@ -243,6 +267,23 @@ export const logoSchema = fotoSchema.nullable();
 /** Foto dalam daftar (kegiatan, sejarah) memiliki id sendiri untuk dihapus/dipindah. */
 export const fotoBerIdSchema = fotoSchema.extend({ id });
 export type FotoBerId = z.infer<typeof fotoBerIdSchema>;
+
+/* ------------------------------ Penceramah ------------------------------ */
+
+export const namaPenceramahSchema = teks("Nama penceramah", { min: 3, max: 100 });
+
+/**
+ * Satu foto per penceramah, dicocokkan dengan nama di jadwal lewat
+ * `kunciNama` (gelar seperti "Ust." atau ", Lc." diabaikan).
+ */
+export const penceramahItem = z.object({
+  id,
+  nama: namaPenceramahSchema,
+  foto: fotoSchema,
+  /** true bila latar belakang foto sudah dihapus (PNG/WEBP transparan). */
+  latarDihapus: z.boolean(),
+});
+export type PenceramahItem = z.infer<typeof penceramahItem>;
 
 /* ------------------------------ Legalitas ------------------------------ */
 
@@ -396,6 +437,8 @@ export const skemaKonten = {
   logo: logoSchema,
   tv: setelanTvSchema,
   adzan: adzanSchema,
+  identitas: identitasSchema,
+  penceramah: z.array(penceramahItem).max(MAKS_PENCERAMAH),
 } as const;
 
 export type KunciKonten = keyof typeof skemaKonten;

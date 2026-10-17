@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { IkonGembok, IkonMasjid } from "@/components/ikon";
-import { SITE } from "@/lib/site";
 import { totpAktif } from "@/server/auth/kredensial";
 import { bacaSesi } from "@/server/auth/sesi";
+import { bacaIdentitas } from "@/server/identitas";
 import { FormLogin } from "./form-login";
 
 export const metadata: Metadata = { title: "Login" };
@@ -23,7 +23,7 @@ async function sudahLogin(): Promise<boolean> {
 
 export default async function HalamanLogin({ searchParams }: PageProps<"/admin/login">) {
   if (await sudahLogin()) redirect("/admin");
-  const sp = await searchParams;
+  const [sp, { nama }] = await Promise.all([searchParams, bacaIdentitas()]);
   const info =
     sp.keluar === "1"
       ? "Anda telah keluar. Sampai jumpa!"
@@ -39,7 +39,7 @@ export default async function HalamanLogin({ searchParams }: PageProps<"/admin/l
             <IkonMasjid className="size-8" />
           </span>
           <h1 className="mt-3 text-xl font-bold text-hijau-900">Panel Admin</h1>
-          <p className="text-sm text-stone-600">{SITE.nama}</p>
+          <p className="text-sm text-stone-600">{nama}</p>
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-6">
           {info && <p className="mb-4 rounded-xl bg-hijau-50 px-3 py-2.5 text-sm text-hijau-800 ring-1 ring-hijau-200">{info}</p>}

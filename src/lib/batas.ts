@@ -1,5 +1,6 @@
 /** Batas jumlah/panjang data. Tanpa zod supaya bisa dipakai komponen browser. */
 export const MAKS_JADWAL = 100;
+export const MAKS_PENCERAMAH = 100;
 export const MAKS_GALERI = 60;
 export const MAKS_PENETAPAN = 30;
 export const MAKS_PENGUMUMAN = 30;

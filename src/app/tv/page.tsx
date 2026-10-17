@@ -5,7 +5,8 @@ import { LayarTv, type DataTv } from "@/components/tv/layar-tv";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
 import { KUNCI_ACARA } from "@/lib/schemas";
-import { SITE } from "@/lib/site";
+import { petaFotoPenceramah } from "@/lib/penceramah";
+import { alamatPendek } from "@/lib/site";
 import { tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
 import { bacaKontenPublik } from "@/server/konten-publik";
@@ -13,7 +14,7 @@ import { TAG_KONTEN } from "@/server/store";
 
 export const metadata: Metadata = {
   title: "Layar TV",
-  description: `Tampilan jadwal sholat dan informasi untuk TV di dalam ${SITE.nama}.`,
+  description: "Tampilan jadwal sholat dan informasi untuk TV di dalam masjid.",
   robots: { index: false, follow: false },
 };
 
@@ -51,6 +52,11 @@ export default async function HalamanTv() {
   }));
 
   const data: DataTv = {
+    identitas: {
+      nama: konten.identitas.nama,
+      namaArab: konten.identitas.namaArab,
+      alamat: alamatPendek(konten.identitas),
+    },
     sholat: [sholatHariIni, sholatBesok],
     hijriah: {
       [hariIni]: formatHijriah(keHijriah(hariIni, koreksi)),
@@ -66,6 +72,7 @@ export default async function HalamanTv() {
       kuliahSubuh: konten.kuliahSubuh,
       pengajianIbu: konten.pengajianIbu,
     },
+    penceramah: petaFotoPenceramah(konten.penceramah),
     kegiatan: konten.kegiatan
       .filter((k) => k.foto.length > 0)
       .slice(0, 4)

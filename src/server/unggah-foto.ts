@@ -44,7 +44,7 @@ export function blobTerkonfigurasi(): boolean {
 export async function prosesDanUnggahFoto(
   file: FormDataEntryValue | null,
   folder: FolderFoto,
-  opsi: { sisiMaks?: number; logo?: boolean } = {},
+  opsi: { sisiMaks?: number; kualitasTinggi?: boolean } = {},
 ): Promise<Foto> {
   if (!(file instanceof File) || file.size === 0) {
     throw new FotoTidakValid("Pilih file foto terlebih dahulu.");
@@ -67,8 +67,8 @@ export async function prosesDanUnggahFoto(
     hasil = await gambar
       .rotate()
       .resize({ width: sisi, height: sisi, fit: "inside", withoutEnlargement: true })
-      // Logo: kualitas tinggi dan transparansi (PNG/WEBP) dipertahankan.
-      .webp(opsi.logo ? { quality: 92, alphaQuality: 100, smartSubsample: true } : { quality: 82 })
+      // Transparansi (PNG/WEBP) selalu dipertahankan; logo & foto penceramah memakai kualitas tinggi.
+      .webp(opsi.kualitasTinggi ? { quality: 92, alphaQuality: 100, smartSubsample: true } : { quality: 82 })
       .toBuffer({ resolveWithObject: true });
   } catch (err) {
     console.warn("[unggah-foto] Gambar ditolak:", (err as Error).message);

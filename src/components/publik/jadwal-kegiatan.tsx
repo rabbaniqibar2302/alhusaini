@@ -1,64 +1,74 @@
 import type { ReactNode } from "react";
-import { IkonBuku, IkonJam, IkonMatahari, IkonPengguna } from "@/components/ikon";
-import { INFO_KAJIAN, labelJamKajian, labelWaktuKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
+import { IkonBuku, IkonJam, IkonMatahari, IkonMikrofon } from "@/components/ikon";
+import { KartuPenceramah, waktuTanggal } from "@/components/kartu-penceramah";
+import { INFO_KAJIAN, labelJamKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
+import { fotoUntuk, type PetaFotoPenceramah } from "@/lib/penceramah";
 import type { KajianItem, KhotibItem } from "@/lib/schemas";
-import { formatTanggal } from "@/lib/time";
 import { CatatanContoh, InfoKosong } from "./bagian";
+
+/** Di HP kartu bergeser ke samping; di layar lebar tersusun dalam grid. */
+function DeretKartu({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <ul
+      aria-label={label}
+      className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pt-1 pb-3 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 md:grid-cols-3 lg:grid-cols-4"
+    >
+      {children}
+    </ul>
+  );
+}
+
+function ItemDeret({ children }: { children: ReactNode }) {
+  return <li className="w-[72%] max-w-72 shrink-0 snap-start sm:w-auto sm:max-w-none">{children}</li>;
+}
 
 /* ------------------------------ Khotib Jumat ------------------------------ */
 
-export function TabelKhotib({ items, hariIni }: { items: KhotibItem[]; hariIni: string }) {
+const KHOTIB_TAMPIL = 4;
+
+export function JadwalKhotib({
+  items,
+  hariIni,
+  penceramah,
+}: {
+  items: KhotibItem[];
+  hariIni: string;
+  penceramah: PetaFotoPenceramah;
+}) {
   const mendatang = items
     .filter((x) => x.tanggal >= hariIni)
     .sort((a, b) => a.tanggal.localeCompare(b.tanggal))
-    .slice(0, 8);
+    .slice(0, KHOTIB_TAMPIL);
 
   if (mendatang.length === 0) {
     return <InfoKosong teks="Jadwal khotib Jumat berikutnya belum diumumkan." />;
   }
 
-  const sel = "md:table-cell md:px-4 md:py-3.5 md:align-top";
-  const label = "w-16 shrink-0 text-stone-500 md:hidden";
-
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80">
-      <table className="w-full text-left text-sm">
-        <caption className="sr-only">Jadwal khotib dan imam sholat Jumat</caption>
-        <thead className="hidden bg-hijau-900 text-hijau-50 md:table-header-group">
-          <tr>
-            <th scope="col" className="px-4 py-3 font-semibold">Tanggal</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Khotib</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Imam</th>
-            <th scope="col" className="px-4 py-3 font-semibold">Tema Khutbah</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-stone-100">
-          {mendatang.map((x, i) => (
-            <tr key={x.id} className={`block space-y-1.5 p-4 md:table-row md:space-y-0 md:p-0 ${i === 0 ? "bg-emas-50/70" : ""}`}>
-              <td className={`block ${sel}`}>
-                <span className="font-semibold text-hijau-900">{formatTanggal(x.tanggal, { hari: true })}</span>
-                {i === 0 && (
-                  <span className="ml-2 inline-block rounded-full bg-emas-400 px-2 py-0.5 text-[0.7rem] font-semibold text-hijau-950 md:mt-1 md:ml-0 md:block md:w-fit">
-                    {x.tanggal === hariIni ? "Hari ini" : "Jumat terdekat"}
-                  </span>
-                )}
-              </td>
-              <td className={`flex gap-2 ${sel}`}>
-                <span className={label}>Khotib</span>
-                <span className="font-medium text-stone-900">{x.khotib}</span>
-              </td>
-              <td className={`flex gap-2 ${sel}`}>
-                <span className={label}>Imam</span>
-                <span>{x.imam || "—"}</span>
-              </td>
-              <td className={`flex gap-2 ${sel}`}>
-                <span className={label}>Tema</span>
-                <span className="text-stone-700">{x.tema || "—"}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <DeretKartu label="Jadwal khotib Jumat">
+        {mendatang.map((x, i) => (
+          <ItemDeret key={x.id}>
+            <KartuPenceramah
+              nama={x.khotib}
+              peran="Khotib"
+              kategori={i === 0 ? "Jumat terdekat" : "Sholat Jumat"}
+              ikonKategori={<IkonMikrofon className="size-3.5 shrink-0 text-emas-300" />}
+              foto={fotoUntuk(penceramah, x.khotib)}
+              waktu={waktuTanggal(x.tanggal)}
+              hariIni={x.tanggal === hariIni}
+              materi={x.tema ? `“${x.tema}”` : undefined}
+              tambahan={
+                x.imam ? (
+                  <>
+                    Imam: <span className="font-semibold text-stone-700">{x.imam}</span>
+                  </>
+                ) : undefined
+              }
+            />
+          </ItemDeret>
+        ))}
+      </DeretKartu>
       {mendatang.some((x) => x.contoh) && <CatatanContoh />}
     </div>
   );
@@ -66,118 +76,75 @@ export function TabelKhotib({ items, hariIni }: { items: KhotibItem[]; hariIni: 
 
 /* --------------------------------- Kajian --------------------------------- */
 
-function KartuKajian({
-  judul,
-  keterangan,
-  ikon,
-  kosong,
-  contoh,
-  children,
-}: {
-  judul: string;
-  keterangan: string;
-  ikon: ReactNode;
-  kosong: boolean;
-  contoh: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <article className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80">
-      <header className="flex items-center gap-3 border-b border-stone-100 bg-hijau-50/60 px-4 py-3.5">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-hijau-900 text-emas-300">{ikon}</span>
-        <div>
-          <h3 className="font-bold text-hijau-900">{judul}</h3>
-          <p className="text-xs text-stone-500">{keterangan}</p>
-        </div>
-      </header>
-      {kosong ? (
-        <p className="px-4 py-6 text-center text-sm text-stone-500">Belum ada jadwal yang diumumkan.</p>
-      ) : (
-        <ul className="flex-1 divide-y divide-stone-100">{children}</ul>
-      )}
-      {contoh && <CatatanContoh />}
-    </article>
-  );
-}
-
-function BarisKajian({
-  waktu,
-  sub,
-  nama,
-  materi,
-  sorot,
-  hariIni,
-}: {
-  waktu: string;
-  sub?: string;
-  nama: string;
-  materi: string;
-  sorot?: boolean;
-  hariIni?: boolean;
-}) {
-  return (
-    <li className={`px-4 py-3 ${sorot ? "bg-emas-50/70" : ""}`}>
-      <p className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold text-hijau-800">
-        {waktu}
-        {hariIni && (
-          <span className="rounded-full bg-emas-400 px-2 py-0.5 text-[0.7rem] font-semibold text-hijau-950">Hari ini</span>
-        )}
-        {sub && <span className="text-xs font-medium text-stone-500">{sub}</span>}
-      </p>
-      <p className="mt-1 flex items-start gap-1.5 text-sm font-medium text-stone-900">
-        <IkonPengguna className="mt-0.5 size-4 shrink-0 text-emas-600" />
-        {nama}
-      </p>
-      <p className="mt-0.5 flex items-start gap-1.5 text-sm text-stone-600">
-        <IkonBuku className="mt-0.5 size-4 shrink-0 text-emas-600" />
-        {materi}
-      </p>
-    </li>
-  );
-}
+const IKON_KAJIAN: Record<JenisKajian, (p: { className?: string }) => ReactNode> = {
+  pengajianRabu: IkonBuku,
+  kuliahSubuh: IkonMatahari,
+  pengajianIbu: IkonJam,
+};
 
 export function JadwalKajian({
   pengajianRabu,
   kuliahSubuh,
   pengajianIbu,
   hariIni,
+  penceramah,
 }: {
   pengajianRabu: KajianItem[];
   kuliahSubuh: KajianItem[];
   pengajianIbu: KajianItem[];
   hariIni: string;
+  penceramah: PetaFotoPenceramah;
 }) {
-  const kartu: { jenis: JenisKajian; items: KajianItem[]; ikon: ReactNode }[] = [
-    { jenis: "pengajianRabu", items: pengajianRabu, ikon: <IkonBuku className="size-5" /> },
-    { jenis: "kuliahSubuh", items: kuliahSubuh, ikon: <IkonMatahari className="size-5" /> },
-    { jenis: "pengajianIbu", items: pengajianIbu, ikon: <IkonJam className="size-5" /> },
+  const kelompok: { jenis: JenisKajian; items: KajianItem[] }[] = [
+    { jenis: "pengajianRabu", items: pengajianRabu },
+    { jenis: "kuliahSubuh", items: kuliahSubuh },
+    { jenis: "pengajianIbu", items: pengajianIbu },
   ];
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {kartu.map(({ jenis, items, ikon }) => {
+    <div className="space-y-10">
+      {kelompok.map(({ jenis, items }) => {
         const daftar = susunKajian(items, hariIni);
+        const Ikon = IKON_KAJIAN[jenis];
+        const info = INFO_KAJIAN[jenis];
         return (
-          <KartuKajian
-            key={jenis}
-            judul={INFO_KAJIAN[jenis].judul}
-            keterangan={INFO_KAJIAN[jenis].keterangan}
-            ikon={ikon}
-            kosong={daftar.length === 0}
-            contoh={daftar.some((x) => x.contoh)}
-          >
-            {daftar.map((x, i) => (
-              <BarisKajian
-                key={x.id}
-                waktu={labelWaktuKajian(x)}
-                sub={labelJamKajian(jenis, x)}
-                nama={x.ustadz}
-                materi={x.materi}
-                sorot={i === 0 && x.pola === "tanggal"}
-                hariIni={x.pola === "tanggal" && x.tanggal === hariIni}
-              />
-            ))}
-          </KartuKajian>
+          <section key={jenis} aria-labelledby={`kajian-${jenis}`}>
+            <header className="mb-4 flex items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-hijau-900 text-emas-300">
+                <Ikon className="size-5" />
+              </span>
+              <div>
+                <h3 id={`kajian-${jenis}`} className="text-lg font-bold text-hijau-900">
+                  {info.judul}
+                </h3>
+                <p className="text-sm text-stone-500">{info.keterangan}</p>
+              </div>
+            </header>
+            {daftar.length === 0 ? (
+              <InfoKosong teks="Belum ada jadwal yang diumumkan." />
+            ) : (
+              <>
+                <DeretKartu label={`Jadwal ${info.judul}`}>
+                  {daftar.map((x) => (
+                    <ItemDeret key={x.id}>
+                      <KartuPenceramah
+                        nama={x.ustadz}
+                        peran="Pemateri"
+                        kategori={info.singkat}
+                        ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
+                        foto={fotoUntuk(penceramah, x.ustadz)}
+                        waktu={x.pola === "mingguan" ? { pola: "mingguan", hari: x.hari } : waktuTanggal(x.tanggal)}
+                        hariIni={x.pola === "tanggal" && x.tanggal === hariIni}
+                        jam={labelJamKajian(jenis, x)?.replace(/^Pukul /, "")}
+                        materi={x.materi}
+                      />
+                    </ItemDeret>
+                  ))}
+                </DeretKartu>
+                {daftar.some((x) => x.contoh) && <CatatanContoh />}
+              </>
+            )}
+          </section>
         );
       })}
     </div>

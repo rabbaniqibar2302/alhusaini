@@ -72,7 +72,7 @@ export async function hapusFotoMasjid(_sebelumnya: HasilAksi): Promise<HasilAksi
 export async function unggahLogo(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
     const lama = await bacaKonten("logo");
-    const baru = await prosesDanUnggahFoto(formData.get("foto"), "logo", { sisiMaks: 600, logo: true });
+    const baru = await prosesDanUnggahFoto(formData.get("foto"), "logo", { sisiMaks: 600, kualitasTinggi: true });
     await simpanAtauBersihkan(baru, () => simpanKonten("logo", baru));
     await hapusFoto(lama);
     segarkanHalamanPublik();

@@ -11,11 +11,11 @@ export const instant = false;
 export default async function Halaman() {
   await wajibAdminHalaman();
   const hariIni = tanggalWIB();
-  const items = await bacaKonten("kuliahSubuh", hariIni);
+  const [items, penceramah] = await Promise.all([bacaKonten("kuliahSubuh", hariIni), bacaKonten("penceramah", hariIni)]);
   return (
     <>
       <JudulHalaman judul="Jadwal Kuliah Subuh" deskripsi="Kajian ba'da Subuh pada tanggal tertentu atau rutin setiap pekan, di hari apa saja." />
-      <KelolaJadwal jenis="kuliahSubuh" items={items} hariIni={hariIni} />
+      <KelolaJadwal jenis="kuliahSubuh" items={items} hariIni={hariIni} penceramah={penceramah} />
     </>
   );
 }

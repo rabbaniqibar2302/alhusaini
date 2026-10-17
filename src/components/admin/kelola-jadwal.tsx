@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IkonPensil, IkonPeringatan, IkonSampah } from "@/components/ikon";
 import { HASIL_AWAL, type HasilAksi } from "@/lib/hasil-aksi";
 import type { PolaJadwal } from "@/lib/kajian";
-import type { JenisJadwal } from "@/lib/schemas";
+import { fotoUntuk, kunciNama, petaFotoPenceramah } from "@/lib/penceramah";
+import type { JenisJadwal, PenceramahItem } from "@/lib/schemas";
 import { HARI_PEKAN, isTanggalValid, namaHari } from "@/lib/time";
 import { hapusJadwal, hapusJadwalLewat, simpanJadwal } from "@/server/aksi/jadwal";
+import { PanggungPenceramah } from "@/components/kartu-penceramah";
+import { InputFotoPenceramah } from "./input-foto-penceramah";
 import { KONFIGURASI_JADWAL, OPSI_HARI, peringatanHari, type ItemJadwalUmum } from "./konfigurasi-jadwal";
 import { Bidang, Kartu, Lencana, PesanHasil, Pilihan, TombolKirim } from "./ui";
 import { useFormAksi } from "./use-form-aksi";
@@ -93,21 +96,28 @@ function PilihWaktu({
   );
 }
 
+type DataPenceramah = { peta: ReturnType<typeof petaFotoPenceramah>; nama: string[] };
+
 function FormJadwal({
   jenis,
   item,
   nilaiAwal,
+  penceramah,
   onSelesai,
   onBatal,
 }: {
   jenis: JenisJadwal;
   item: ItemJadwalUmum | null;
   nilaiAwal: Record<string, string>;
+  penceramah: DataPenceramah;
   onSelesai: (hasil: HasilAksi) => void;
   onBatal: () => void;
 }) {
   const k = KONFIGURASI_JADWAL[jenis];
   const awal = (nama: string) => (item ? teks(item[nama]) : (nilaiAwal[nama] ?? ""));
+  const fieldPenceramah = k.field.find((f) => f.penceramah)?.nama ?? "";
+  const [namaPenceramah, setNamaPenceramah] = useState(awal(fieldPenceramah));
+  const [olahFoto, setOlahFoto] = useState(false);
   const [pola, setPola] = useState<PolaJadwal>(awal("pola") === "mingguan" ? "mingguan" : "tanggal");
   const [tanggal, setTanggal] = useState(awal("tanggal") || nilaiAwal.tanggal || "");
   const [hari, setHari] = useState(awal("hari") || nilaiAwal.hari || HARI_PEKAN[0]);
@@ -135,6 +145,28 @@ function FormJadwal({
             onHari={setHari}
             galat={galat}
           />
+        ) : f.penceramah ? (
+          <div key={f.nama} className="space-y-2">
+            <Bidang
+              label={f.label}
+              name={f.nama}
+              type="text"
+              required={f.wajib}
+              maxLength={f.maks}
+              placeholder={f.placeholder}
+              defaultValue={awal(f.nama)}
+              list="daftar-penceramah"
+              autoComplete="off"
+              onChange={(e) => setNamaPenceramah(e.currentTarget.value)}
+              galat={galat[f.nama]}
+            />
+            <InputFotoPenceramah
+              nama={namaPenceramah}
+              tersimpan={fotoUntuk(penceramah.peta, namaPenceramah)}
+              galat={galat.foto}
+              onSibuk={setOlahFoto}
+            />
+          </div>
         ) : (
           <Bidang
             key={f.nama}
@@ -150,6 +182,11 @@ function FormJadwal({
           />
         ),
       )}
+      <datalist id="daftar-penceramah">
+        {penceramah.nama.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
       {peringatan && (
         <p className="flex items-center gap-1.5 text-xs text-emas-700">
           <IkonPeringatan className="size-4" /> {peringatan} Pastikan tanggalnya benar.
@@ -157,7 +194,9 @@ function FormJadwal({
       )}
       {!form.hasil.ok && <PesanHasil hasil={form.hasil} />}
       <div className="flex flex-wrap gap-2">
-        <TombolKirim pending={form.pending}>{item ? "Simpan perubahan" : "Tambah jadwal"}</TombolKirim>
+        <TombolKirim pending={form.pending || olahFoto}>
+          {olahFoto ? "Memproses foto…" : item ? "Simpan perubahan" : "Tambah jadwal"}
+        </TombolKirim>
         {item && (
           <button
             type="button"
@@ -210,12 +249,24 @@ export function KelolaJadwal({
   jenis,
   items,
   hariIni,
+  penceramah,
 }: {
   jenis: JenisJadwal;
   items: ItemJadwalUmum[];
   hariIni: string;
+  /** Foto penceramah yang sudah tersimpan (dipakai otomatis sesuai nama). */
+  penceramah: PenceramahItem[];
 }) {
   const k = KONFIGURASI_JADWAL[jenis];
+  const fieldPenceramah = k.field.find((f) => f.penceramah)?.nama ?? "";
+  const dataPenceramah = useMemo<DataPenceramah>(() => {
+    // Saran nama: penceramah yang sudah punya foto, lalu nama di jadwal ini.
+    const nama = new Map<string, string>();
+    for (const n of [...penceramah.map((p) => p.nama), ...items.filter((x) => !x.contoh).map((x) => teks(x[fieldPenceramah]))]) {
+      if (n && !nama.has(kunciNama(n))) nama.set(kunciNama(n), n);
+    }
+    return { peta: petaFotoPenceramah(penceramah), nama: [...nama.values()] };
+  }, [penceramah, items, fieldPenceramah]);
   const [sedangEdit, setSedangEdit] = useState<ItemJadwalUmum | null>(null);
   const [putaran, setPutaran] = useState(0);
   // Pesan sukses disimpan di sini karena form di-remount setelah berhasil.
@@ -258,6 +309,7 @@ export function KelolaJadwal({
             jenis={jenis}
             item={sedangEdit}
             nilaiAwal={nilaiAwal}
+            penceramah={dataPenceramah}
             onSelesai={(h) => {
               setSedangEdit(null);
               setPutaran((p) => p + 1);
@@ -292,21 +344,30 @@ export function KelolaJadwal({
                     sedangEdit?.id === item.id ? "-mx-2 rounded-xl bg-emas-50 px-2" : ""
                   } ${lewat ? "opacity-60" : ""}`}
                 >
-                  <div className="min-w-0">
-                    <p className="flex flex-wrap items-center gap-1.5 font-semibold text-hijau-900">
-                      {r.judul}
-                      {item.contoh && <Lencana>Contoh</Lencana>}
-                      {item.pola === "mingguan" && <Lencana warna="hijau">Rutin</Lencana>}
-                      {lewat && <Lencana warna="abu">Sudah lewat</Lencana>}
-                    </p>
-                    <dl className="mt-1 space-y-0.5 text-sm">
-                      {r.baris.map(([label, nilai]) => (
-                        <div key={label} className="flex gap-2">
-                          <dt className="w-20 shrink-0 text-stone-500">{label}</dt>
-                          <dd className="min-w-0 break-words text-stone-800">{nilai}</dd>
-                        </div>
-                      ))}
-                    </dl>
+                  <div className="flex min-w-0 gap-3">
+                    <PanggungPenceramah
+                      foto={fotoUntuk(dataPenceramah.peta, teks(item[fieldPenceramah]))}
+                      nama={teks(item[fieldPenceramah])}
+                      sizes="48px"
+                      kelasInisial="text-[0.7rem]"
+                      className="size-12 shrink-0 rounded-full ring-1 ring-stone-200"
+                    />
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-1.5 font-semibold text-hijau-900">
+                        {r.judul}
+                        {item.contoh && <Lencana>Contoh</Lencana>}
+                        {item.pola === "mingguan" && <Lencana warna="hijau">Rutin</Lencana>}
+                        {lewat && <Lencana warna="abu">Sudah lewat</Lencana>}
+                      </p>
+                      <dl className="mt-1 space-y-0.5 text-sm">
+                        {r.baris.map(([label, nilai]) => (
+                          <div key={label} className="flex gap-2">
+                            <dt className="w-20 shrink-0 text-stone-500">{label}</dt>
+                            <dd className="min-w-0 break-words text-stone-800">{nilai}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
                   </div>
                   <div className="flex shrink-0 items-start gap-2">
                     <button

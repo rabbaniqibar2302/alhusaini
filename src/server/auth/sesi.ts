@@ -1,6 +1,7 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { getRedis, wajibRedis } from "../redis";
 import { kunciSesi, verifikasiSesiDariToken, type SesiAdmin } from "./sesi-aktif";
 import { DURASI_SESI_DETIK, NAMA_COOKIE_SESI, buatToken, opsiCookieSesi, verifikasiToken } from "./token";
@@ -27,6 +28,10 @@ export async function buatSesi(username: string, info: { ip: string; userAgent: 
 
 /** Verifikasi penuh: tanda tangan + masa berlaku token + sesi masih aktif di Redis. */
 export async function bacaSesi(): Promise<SesiAdmin | null> {
+  // Masa berlaku token dicek dengan jam saat ini, jadi hanya boleh berjalan saat
+  // ada request. Tanpa ini, prerender runtime (cookies tersedia, mis. saat
+  // cache metadata diisi ulang setelah admin menyimpan) menolak `new Date()`.
+  await connection();
   const token = (await cookies()).get(NAMA_COOKIE_SESI)?.value;
   return verifikasiSesiDariToken(token);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { DataHariBesar } from "@/components/publik/hitung-mundur-hari-besar";
 import {
   IkonBulan,
@@ -20,9 +20,10 @@ import { formatHijriah, keHijriah } from "@/lib/hijri";
 import { jadwalPerhitungan } from "@/lib/hitung-sholat";
 import { JENIS_KAJIAN, kajianDalamRentang, type JenisKajian } from "@/lib/kajian";
 import { formatHitungMundur, hitungFase, type FaseTv } from "@/lib/layar-tv";
+import { fotoUntuk, type PetaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
 import type { KajianItem, KhotibItem, PengumumanItem, SetelanTv } from "@/lib/schemas";
-import { SITE } from "@/lib/site";
+import { LOKASI_SHOLAT } from "@/lib/site";
 import { WIB_OFFSET_MS, epochWIB, formatTanggal, hariKe, tambahHari, tanggalWIB } from "@/lib/time";
 import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
 import {
@@ -38,6 +39,8 @@ import { IsiSlide, type GambarTv, type HariBesarTv, type SlideTv } from "./slide
 import { useSuaraAdzan, type AdzanTv } from "./suara-adzan";
 
 export type DataTv = {
+  /** Identitas masjid; `alamat` sudah berupa alamat singkat. */
+  identitas: { nama: string; namaArab: string; alamat: string };
   /** Jadwal sholat hari ini & besok saat halaman dibuat. */
   sholat: JadwalHarian[];
   hijriah: Record<string, string>;
@@ -47,6 +50,8 @@ export type DataTv = {
   pengumuman: PengumumanItem[];
   khotib: KhotibItem[];
   kajian: Record<JenisKajian, KajianItem[]>;
+  /** Foto penceramah per kunci nama (lihat kunciNama). */
+  penceramah: PetaFotoPenceramah;
   kegiatan: { id: string; judul: string; tanggal: string; foto: GambarTv }[];
   hariBesar: DataHariBesar[];
   setelan: SetelanTv;
@@ -78,7 +83,8 @@ function halaman(i: number, total: number) {
 
 /** Urutan tampilan yang bergantian di area utama layar. */
 function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
-  const slide: SlideTv[] = [{ jenis: "foto", kunci: "foto", foto: data.fotoMasjid }];
+  const { nama, namaArab } = data.identitas;
+  const slide: SlideTv[] = [{ jenis: "foto", kunci: "foto", foto: data.fotoMasjid, nama, namaArab }];
 
   const pengumuman = potong(pengumumanAktif(data.pengumuman, tanggal), 3).slice(0, 3);
   pengumuman.forEach((items, i) =>
@@ -89,7 +95,11 @@ function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
   const kajianAsli = Object.fromEntries(
     JENIS_KAJIAN.map((j) => [j, data.kajian[j].filter((x) => !x.contoh)]),
   ) as Record<JenisKajian, KajianItem[]>;
-  const kajian = potong(kajianDalamRentang(kajianAsli, tanggal, 7), 5).slice(0, 2);
+  // 3 kartu penceramah per tampilan, maksimal 3 tampilan.
+  const kajian = potong(
+    kajianDalamRentang(kajianAsli, tanggal, 7).map((k) => ({ ...k, foto: fotoUntuk(data.penceramah, k.ustadz) })),
+    3,
+  ).slice(0, 3);
   kajian.forEach((items, i) =>
     slide.push({
       jenis: "kajian",
@@ -99,7 +109,10 @@ function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
     }),
   );
 
-  const khotib = data.khotib.filter((x) => !x.contoh && x.tanggal >= tanggal).slice(0, 2);
+  const khotib = data.khotib
+    .filter((x) => !x.contoh && x.tanggal >= tanggal)
+    .slice(0, 2)
+    .map((x) => ({ ...x, foto: fotoUntuk(data.penceramah, x.khotib) }));
   if (khotib.length > 0) slide.push({ jenis: "khotib", kunci: "khotib", items: khotib });
 
   const [kegiatanPertama, ...kegiatanLain] = data.kegiatan.map(
@@ -138,15 +151,92 @@ function AdzanBerkumandang({ label, gelap = false }: { label: string; gelap?: bo
   );
 }
 
+// Lebar teks di header (rem), di antara logo dan kotak hitung mundur.
+const LEBAR_NAMA_TV = 44;
+
+/**
+ * Tata letak nama di header. Bila nama Latin + Arab muat satu baris, keduanya
+ * berdampingan; bila tidak, nama Arab turun ke baris alamat dan nama Latin
+ * diperkecil seperlunya. Lebar diperkirakan dari jumlah huruf.
+ */
+function tataNamaTv(nama: string, namaArab: string): { bertumpuk: boolean; ukuran: number } {
+  const lebarLatin = (ukuran: number) => 0.47 * ukuran * nama.length;
+  const lebarArab = namaArab ? 1.25 + 0.95 * namaArab.length : 0;
+  if (lebarLatin(3.6) + lebarArab <= LEBAR_NAMA_TV) return { bertumpuk: false, ukuran: 3.6 };
+  return { bertumpuk: true, ukuran: Math.max(2.2, Math.min(3.6, LEBAR_NAMA_TV / lebarLatin(1))) };
+}
+
+/**
+ * Isian ruas yang sedang berjalan: bergerak dari kiri ke kanan seperti garis
+ * loading selama tampilan tampil. Digerakkan Web Animations API, dimulai dari
+ * posisi saat ruas muncul (mis. layar baru dibuka di tengah tampilan).
+ */
+function IsianBerjalan({ durasi, berjalan }: { durasi: number; berjalan: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Dikunci saat ruas mulai; tidak dihitung ulang setiap detik.
+  const [mulaiDari] = useState(berjalan);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof el.animate !== "function") return;
+    const animasi = el.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], {
+      duration: durasi,
+      easing: "linear",
+      fill: "forwards",
+    });
+    animasi.currentTime = Math.min(mulaiDari, durasi);
+    return () => animasi.cancel();
+  }, [durasi, mulaiDari]);
+  return (
+    <div
+      ref={ref}
+      className="size-full origin-left bg-emas-400"
+      style={{ transform: `scaleX(${Math.min(1, mulaiDari / durasi)})` }}
+    />
+  );
+}
+
+/**
+ * Garis kemajuan di bawah area tengah: satu ruas per tampilan. Ruas tampilan
+ * yang sedang tampil terisi perlahan sampai berganti ke tampilan berikutnya.
+ */
+function IndikatorTampilan({
+  jumlah,
+  aktif,
+  putaran,
+  durasi,
+  berjalan,
+}: {
+  jumlah: number;
+  aktif: number;
+  /** Nomor putaran tampilan; berganti setiap tampilan berganti. */
+  putaran: number;
+  durasi: number;
+  /** Lama tampilan aktif sudah tampil (ms). */
+  berjalan: number;
+}) {
+  return (
+    <div aria-hidden="true" className="absolute inset-x-12 bottom-5 flex gap-3">
+      {Array.from({ length: jumlah }, (_, i) => (
+        <div key={i} className="h-2 flex-1 overflow-hidden rounded-full bg-white/20">
+          {i < aktif && <div className="size-full bg-emas-400" />}
+          {i === aktif && <IsianBerjalan key={putaran} durasi={durasi} berjalan={berjalan} />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LayarFase({
   fase,
   sekarang,
   logo,
+  nama,
   adzan,
 }: {
   fase: Exclude<FaseTv, { jenis: "normal" }>;
   sekarang: number;
   logo: LogoTampil | null;
+  nama: string;
   /** Label waktu sholat bila adzannya sedang diputar. */
   adzan: string | null;
 }) {
@@ -157,8 +247,8 @@ function LayarFase({
     >
       <div className={`flex items-center justify-between ${gelap ? "opacity-50" : ""}`}>
         <div className="flex items-center gap-4">
-          <LogoMasjid logo={logo} className="size-[4.5rem]" ikonClassName="size-10" sizes="144px" />
-          <p className="text-[2.2rem] font-bold">{SITE.nama}</p>
+          <LogoMasjid logo={logo} nama={nama} className="size-[4.5rem]" ikonClassName="size-10" sizes="144px" />
+          <p className="text-[2.2rem] font-bold">{nama}</p>
         </div>
         <JamDigital sekarang={sekarang} kecil />
       </div>
@@ -227,20 +317,37 @@ export function LayarTv({ data }: { data: DataTv }) {
     }
   }, [data.hijriah, data.koreksiHijriah, tanggal]);
 
+  const { identitas } = data;
   const slide = useMemo(() => susunSlide(data, tanggal), [data, tanggal]);
   const teksBerjalan = useMemo(() => {
     const aktif = pengumumanAktif(data.pengumuman, tanggal).map((x) => x.teks);
-    return (aktif.length > 0 ? aktif : [`Selamat datang di ${SITE.nama}`, SITE.alamatSingkat]).join(PEMISAH);
-  }, [data.pengumuman, tanggal]);
+    return (aktif.length > 0 ? aktif : [`Selamat datang di ${identitas.nama}`, identitas.alamat]).join(PEMISAH);
+  }, [data.pengumuman, tanggal, identitas.nama, identitas.alamat]);
 
   const fase = sekarang === null ? null : hitungFase(sekarang, jadwal, besok, data.setelan);
   const suara = useSuaraAdzan({ adzan: data.adzan, setelan: data.setelan, jadwal, tanggal, sekarang, fase });
-  const indeksSlide = sekarang === null ? 0 : Math.floor(sekarang / (data.setelan.detikSlide * 1000)) % slide.length;
+  const durasiSlide = data.setelan.detikSlide * 1000;
+  const putaranSlide = sekarang === null ? 0 : Math.floor(sekarang / durasiSlide);
+  const indeksSlide = putaranSlide % slide.length;
   const jumat = hariKe(tanggal) === 5;
 
   const kunciAktif = fase === null ? null : fase.jenis === "normal" ? fase.berikut.kunci : fase.sholat.kunci;
   const jamAktif = fase === null ? null : fase.jenis === "normal" ? fase.berikut.jam : fase.sholat.jam;
   const waktu = DAFTAR_WAKTU.filter((w) => w.kunci !== "imsak" || ramadhan);
+
+  const tataNama = tataNamaTv(identitas.nama, identitas.namaArab);
+  const namaArab = identitas.namaArab && (
+    // Bila ruang tetap tidak cukup, nama Arab yang lebih dulu dipotong.
+    <p
+      lang="ar"
+      dir="rtl"
+      className={`min-w-0 shrink-4 truncate font-arab leading-normal text-emas-300 ${
+        tataNama.bertumpuk ? "text-[2rem]" : "text-[2.5rem]"
+      }`}
+    >
+      {identitas.namaArab}
+    </p>
+  );
 
   const sisaMenuju = fase?.jenis === "normal" && sekarang !== null ? fase.berikut.epoch - sekarang : null;
   // 10 menit terakhir: kotak hitung mundur berkedip; 5 menit terakhir: hitung mundur besar.
@@ -259,18 +366,31 @@ export function LayarTv({ data }: { data: DataTv }) {
           {/* Kiri: identitas masjid + tampilan bergantian */}
           <div className="flex min-w-0 flex-1 flex-col p-8 pr-7">
             <header className="flex items-center gap-6">
-              <LogoMasjid logo={data.logo} className="size-[7.5rem]" ikonClassName="size-16" sizes="240px" priority />
+              <LogoMasjid
+                logo={data.logo}
+                nama={identitas.nama}
+                className="size-[7.5rem]"
+                ikonClassName="size-16"
+                sizes="240px"
+                priority
+              />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-5">
-                  <h1 className="truncate text-[3.6rem] leading-none font-extrabold tracking-tight">{SITE.nama}</h1>
-                  <p lang="ar" dir="rtl" className="shrink-0 font-arab text-[2.5rem] leading-none text-emas-300">
-                    {SITE.namaArab}
+                  <h1
+                    className="min-w-0 truncate leading-tight font-extrabold tracking-tight"
+                    style={{ fontSize: `${tataNama.ukuran.toFixed(2)}rem` }}
+                  >
+                    {identitas.nama}
+                  </h1>
+                  {!tataNama.bertumpuk && namaArab}
+                </div>
+                <div className={`flex items-baseline gap-5 ${tataNama.bertumpuk ? "mt-1" : "mt-3"}`}>
+                  {tataNama.bertumpuk && namaArab}
+                  <p className="flex min-w-0 flex-1 items-center gap-2 text-[1.45rem] text-hijau-100">
+                    <IkonPin className="size-[1.6rem] shrink-0 text-emas-300" />
+                    <span className="truncate">{identitas.alamat}</span>
                   </p>
                 </div>
-                <p className="mt-3 flex items-center gap-2 truncate text-[1.45rem] text-hijau-100">
-                  <IkonPin className="size-[1.6rem] shrink-0 text-emas-300" />
-                  {SITE.alamatSingkat}
-                </p>
               </div>
               {fase?.jenis === "normal" && sisaMenuju !== null && (
                 <div
@@ -300,6 +420,15 @@ export function LayarTv({ data }: { data: DataTv }) {
                   <IsiSlide slide={s} hariIni={tanggal} />
                 </div>
               ))}
+              {sekarang !== null && slide.length > 1 && (
+                <IndikatorTampilan
+                  jumlah={slide.length}
+                  aktif={indeksSlide}
+                  putaran={putaranSlide}
+                  durasi={durasiSlide}
+                  berjalan={sekarang - putaranSlide * durasiSlide}
+                />
+              )}
 
               {fase?.jenis === "normal" && suara.adzanBerkumandang && (
                 <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-hijau-950 text-center">
@@ -357,7 +486,7 @@ export function LayarTv({ data }: { data: DataTv }) {
             </ul>
             <p className="border-t border-white/10 px-8 py-2.5 text-center text-[1.15rem] text-hijau-100">
               {jadwal.sumber === "kemenag" ? "Sumber: Kemenag RI (myQuran)" : "Perkiraan perhitungan metode Kemenag"} ·{" "}
-              {SITE.kotaJadwalSholat}
+              {LOKASI_SHOLAT.kota}
             </p>
           </aside>
         </div>
@@ -382,7 +511,13 @@ export function LayarTv({ data }: { data: DataTv }) {
         </div>
 
         {fase && fase.jenis !== "normal" && sekarang !== null && (
-          <LayarFase fase={fase} sekarang={sekarang} logo={data.logo} adzan={suara.adzanBerkumandang} />
+          <LayarFase
+            fase={fase}
+            sekarang={sekarang}
+            logo={data.logo}
+            nama={identitas.nama}
+            adzan={suara.adzanBerkumandang}
+          />
         )}
 
         {suara.perluIzin && (

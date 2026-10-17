@@ -74,6 +74,7 @@ export default async function Dasbor() {
       ket: `${mendatang(konten.pengajianIbu)} jadwal mendatang/rutin`,
       contoh: adaContoh(konten.pengajianIbu),
     },
+    { label: "Foto Penceramah", href: "/admin/penceramah", ket: `${konten.penceramah.length} foto tersimpan` },
     { label: "Kegiatan Masjid", href: "/admin/kegiatan", ket: `${konten.kegiatan.length} kegiatan` },
     {
       label: "Sejarah Masjid",
@@ -92,6 +93,7 @@ export default async function Dasbor() {
       contoh: adaContoh(konten.galeri),
     },
     { label: "Layar TV", href: "/admin/tv", ket: "Iqomah, tampilan, dan cara pasang di TV" },
+    { label: "Identitas Masjid", href: "/admin/identitas", ket: konten.identitas.nama },
   ];
 
   const khotibBerikut = [...konten.khotib]

@@ -1,16 +1,15 @@
 import type { FotoSejarah } from "@/lib/schemas";
-import { SITE } from "@/lib/site";
 import type { ItemFoto } from "./penampil-foto";
 
 export { cuplikanSejarah, paragrafSejarah } from "@/lib/sejarah";
 
-export function fotoSejarahTampil(foto: FotoSejarah[]): ItemFoto[] {
+export function fotoSejarahTampil(foto: FotoSejarah[], namaMasjid: string): ItemFoto[] {
   return foto.map((f, i) => ({
     id: f.id,
     url: f.url,
     lebar: f.lebar,
     tinggi: f.tinggi,
-    alt: f.keterangan || `Foto sejarah ${SITE.nama} ${i + 1}`,
+    alt: f.keterangan || `Foto sejarah ${namaMasjid} ${i + 1}`,
     keterangan: f.keterangan,
   }));
 }

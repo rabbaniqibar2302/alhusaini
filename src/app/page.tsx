@@ -21,7 +21,7 @@ import { GaleriFoto } from "@/components/publik/galeri-foto";
 import { HeaderSitus } from "@/components/publik/header-situs";
 import { Hero } from "@/components/publik/hero";
 import { HitungMundurHariBesar, type DataHariBesar } from "@/components/publik/hitung-mundur-hari-besar";
-import { JadwalKajian, TabelKhotib } from "@/components/publik/jadwal-kegiatan";
+import { JadwalKajian, JadwalKhotib } from "@/components/publik/jadwal-kegiatan";
 import { JadwalSholatLangsung } from "@/components/publik/jadwal-sholat-langsung";
 import { KartuLegalitas } from "@/components/publik/legalitas";
 import { DaftarPengumuman } from "@/components/publik/pengumuman";
@@ -29,9 +29,9 @@ import { NarasiSejarah, cuplikanSejarah, fotoSejarahTampil } from "@/components/
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
 import { tautanWhatsApp } from "@/lib/kontak";
+import { petaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
 import { KUNCI_ACARA } from "@/lib/schemas";
-import { SITE } from "@/lib/site";
 import { formatTanggal, tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
 import { bacaKontenPublik, kegiatanTampil } from "@/server/konten-publik";
@@ -81,6 +81,7 @@ export default async function Beranda() {
   if (databaseGagal) cacheLife("minutes");
   else cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
 
+  const { identitas } = konten;
   const koreksi = konten.countdown.koreksiHijriah;
   const hijriah = {
     [hariIni]: formatHijriah(keHijriah(hariIni, koreksi)),
@@ -110,10 +111,11 @@ export default async function Beranda() {
     tanggalTampil: g.tanggal ? formatTanggal(g.tanggal, { hari: true }) : undefined,
   }));
 
+  const fotoPenceramah = petaFotoPenceramah(konten.penceramah);
   const pengumuman = pengumumanAktif(konten.pengumuman, hariIni).filter((x) => x.diWebsite);
   const kegiatan = kegiatanTampil(konten.kegiatan.slice(0, KEGIATAN_DI_BERANDA), hariIni);
   const sejarah = cuplikanSejarah(konten.sejarah.narasi);
-  const fotoSejarah = fotoSejarahTampil(konten.sejarah.foto);
+  const fotoSejarah = fotoSejarahTampil(konten.sejarah.foto, identitas.nama);
   const adaSejarah = sejarah.paragraf.length > 0 || fotoSejarah.length > 0;
 
   const daftarBagian: (IsiBagian | false)[] = [
@@ -136,9 +138,9 @@ export default async function Beranda() {
       id: "khotib",
       kicker: "Sholat Jumat",
       judul: "Jadwal Khotib Jumat",
-      subjudul: `Khotib, imam, dan tema khutbah sholat Jumat di ${SITE.nama}.`,
+      subjudul: `Khotib, imam, dan tema khutbah sholat Jumat di ${identitas.nama}.`,
       ikon: <IkonMikrofon className="size-4" />,
-      isi: <TabelKhotib items={konten.khotib} hariIni={hariIni} />,
+      isi: <JadwalKhotib items={konten.khotib} hariIni={hariIni} penceramah={fotoPenceramah} />,
     },
     {
       id: "kajian",
@@ -152,6 +154,7 @@ export default async function Beranda() {
           kuliahSubuh={konten.kuliahSubuh}
           pengajianIbu={konten.pengajianIbu}
           hariIni={hariIni}
+          penceramah={fotoPenceramah}
         />
       ),
     },
@@ -159,7 +162,7 @@ export default async function Beranda() {
       id: "kegiatan",
       kicker: "Kegiatan",
       judul: "Kegiatan Masjid",
-      subjudul: `Dokumentasi dan agenda kegiatan ${SITE.nama} bersama jamaah dan warga sekitar.`,
+      subjudul: `Dokumentasi dan agenda kegiatan ${identitas.nama} bersama jamaah dan warga sekitar.`,
       ikon: <IkonKalender className="size-4" />,
       isi: (
         <>
@@ -176,7 +179,7 @@ export default async function Beranda() {
       id: "ambulans",
       kicker: "Layanan Umat",
       judul: "Kegiatan Ambulans Masjid",
-      subjudul: `Dokumentasi layanan ambulans ${SITE.nama} untuk membantu warga sekitar.`,
+      subjudul: `Dokumentasi layanan ambulans ${identitas.nama} untuk membantu warga sekitar.`,
       ikon: <IkonAmbulans className="size-4" />,
       isi: (
         <>
@@ -184,7 +187,7 @@ export default async function Beranda() {
             <a
               href={tautanWhatsApp(
                 konten.kontak.whatsapp,
-                `Assalamu'alaikum, saya ingin bertanya tentang layanan ambulans ${SITE.nama}.`,
+                `Assalamu'alaikum, saya ingin bertanya tentang layanan ambulans ${identitas.nama}.`,
               )}
               target="_blank"
               rel="noopener noreferrer"
@@ -211,7 +214,7 @@ export default async function Beranda() {
     adaSejarah && {
       id: "sejarah",
       kicker: "Sejarah",
-      judul: `Sejarah ${SITE.nama}`,
+      judul: `Sejarah ${identitas.nama}`,
       ikon: <IkonSejarah className="size-4" />,
       isi: (
         <div className={`grid gap-8 ${fotoSejarah.length > 0 && sejarah.paragraf.length > 0 ? "lg:grid-cols-[1.15fr_1fr]" : ""}`}>
@@ -241,7 +244,7 @@ export default async function Beranda() {
       id: "legalitas",
       kicker: "Legalitas",
       judul: "Masjid Terdaftar Resmi",
-      subjudul: `${SITE.nama} terdaftar di Kementerian Agama RI dan Dewan Masjid Indonesia.`,
+      subjudul: `${identitas.nama} terdaftar di Kementerian Agama RI dan Dewan Masjid Indonesia.`,
       ikon: <IkonPerisai className="size-4" />,
       isi: <KartuLegalitas data={konten.legalitas} />,
     },
@@ -250,14 +253,14 @@ export default async function Beranda() {
 
   return (
     <>
-      <HeaderSitus logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah }} />
+      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah }} />
       <main className="flex-1">
         {databaseGagal && (
           <p role="status" className="bg-emas-100 px-4 py-2 text-center text-sm text-emas-900">
             Sebagian informasi sedang tidak dapat dimuat. Silakan muat ulang halaman beberapa saat lagi.
           </p>
         )}
-        <Hero foto={konten.hero} />
+        <Hero foto={konten.hero} identitas={identitas} />
 
         <section id="jadwal-sholat" aria-label="Jadwal sholat hari ini" className="bg-white">
           <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 pb-12 sm:-mt-12 sm:pb-16">
@@ -279,7 +282,7 @@ export default async function Beranda() {
           </Bagian>
         ))}
       </main>
-      <FooterSitus kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
+      <FooterSitus identitas={identitas} kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
     </>
   );
 }
