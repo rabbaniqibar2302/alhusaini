@@ -193,22 +193,24 @@ export function KelolaKas({
 
   return (
     <div className="space-y-6">
-      <p className="-mb-3 text-sm text-stone-600">
-        Periode laporan: <span className="font-semibold text-hijau-900">{r.periodeLabel}</span>
-      </p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          ["Saldo kas saat ini", formatRupiah(r.saldoAkhir), "text-hijau-900"],
-          [`Saldo awal periode`, formatRupiah(r.saldoAwal), "text-stone-900"],
-          ["Pemasukan periode ini", `+${formatRupiah(r.masuk)}`, "text-hijau-700"],
-          ["Pengeluaran periode ini", `−${formatRupiah(r.keluar)}`, "text-red-700"],
-        ].map(([label, nilai, warna]) => (
-          <div key={label} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
-            <p className="text-xs text-stone-500">{label}</p>
-            <p className={`mt-1 text-lg font-bold tabular-nums ${warna}`}>{nilai}</p>
-          </div>
-        ))}
-      </div>
+      <section className="space-y-3">
+        <p className="text-sm text-stone-600">
+          Periode laporan: <span className="font-semibold text-hijau-900">{r.periodeLabel}</span>
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Saldo kas saat ini", formatRupiah(r.saldoAkhir), "text-hijau-900"],
+            ["Saldo awal periode", formatRupiah(r.saldoAwal), "text-stone-900"],
+            ["Pemasukan periode ini", `+${formatRupiah(r.masuk)}`, "text-hijau-700"],
+            ["Pengeluaran periode ini", `−${formatRupiah(r.keluar)}`, "text-red-700"],
+          ].map(([label, nilai, warna]) => (
+            <div key={label} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+              <p className="text-xs text-stone-500">{label}</p>
+              <p className={`mt-1 text-lg font-bold tabular-nums ${warna}`}>{nilai}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
         <div className="space-y-6">
