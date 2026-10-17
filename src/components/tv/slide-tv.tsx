@@ -1,13 +1,47 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { IkonBulanSabit, IkonBuku, IkonJam, IkonMikrofon, IkonPengumuman } from "@/components/ikon";
+import {
+  IkonBulanSabit,
+  IkonBuku,
+  IkonDompet,
+  IkonGrafik,
+  IkonJam,
+  IkonKalender,
+  IkonMikrofon,
+  IkonPengumuman,
+  IkonPin,
+  IkonQr,
+} from "@/components/ikon";
 import { PanggungPenceramah } from "@/components/kartu-penceramah";
+import { hitungMundurAgenda, labelTanggalAgenda } from "@/lib/agenda";
 import { INFO_KAJIAN, type KejadianKajian } from "@/lib/kajian";
+import { formatRupiah } from "@/lib/kas";
 import type { FotoPenceramah } from "@/lib/penceramah";
-import type { KhotibItem } from "@/lib/schemas";
+import type { JenisTransaksi, KhotibItem, Rekening } from "@/lib/schemas";
 import { NAMA_BULAN, formatTanggal, namaHari, selisihHari, tambahHari } from "@/lib/time";
 
 export type GambarTv = { url: string; lebar: number; tinggi: number };
+
+export type AgendaTv = {
+  id: string;
+  judul: string;
+  tanggal: string;
+  tanggalSelesai: string;
+  jam: string;
+  lokasi: string;
+  poster: GambarTv | null;
+};
+
+export type KasTv = {
+  periodeLabel: string;
+  saldoAkhir: number;
+  masuk: number;
+  keluar: number;
+  terakhir: string | null;
+  transaksi: { id: string; tanggal: string; keterangan: string; jenis: JenisTransaksi; jumlah: number }[];
+};
+
+export type InfakTv = { qris: GambarTv | null; namaQris: string; rekening: Rekening[]; catatan: string };
 
 export type HariBesarTv = { kunci: string; judul: string; label: string; ucapan: string; tanggal: string; tahunHijriah: number };
 
@@ -17,7 +51,10 @@ export type SlideTv =
   | { jenis: "kajian"; kunci: string; items: (KejadianKajian & { foto: FotoPenceramah | null })[]; halaman: string }
   | { jenis: "khotib"; kunci: string; items: (KhotibItem & { foto: FotoPenceramah | null })[] }
   | { jenis: "hari-besar"; kunci: string; acara: HariBesarTv[] }
-  | { jenis: "kegiatan"; kunci: string; judul: string; tanggal: string; foto: GambarTv };
+  | { jenis: "kegiatan"; kunci: string; judul: string; tanggal: string; foto: GambarTv }
+  | { jenis: "agenda"; kunci: string; item: AgendaTv; halaman: string }
+  | { jenis: "kas"; kunci: string; kas: KasTv }
+  | { jenis: "infak"; kunci: string; infak: InfakTv };
 
 function Judul({ ikon, teks, sub }: { ikon: ReactNode; teks: string; sub?: string }) {
   return (
@@ -230,6 +267,166 @@ export function IsiSlide({ slide, hariIni }: { slide: SlideTv; hariIni: string }
                   Jumat berikutnya, {formatTanggal(berikut.tanggal)}
                   <span className="block truncate font-semibold text-white">{berikut.khotib}</span>
                 </p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    case "agenda": {
+      const a = slide.item;
+      const mundur = hitungMundurAgenda(a, hariIni);
+      const [, bulan, tgl] = a.tanggal.split("-").map(Number);
+      return (
+        <div className="flex h-full bg-hijau-900">
+          <div className="relative h-full w-[40%] shrink-0 overflow-hidden bg-hijau-950">
+            {a.poster ? (
+              <>
+                <Image src={a.poster.url} alt="" fill sizes="96px" className="scale-125 object-cover opacity-60 blur-2xl" />
+                <Image src={a.poster.url} alt={`Poster ${a.judul}`} fill sizes="800px" className="object-contain p-6" />
+              </>
+            ) : (
+              <div className="pola-islami grid size-full place-items-center bg-linear-to-b from-hijau-700 to-hijau-950 text-center">
+                <div>
+                  <IkonKalender className="mx-auto size-[5rem] text-emas-300" />
+                  <p className="mt-3 text-[9rem] leading-none font-extrabold">{tgl}</p>
+                  <p className="text-[2.4rem] font-semibold tracking-[0.2em] text-emas-200 uppercase">{NAMA_BULAN[bulan - 1]}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="pola-islami flex min-w-0 flex-1 flex-col p-12">
+            <Judul ikon={<IkonKalender className="size-[2.4rem]" />} teks="Agenda Mendatang" sub={slide.halaman} />
+            <div className="flex min-h-0 flex-1 flex-col justify-center">
+              <p
+                className={`w-fit rounded-full px-6 py-2 text-[1.9rem] font-bold ${
+                  mundur === "Hari ini" || mundur === "Besok" || mundur === "Sedang berlangsung"
+                    ? "bg-emas-400 text-hijau-950"
+                    : "bg-white/10 text-emas-200 ring-1 ring-white/15"
+                }`}
+              >
+                {mundur}
+              </p>
+              <p className="mt-5 line-clamp-3 text-[4rem] leading-tight font-extrabold text-balance">{a.judul}</p>
+              <ul className="mt-6 space-y-3 text-[2.1rem] text-hijau-50">
+                <li className="flex items-center gap-4">
+                  <IkonKalender className="size-[2.2rem] shrink-0 text-emas-300" />
+                  {labelTanggalAgenda(a)}
+                </li>
+                {a.jam && (
+                  <li className="flex items-center gap-4">
+                    <IkonJam className="size-[2.2rem] shrink-0 text-emas-300" />
+                    Pukul {a.jam} WIB
+                  </li>
+                )}
+                {a.lokasi && (
+                  <li className="flex items-center gap-4">
+                    <IkonPin className="size-[2.2rem] shrink-0 text-emas-300" />
+                    <span className="truncate">{a.lokasi}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    case "kas": {
+      const k = slide.kas;
+      return (
+        <div className="pola-islami flex h-full flex-col bg-hijau-900 px-12 pt-10 pb-14">
+          <Judul ikon={<IkonGrafik className="size-[2.4rem]" />} teks="Laporan Kas Masjid" sub={k.periodeLabel} />
+          <div className="mt-8 grid min-h-0 flex-1 grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-8">
+            <div className="flex flex-col justify-center rounded-[2rem] bg-white/10 p-9 ring-1 ring-white/15">
+              <p className="text-[1.6rem] font-semibold tracking-[0.2em] text-emas-300 uppercase">Saldo kas</p>
+              <p
+                className="mt-2 leading-tight font-extrabold whitespace-nowrap tabular-nums"
+                // Angka panjang (miliaran) diperkecil supaya tetap satu baris.
+                style={{ fontSize: `${Math.min(3.6, 23 / (formatRupiah(k.saldoAkhir).length * 0.6)).toFixed(2)}rem` }}
+              >
+                {formatRupiah(k.saldoAkhir)}
+              </p>
+              {k.terakhir && <p className="text-[1.6rem] text-hijau-100">per {formatTanggal(k.terakhir, { hari: true })}</p>}
+              <dl className="mt-7 space-y-4 border-t border-white/15 pt-6">
+                <div>
+                  <dt className="text-[1.45rem] text-hijau-100">Pemasukan periode ini</dt>
+                  <dd className="text-[2.3rem] leading-tight font-bold whitespace-nowrap text-emerald-300 tabular-nums">
+                    +{formatRupiah(k.masuk)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[1.45rem] text-hijau-100">Pengeluaran periode ini</dt>
+                  <dd className="text-[2.3rem] leading-tight font-bold whitespace-nowrap text-red-300 tabular-nums">
+                    −{formatRupiah(k.keluar)}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="flex min-h-0 flex-col">
+              <p className="text-[1.6rem] font-semibold tracking-[0.2em] text-emas-300 uppercase">Transaksi terakhir</p>
+              {k.transaksi.length === 0 ? (
+                <p className="mt-4 text-[1.9rem] text-hijau-100">Belum ada transaksi di periode ini.</p>
+              ) : (
+                <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-white/10">
+                  {k.transaksi.map((t) => (
+                    <li key={t.id} className="flex items-center gap-5 py-2">
+                      <span className="w-[6.5rem] shrink-0 text-[1.5rem] text-hijau-100">
+                        {formatTanggal(t.tanggal, { singkat: true }).replace(/ \d{4}$/, "")}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[1.75rem]">{t.keterangan}</span>
+                      <span
+                        className={`shrink-0 text-[1.9rem] font-bold tabular-nums ${
+                          t.jenis === "masuk" ? "text-emerald-300" : "text-red-300"
+                        }`}
+                      >
+                        {t.jenis === "masuk" ? "+" : "−"}
+                        {formatRupiah(t.jumlah)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    case "infak": {
+      const { qris, rekening, namaQris, catatan } = slide.infak;
+      const padat = rekening.length > 3;
+      return (
+        <div className="pola-islami flex h-full flex-col bg-hijau-900 px-12 pt-10 pb-14">
+          <Judul ikon={<IkonDompet className="size-[2.4rem]" />} teks="Infak & Sedekah" sub="Semoga Allah membalas dengan kebaikan" />
+          <div className="mt-8 flex min-h-0 flex-1 gap-10">
+            {qris && (
+              <div className="flex shrink-0 flex-col items-center self-center rounded-[2rem] bg-white p-5 text-hijau-950">
+                <p className="flex items-center gap-3 text-[1.7rem] font-extrabold tracking-wider uppercase">
+                  <IkonQr className="size-[2rem] text-emas-600" /> Scan QRIS
+                </p>
+                <div
+                  className="relative mt-3 h-[22rem] max-w-[30rem]"
+                  style={{ aspectRatio: `${qris.lebar} / ${qris.tinggi}` }}
+                >
+                  <Image src={qris.url} alt="QRIS infak" fill sizes="700px" className="object-contain" />
+                </div>
+                {namaQris && <p className="mt-2 max-w-[24rem] truncate text-[1.5rem] font-semibold">{namaQris}</p>}
+              </div>
+            )}
+            {(rekening.length > 0 || catatan) && (
+              <div className="flex min-w-0 flex-1 flex-col justify-center gap-4">
+                {rekening.slice(0, 5).map((r) => (
+                  <div key={r.id} className={`rounded-[1.6rem] bg-white/10 ring-1 ring-white/15 ${padat ? "px-7 py-3" : "px-8 py-5"}`}>
+                    <p className="text-[1.5rem] font-bold tracking-wider text-emas-300 uppercase">{r.bank}</p>
+                    <p className={`leading-tight font-extrabold tracking-wide tabular-nums ${padat ? "text-[2.6rem]" : "text-[3.3rem]"}`}>
+                      {r.nomor}
+                    </p>
+                    <p className={`truncate text-hijau-50 ${padat ? "text-[1.5rem]" : "text-[1.8rem]"}`}>a.n. {r.atasNama}</p>
+                  </div>
+                ))}
+                {catatan && <p className="text-[1.6rem] text-hijau-100">{catatan}</p>}
               </div>
             )}
           </div>

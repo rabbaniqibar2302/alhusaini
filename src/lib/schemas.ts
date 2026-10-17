@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  MAKS_AGENDA,
   MAKS_FOTO_KEGIATAN,
   MAKS_FOTO_SEJARAH,
   MAKS_GALERI,
@@ -9,7 +10,11 @@ import {
   MAKS_NARASI,
   MAKS_PENETAPAN,
   MAKS_PENCERAMAH,
+  MAKS_JUMLAH_KAS,
+  MAKS_KETERANGAN_AGENDA,
   MAKS_PENGUMUMAN,
+  MAKS_REKENING,
+  MAKS_TRANSAKSI_KAS,
 } from "./batas";
 import { POLA_PATHNAME_AUDIO, UKURAN_MAKS_AUDIO } from "./audio";
 import { JENIS_KAJIAN, POLA_JADWAL } from "./kajian";
@@ -239,7 +244,17 @@ export type Identitas = z.infer<typeof identitasSchema>;
 /* -------------------------------- Foto -------------------------------- */
 
 /** Folder di Vercel Blob (`masjid/<folder>/<uuid>.webp`). */
-export const FOLDER_FOTO = ["hero", "legalitas", "galeri", "logo", "kegiatan", "sejarah", "penceramah"] as const;
+export const FOLDER_FOTO = [
+  "hero",
+  "legalitas",
+  "galeri",
+  "logo",
+  "kegiatan",
+  "sejarah",
+  "penceramah",
+  "agenda",
+  "qris",
+] as const;
 export type FolderFoto = (typeof FOLDER_FOTO)[number];
 
 const POLA_URL_LOKAL = /^\/images\/[a-z0-9-]+\.svg$/;
@@ -364,6 +379,94 @@ export const pengumumanInput = pengumumanDasar.refine((x) => !x.mulai || !x.samp
 export const pengumumanItem = pengumumanDasar.extend({ id, contoh });
 export type PengumumanItem = z.infer<typeof pengumumanItem>;
 
+/* ------------------------------- Kas masjid ------------------------------- */
+
+export const JENIS_TRANSAKSI = ["masuk", "keluar"] as const;
+export type JenisTransaksi = (typeof JENIS_TRANSAKSI)[number];
+
+/** Rupiah bulat. Dari form boleh diketik "1.250.000" atau "Rp 1.250.000". */
+export const rupiahSchema = z.preprocess(
+  (v) => {
+    if (typeof v !== "string") return v;
+    const t = v.trim().replace(/^rp\.?\s*/i, "");
+    if (t === "" || /,\d/.test(t) || /[^\d.\s]/.test(t)) return NaN;
+    return Number(t.replace(/[.\s]/g, ""));
+  },
+  z
+    .number({ error: "Isi jumlah dalam rupiah, tanpa sen (mis. 1.250.000)" })
+    .int("Isi jumlah dalam rupiah, tanpa sen (mis. 1.250.000)")
+    .min(0, "Jumlah tidak boleh negatif")
+    .max(MAKS_JUMLAH_KAS, "Jumlah terlalu besar"),
+);
+
+export const transaksiKasInput = z.object({
+  tanggal,
+  jenis: z.enum(JENIS_TRANSAKSI, { error: "Pilih pemasukan atau pengeluaran" }),
+  keterangan: teks("Keterangan", { min: 3, max: 120 }),
+  jumlah: rupiahSchema.refine((n) => n > 0, "Jumlah harus lebih dari 0"),
+});
+
+export const transaksiKasItem = transaksiKasInput.extend({ id });
+export type TransaksiKas = z.infer<typeof transaksiKasItem>;
+
+export const PILIHAN_PERIODE_KAS = [1, 2, 3, 4, 6, 12] as const;
+
+export const setelanKasSchema = z.object({
+  /** Saldo sebelum transaksi pertama yang dicatat. */
+  saldoAwal: rupiahSchema,
+  /** Laporan menampilkan sekian bulan terakhir (termasuk bulan berjalan). */
+  periodeBulan: z.coerce
+    .number()
+    .refine((n) => (PILIHAN_PERIODE_KAS as readonly number[]).includes(n), "Pilih periode laporan"),
+  tampilWebsite: z.boolean(),
+  tampilTv: z.boolean(),
+});
+export type SetelanKas = z.infer<typeof setelanKasSchema>;
+
+/* ------------------------------ Agenda event ------------------------------ */
+
+const agendaDasar = z.object({
+  judul: teks("Nama acara", { min: 3, max: 120 }),
+  tanggal,
+  /** Untuk acara lebih dari sehari; kosong bila satu hari. */
+  tanggalSelesai: tanggalAtauKosong,
+  jam: jamAtauKosong,
+  lokasi: teks("Lokasi", { max: 120 }),
+  keterangan: teksPanjang("Keterangan", { max: MAKS_KETERANGAN_AGENDA }),
+});
+
+export const agendaInput = agendaDasar.refine((x) => !x.tanggalSelesai || x.tanggalSelesai >= x.tanggal, {
+  path: ["tanggalSelesai"],
+  message: "Tanggal selesai tidak boleh sebelum tanggal mulai",
+});
+
+export const agendaItem = agendaDasar.extend({ id, poster: fotoSchema.nullable(), contoh });
+export type AgendaItem = z.infer<typeof agendaItem>;
+
+/* ---------------------------------- Infak ---------------------------------- */
+
+export const rekeningSchema = z.object({
+  id,
+  bank: teks("Nama bank", { min: 2, max: 40 }),
+  nomor: z
+    .string({ error: "Nomor rekening wajib diisi" })
+    .trim()
+    .regex(/^[0-9][0-9 -]{3,28}[0-9]$/, "Nomor rekening hanya boleh berisi angka, spasi, atau tanda -"),
+  atasNama: teks("Atas nama", { min: 3, max: 80 }),
+});
+export type Rekening = z.infer<typeof rekeningSchema>;
+
+export const infakTeksSchema = z.object({
+  rekening: z.array(rekeningSchema).max(MAKS_REKENING, `Maksimal ${MAKS_REKENING} rekening`),
+  /** Nama merchant QRIS (opsional), mis. "Masjid Al Husaini". */
+  namaQris: teks("Nama QRIS", { max: 80 }),
+  catatan: teks("Catatan", { max: 200 }),
+  tampilTv: z.boolean(),
+});
+
+export const infakSchema = infakTeksSchema.extend({ qris: fotoSchema.nullable() });
+export type Infak = z.infer<typeof infakSchema>;
+
 /* ------------------------------ Suara adzan ------------------------------ */
 
 const POLA_URL_AUDIO =
@@ -439,6 +542,10 @@ export const skemaKonten = {
   adzan: adzanSchema,
   identitas: identitasSchema,
   penceramah: z.array(penceramahItem).max(MAKS_PENCERAMAH),
+  kas: z.array(transaksiKasItem).max(MAKS_TRANSAKSI_KAS),
+  setelanKas: setelanKasSchema,
+  agenda: z.array(agendaItem).max(MAKS_AGENDA),
+  infak: infakSchema,
 } as const;
 
 export type KunciKonten = keyof typeof skemaKonten;

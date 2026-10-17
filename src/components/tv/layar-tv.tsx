@@ -35,7 +35,15 @@ import {
   useTombolLayarPenuh,
 } from "./hook-tv";
 import { JamAnalog } from "./jam-analog";
-import { IsiSlide, type GambarTv, type HariBesarTv, type SlideTv } from "./slide-tv";
+import {
+  IsiSlide,
+  type AgendaTv,
+  type GambarTv,
+  type HariBesarTv,
+  type InfakTv,
+  type KasTv,
+  type SlideTv,
+} from "./slide-tv";
 import { useSuaraAdzan, type AdzanTv } from "./suara-adzan";
 
 export type DataTv = {
@@ -53,6 +61,12 @@ export type DataTv = {
   /** Foto penceramah per kunci nama (lihat kunciNama). */
   penceramah: PetaFotoPenceramah;
   kegiatan: { id: string; judul: string; tanggal: string; foto: GambarTv }[];
+  /** Agenda yang belum lewat (terdekat dulu). */
+  agenda: AgendaTv[];
+  /** null bila laporan kas tidak ditampilkan di TV. */
+  kas: KasTv | null;
+  /** null bila info infak kosong atau tidak ditampilkan di TV. */
+  infak: InfakTv | null;
   hariBesar: DataHariBesar[];
   setelan: SetelanTv;
   /** URL file adzan (umum & Subuh) di Vercel Blob. */
@@ -92,6 +106,11 @@ function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
   );
 
   // Data contoh tidak ditampilkan di TV supaya jamaah tidak salah informasi.
+  const agenda = data.agenda.filter((a) => (a.tanggalSelesai || a.tanggal) >= tanggal).slice(0, 3);
+  agenda.forEach((item, i) =>
+    slide.push({ jenis: "agenda", kunci: `agenda-${item.id}`, item, halaman: halaman(i, agenda.length) }),
+  );
+
   const kajianAsli = Object.fromEntries(
     JENIS_KAJIAN.map((j) => [j, data.kajian[j].filter((x) => !x.contoh)]),
   ) as Record<JenisKajian, KajianItem[]>;
@@ -125,6 +144,8 @@ function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
     return k ? [{ kunci: a.kunci, judul: a.judul, label: a.label, ucapan: a.ucapan, tanggal: k.tanggal, tahunHijriah: k.tahunHijriah }] : [];
   });
   if (hariBesar.length > 0) slide.push({ jenis: "hari-besar", kunci: "hari-besar", acara: hariBesar });
+  if (data.infak) slide.push({ jenis: "infak", kunci: "infak", infak: data.infak });
+  if (data.kas) slide.push({ jenis: "kas", kunci: "kas", kas: data.kas });
 
   slide.push(...kegiatanLain);
   return slide;

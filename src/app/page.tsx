@@ -6,6 +6,8 @@ import {
   IkonBuka,
   IkonBulanSabit,
   IkonBuku,
+  IkonDompet,
+  IkonGrafik,
   IkonInfo,
   IkonKalender,
   IkonMikrofon,
@@ -15,29 +17,35 @@ import {
   IkonWhatsApp,
 } from "@/components/ikon";
 import { Bagian, InfoKosong } from "@/components/publik/bagian";
+import { DaftarAgenda } from "@/components/publik/agenda";
 import { DaftarKegiatan } from "@/components/publik/daftar-kegiatan";
 import { FooterSitus } from "@/components/publik/footer-situs";
 import { GaleriFoto } from "@/components/publik/galeri-foto";
 import { HeaderSitus } from "@/components/publik/header-situs";
 import { Hero } from "@/components/publik/hero";
 import { HitungMundurHariBesar, type DataHariBesar } from "@/components/publik/hitung-mundur-hari-besar";
+import { InfoInfak } from "@/components/publik/infak";
 import { JadwalKajian, JadwalKhotib } from "@/components/publik/jadwal-kegiatan";
 import { JadwalSholatLangsung } from "@/components/publik/jadwal-sholat-langsung";
+import { LaporanKas } from "@/components/publik/laporan-kas";
 import { KartuLegalitas } from "@/components/publik/legalitas";
 import { DaftarPengumuman } from "@/components/publik/pengumuman";
 import { NarasiSejarah, cuplikanSejarah, fotoSejarahTampil } from "@/components/publik/sejarah";
+import { agendaMendatang } from "@/lib/agenda";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
+import { ringkasanKas } from "@/lib/kas";
 import { tautanWhatsApp } from "@/lib/kontak";
 import { petaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { formatTanggal, tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
-import { bacaKontenPublik, kegiatanTampil } from "@/server/konten-publik";
+import { bacaKontenPublik, bagianTambahan, kegiatanTampil } from "@/server/konten-publik";
 import { TAG_KONTEN } from "@/server/store";
 
 const KEGIATAN_DI_BERANDA = 6;
+const AGENDA_DI_BERANDA = 6;
 
 type IsiBagian = {
   id: string;
@@ -112,6 +120,9 @@ export default async function Beranda() {
   }));
 
   const fotoPenceramah = petaFotoPenceramah(konten.penceramah);
+  const tambahan = bagianTambahan(konten, hariIni);
+  const agenda = agendaMendatang(konten.agenda, hariIni).slice(0, AGENDA_DI_BERANDA);
+  const kas = tambahan.kas ? ringkasanKas(konten.kas, konten.setelanKas, hariIni) : null;
   const pengumuman = pengumumanAktif(konten.pengumuman, hariIni).filter((x) => x.diWebsite);
   const kegiatan = kegiatanTampil(konten.kegiatan.slice(0, KEGIATAN_DI_BERANDA), hariIni);
   const sejarah = cuplikanSejarah(konten.sejarah.narasi);
@@ -125,6 +136,14 @@ export default async function Beranda() {
       judul: "Pengumuman",
       ikon: <IkonPengumuman className="size-4" />,
       isi: <DaftarPengumuman items={pengumuman} />,
+    },
+    agenda.length > 0 && {
+      id: "agenda",
+      kicker: "Agenda",
+      judul: "Agenda Mendatang",
+      subjudul: `Acara yang akan datang di ${identitas.nama}. Ketuk poster untuk memperbesar.`,
+      ikon: <IkonKalender className="size-4" />,
+      isi: <DaftarAgenda items={agenda} hariIni={hariIni} />,
     },
     {
       id: "hari-besar",
@@ -174,6 +193,22 @@ export default async function Beranda() {
           </TautanLanjut>
         </>
       ),
+    },
+    tambahan.infak && {
+      id: "infak",
+      kicker: "Infak & Sedekah",
+      judul: "Salurkan Infak Anda",
+      subjudul: `Infak untuk kemakmuran ${identitas.nama} dapat disalurkan melalui QRIS atau transfer ke rekening berikut.`,
+      ikon: <IkonDompet className="size-4" />,
+      isi: <InfoInfak infak={konten.infak} namaMasjid={identitas.nama} />,
+    },
+    kas !== null && {
+      id: "kas",
+      kicker: "Transparansi",
+      judul: "Laporan Kas Masjid",
+      subjudul: `Pemasukan dan pengeluaran kas ${identitas.nama} periode ${kas.periodeLabel}.`,
+      ikon: <IkonGrafik className="size-4" />,
+      isi: <LaporanKas ringkasan={kas} />,
     },
     {
       id: "ambulans",
@@ -253,7 +288,7 @@ export default async function Beranda() {
 
   return (
     <>
-      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah }} />
+      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah, ...tambahan }} />
       <main className="flex-1">
         {databaseGagal && (
           <p role="status" className="bg-emas-100 px-4 py-2 text-center text-sm text-emas-900">

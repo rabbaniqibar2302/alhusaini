@@ -3,8 +3,10 @@ import Link from "next/link";
 import { JudulHalaman } from "@/components/admin/judul-halaman";
 import { Kartu, Lencana } from "@/components/admin/ui";
 import { IkonCentang, IkonPeringatan } from "@/components/ikon";
+import { agendaMendatang } from "@/lib/agenda";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
+import { formatRupiah, ringkasanKas } from "@/lib/kas";
 import { pengumumanAktif } from "@/lib/pengumuman";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { formatTanggal, selisihHari, tanggalWIB } from "@/lib/time";
@@ -49,6 +51,27 @@ export default async function Dasbor() {
       href: "/admin/pengumuman",
       ket: `${pengumumanAktif(konten.pengumuman, hariIni).length} aktif`,
       contoh: adaContoh(konten.pengumuman),
+    },
+    {
+      label: "Agenda Event",
+      href: "/admin/agenda",
+      ket: `${agendaMendatang(konten.agenda, hariIni).length} agenda mendatang`,
+    },
+    {
+      label: "Kas Masjid",
+      href: "/admin/kas",
+      ket: `Saldo ${formatRupiah(ringkasanKas(konten.kas, konten.setelanKas, hariIni).saldoAkhir)} · ${konten.kas.length} transaksi`,
+    },
+    {
+      label: "Infak",
+      href: "/admin/infak",
+      ket:
+        [
+          konten.infak.rekening.length > 0 && `${konten.infak.rekening.length} rekening`,
+          konten.infak.qris && "QRIS terpasang",
+        ]
+          .filter(Boolean)
+          .join(" · ") || "Belum diisi",
     },
     {
       label: "Khotib Jumat",

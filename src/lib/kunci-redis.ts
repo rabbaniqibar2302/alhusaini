@@ -19,4 +19,8 @@ export const KUNCI_REDIS: Record<KunciKonten, string> = {
   adzan: "media:adzan",
   identitas: "setting:identitas",
   penceramah: "media:penceramah",
+  kas: "keuangan:kas",
+  setelanKas: "setting:kas",
+  agenda: "konten:agenda",
+  infak: "setting:infak",
 };

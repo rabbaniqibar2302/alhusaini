@@ -2,15 +2,24 @@ import Link from "next/link";
 import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
 import type { Identitas } from "@/lib/schemas";
 
-export type BagianOpsional = { kegiatan?: boolean; sejarah?: boolean };
+export type BagianOpsional = {
+  kegiatan?: boolean;
+  sejarah?: boolean;
+  agenda?: boolean;
+  infak?: boolean;
+  kas?: boolean;
+};
 
 function navigasi(ada: BagianOpsional): [string, string][] {
   const daftar: [string, string, boolean?][] = [
     ["/#jadwal-sholat", "Jadwal Sholat"],
+    ["/#agenda", "Agenda", ada.agenda === true],
     ["/#hari-besar", "Hari Besar"],
     ["/#khotib", "Khotib Jumat"],
     ["/#kajian", "Kajian"],
     ["/#kegiatan", "Kegiatan", ada.kegiatan],
+    ["/#infak", "Infak", ada.infak === true],
+    ["/#kas", "Laporan Kas", ada.kas === true],
     ["/#ambulans", "Ambulans"],
     ["/#sejarah", "Sejarah", ada.sejarah],
     ["/#legalitas", "Legalitas"],

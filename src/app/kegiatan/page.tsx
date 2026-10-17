@@ -9,7 +9,7 @@ import { cuplikanSejarah } from "@/components/publik/sejarah";
 import { namaDenganWilayah } from "@/lib/site";
 import { tanggalWIB } from "@/lib/time";
 import { bacaIdentitas } from "@/server/identitas";
-import { bacaKontenPublik, kegiatanTampil } from "@/server/konten-publik";
+import { bacaKontenPublik, bagianTambahan, kegiatanTampil } from "@/server/konten-publik";
 import { TAG_KONTEN } from "@/server/store";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,7 +35,7 @@ export default async function HalamanKegiatan() {
 
   return (
     <>
-      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah }} />
+      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah, ...bagianTambahan(konten, hariIni) }} />
       <main className="flex-1 bg-krem">
         <JudulHalamanPublik
           kicker="Kegiatan"

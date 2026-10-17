@@ -56,7 +56,21 @@ export function GaleriFoto({
 }
 
 /** Satu foto (mis. bukti registrasi) yang bisa diperbesar. */
-export function FotoDiperbesar({ item, className = "" }: { item: ItemFoto; className?: string }) {
+export function FotoDiperbesar({
+  item,
+  className = "",
+  isi = "cover",
+  ikutiRasio = false,
+  sizes = "(min-width: 768px) 40vw, 90vw",
+}: {
+  item: ItemFoto;
+  className?: string;
+  /** "contain" untuk gambar yang tidak boleh terpotong (mis. QRIS, poster). */
+  isi?: "cover" | "contain";
+  /** Tinggi kotak mengikuti rasio gambar (bila wadah tidak menentukan tinggi). */
+  ikutiRasio?: boolean;
+  sizes?: string;
+}) {
   const [buka, setBuka] = useState(false);
   return (
     <>
@@ -64,15 +78,16 @@ export function FotoDiperbesar({ item, className = "" }: { item: ItemFoto; class
         type="button"
         onClick={() => setBuka(true)}
         className={`group relative block overflow-hidden rounded-xl bg-stone-100 ring-1 ring-stone-200 ${className}`}
+        style={ikutiRasio ? { aspectRatio: `${item.lebar} / ${item.tinggi}` } : undefined}
         aria-label={`Perbesar: ${item.alt}`}
       >
         <Image
           src={item.url}
           alt={item.alt}
           fill
-          sizes="(min-width: 768px) 40vw, 90vw"
+          sizes={sizes}
           unoptimized={item.url.endsWith(".svg")}
-          className="object-cover transition duration-300 group-hover:scale-105"
+          className={`transition duration-300 ${isi === "cover" ? "object-cover group-hover:scale-105" : "object-contain"}`}
         />
         <span className="absolute right-2 bottom-2 flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-xs text-white">
           <IkonPerbesar className="size-3.5" /> Perbesar

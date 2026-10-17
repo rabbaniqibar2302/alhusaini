@@ -1,6 +1,9 @@
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import type { KegiatanTampil } from "@/components/publik/daftar-kegiatan";
+import { agendaMendatang } from "@/lib/agenda";
+import { adaInfak } from "@/lib/infak";
+import { adaLaporanKas } from "@/lib/kas";
 import type { KegiatanItem, Konten } from "@/lib/schemas";
 import { formatTanggal } from "@/lib/time";
 import { bacaSemuaKonten, kontenCadangan } from "./store";
@@ -18,6 +21,15 @@ export async function bacaKontenPublik(hariIni: string): Promise<{ konten: Konte
     console.error("[publik] Gagal membaca database:", err);
     return { konten: kontenCadangan(hariIni), gagal: true };
   }
+}
+
+/** Bagian agenda, infak, dan laporan kas hanya tampil (beserta menunya) bila ada isinya. */
+export function bagianTambahan(konten: Konten, hariIni: string) {
+  return {
+    agenda: agendaMendatang(konten.agenda, hariIni).length > 0,
+    infak: adaInfak(konten.infak),
+    kas: konten.setelanKas.tampilWebsite && adaLaporanKas(konten.kas, konten.setelanKas),
+  };
 }
 
 export function kegiatanTampil(items: KegiatanItem[], hariIni: string): KegiatanTampil[] {

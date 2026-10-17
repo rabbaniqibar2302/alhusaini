@@ -302,3 +302,32 @@ export const IkonSuaraMati = (p: IkonProps) => (
     <path d="m16.5 9.5 5 5M21.5 9.5l-5 5" />
   </Dasar>
 );
+
+export const IkonSalin = (p: IkonProps) => (
+  <Dasar {...p}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+  </Dasar>
+);
+
+export const IkonDompet = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M19 7V5.5A1.5 1.5 0 0 0 17.5 4H5a2 2 0 0 0 0 4h14a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6" />
+    <path d="M16 14h.01" strokeWidth={3} />
+  </Dasar>
+);
+
+export const IkonQr = (p: IkonProps) => (
+  <Dasar {...p}>
+    <rect x="3.5" y="3.5" width="6" height="6" rx="1" />
+    <rect x="14.5" y="3.5" width="6" height="6" rx="1" />
+    <rect x="3.5" y="14.5" width="6" height="6" rx="1" />
+    <path d="M14.5 14.5h2.5v2.5M20.5 14.5v.01M14.5 20.5h.01M17.5 20.5h3v-3" />
+  </Dasar>
+);
+
+export const IkonGrafik = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+  </Dasar>
+);

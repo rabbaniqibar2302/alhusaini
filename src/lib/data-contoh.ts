@@ -1,3 +1,5 @@
+import { INFAK_KOSONG } from "./infak";
+import { SETELAN_KAS_BAWAAN } from "./kas";
 import { SETELAN_TV_BAWAAN } from "./layar-tv";
 import type { KajianItem, Konten } from "./schemas";
 import { IDENTITAS_BAWAAN } from "./site";
@@ -138,5 +140,10 @@ export function dataContoh(hariIni: string): Konten {
     identitas: IDENTITAS_BAWAAN,
     // Foto orang sungguhan tidak boleh dikarang; kartu memakai inisial nama.
     penceramah: [],
+    // Data keuangan, agenda, dan rekening adalah data asli; tidak ada contohnya.
+    kas: [],
+    setelanKas: SETELAN_KAS_BAWAAN,
+    agenda: [],
+    infak: INFAK_KOSONG,
   };
 }

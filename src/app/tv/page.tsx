@@ -4,6 +4,9 @@ import type { DataHariBesar } from "@/components/publik/hitung-mundur-hari-besar
 import { LayarTv, type DataTv } from "@/components/tv/layar-tv";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
+import { agendaMendatang } from "@/lib/agenda";
+import { adaInfak } from "@/lib/infak";
+import { adaLaporanKas, ringkasanKas, urutkanTransaksi } from "@/lib/kas";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { petaFotoPenceramah } from "@/lib/penceramah";
 import { alamatPendek } from "@/lib/site";
@@ -51,6 +54,12 @@ export default async function HalamanTv() {
     })),
   }));
 
+  const { setelanKas, infak } = konten;
+  const kas =
+    setelanKas.tampilTv && adaLaporanKas(konten.kas, setelanKas)
+      ? ringkasanKas(konten.kas, setelanKas, hariIni)
+      : null;
+
   const data: DataTv = {
     identitas: {
       nama: konten.identitas.nama,
@@ -78,6 +87,22 @@ export default async function HalamanTv() {
       .slice(0, 4)
       .map((k) => ({ id: k.id, judul: k.judul, tanggal: k.tanggal, foto: k.foto[0] })),
     hariBesar,
+    agenda: agendaMendatang(konten.agenda, hariIni)
+      .filter((a) => !a.contoh)
+      .slice(0, 3)
+      .map(({ id, judul, tanggal, tanggalSelesai, jam, lokasi, poster }) => ({ id, judul, tanggal, tanggalSelesai, jam, lokasi, poster })),
+    kas: kas && {
+      periodeLabel: kas.periodeLabel,
+      saldoAkhir: kas.saldoAkhir,
+      masuk: kas.masuk,
+      keluar: kas.keluar,
+      terakhir: kas.terakhir,
+      transaksi: urutkanTransaksi(konten.kas).slice(0, 6),
+    },
+    infak:
+      infak.tampilTv && adaInfak(infak)
+        ? { qris: infak.qris, namaQris: infak.namaQris, rekening: infak.rekening, catatan: infak.catatan }
+        : null,
     setelan: konten.tv,
     adzan: { umum: konten.adzan.umum?.url ?? null, subuh: konten.adzan.subuh?.url ?? null },
   };

@@ -9,6 +9,7 @@ export const MENU_ADMIN = [
     item: [
       { href: "/admin", label: "Dasbor" },
       { href: "/admin/pengumuman", label: "Pengumuman" },
+      { href: "/admin/agenda", label: "Agenda Event" },
     ],
   },
   {
@@ -20,6 +21,13 @@ export const MENU_ADMIN = [
       { href: "/admin/pengajian-ibu", label: "Pengajian Ibu" },
       { href: "/admin/penceramah", label: "Foto Penceramah" },
       { href: "/admin/hitung-mundur", label: "Hitung Mundur" },
+    ],
+  },
+  {
+    grup: "Keuangan",
+    item: [
+      { href: "/admin/kas", label: "Kas Masjid" },
+      { href: "/admin/infak", label: "Infak" },
     ],
   },
   {

@@ -13,11 +13,17 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 - Jadwal sholat hari ini (Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, Isya) dari data Kemenag
   melalui API myQuran untuk wilayah Jakarta Pusat. Sholat berikutnya disorot, lengkap dengan hitung mundur.
 - Pengumuman (yang ditandai admin untuk website).
+- **Agenda mendatang**: kartu acara dengan poster (bisa diperbesar), hitung mundur ("3 hari lagi"), tanggal
+  (bisa beberapa hari), jam, lokasi, dan keterangan. Agenda yang sudah lewat otomatis tidak tampil.
 - Hitung mundur (hari, jam, menit, detik) menuju 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah.
 - Jadwal Khotib Jumat, Pengajian Rabu, Kuliah Subuh, dan Pengajian Kaum Ibu dalam bentuk **kartu penceramah**:
   foto khotib/ustadz/ustadzah (latar belakang sudah dihapus), nama, tanggal atau hari rutin, jam, serta materi/tema.
   Di HP kartu bisa digeser ke samping. Penceramah yang belum punya foto ditampilkan dengan inisial namanya.
   Setiap kajian bisa dijadwalkan pada **tanggal tertentu** atau **rutin setiap pekan**.
+- **Infak & sedekah**: gambar QRIS (bisa diperbesar) dan/atau daftar rekening bank dengan tombol *Salin* nomor rekening.
+- **Laporan kas masjid**: saldo kas, pemasukan & pengeluaran selama periode yang dipilih admin (1–12 bulan
+  terakhir), dan rincian transaksi per bulan.
+- Bagian agenda, infak, dan laporan kas (beserta menunya) hanya muncul bila sudah ada isinya.
 - Kegiatan masjid: kartu kegiatan terbaru (foto, tanggal, keterangan) dan halaman `/kegiatan` berisi semua kegiatan.
 - Sejarah masjid: cuplikan di halaman depan dan halaman `/sejarah` berisi narasi lengkap beserta foto.
 - Legalitas: kartu bukti registrasi Kemenag (SIMAS) dan DMI beserta nomornya. Foto bisa diperbesar.
@@ -35,6 +41,12 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 - Foto penceramah: cukup unggah foto orangnya, **latar belakang dihapus otomatis** (lihat
   [Foto penceramah](#foto-penceramah)). Bisa langsung dari form jadwal atau dari menu *Foto Penceramah*.
 - Pengumuman dengan periode tampil (mulai/sampai), opsional tampil juga di website.
+- Agenda event: nama acara, tanggal mulai/selesai, jam, lokasi, keterangan, dan poster. Ada tombol untuk
+  membersihkan agenda yang sudah lewat.
+- Kas masjid: catat pemasukan/pengeluaran (jumlah boleh diketik `1.250.000`), ubah/hapus transaksi, atur saldo
+  awal, periode laporan, dan tampil/tidaknya laporan di website & layar TV.
+- Infak: hingga 5 rekening bank, gambar QRIS, nama QRIS, dan catatan. Bila rekening dan QRIS sama-sama diisi,
+  keduanya tampil bersamaan.
 - Kegiatan masjid: nama, tanggal, keterangan, dan hingga 12 foto per kegiatan (bisa pilih beberapa foto sekaligus).
 - Sejarah masjid: narasi beberapa paragraf dan hingga 30 foto berketerangan yang urutannya bisa diatur.
 - Menetapkan tanggal 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah sesuai sidang isbat, plus koreksi kalender Hijriah ±2 hari.
@@ -135,6 +147,10 @@ Kunci Redis yang dipakai (nilai disimpan sebagai JSON):
 | `media:galeri-ambulans` | galeri kegiatan ambulans |
 | `media:adzan` | file suara adzan (umum & Subuh) |
 | `media:penceramah` | foto khotib & ustadz/ustadzah (dicocokkan dengan nama di jadwal) |
+| `konten:agenda` | agenda/event mendatang beserta posternya |
+| `keuangan:kas` | transaksi kas (pemasukan & pengeluaran) |
+| `setting:kas` | saldo awal, periode laporan, tampil di website/TV |
+| `setting:infak` | rekening bank, QRIS, catatan infak |
 
 Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`,
 dan `cadangan:*` (salinan otomatis bila data lama di Redis tidak lolos validasi saat akan ditimpa, disimpan 180 hari).
@@ -206,7 +222,8 @@ Halaman `/tv` dirancang untuk TV di dalam masjid (16:9, Full HD, dan otomatis me
   hari Jumat: layar **khutbah Jumat** sejak masuk waktu Dzuhur;
 - tampilan bergantian: foto masjid, pengumuman, jadwal kajian 7 hari ke depan (3 kartu penceramah per tampilan,
   berisi foto, nama, materi, tanggal, dan jam), khotib Jumat (foto besar, imam, tema, dan khotib Jumat berikutnya),
-  hitung mundur hari besar, dan foto kegiatan terbaru.
+  hitung mundur hari besar, agenda mendatang (poster + hitung mundur), info infak (QRIS & rekening), laporan kas
+  (saldo, pemasukan/pengeluaran periode, transaksi terakhir), dan foto kegiatan terbaru.
   Garis kemajuan di bagian bawah menunjukkan urutan tampilan dan sisa waktu tampilan yang sedang tampil;
 - teks berjalan berisi semua pengumuman yang aktif.
 
@@ -299,7 +316,7 @@ WIB, jadi masjid di zona WITA/WIT butuh penyesuaian lebih lanjut.
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, validasi) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, laporan kas, agenda, infak, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
