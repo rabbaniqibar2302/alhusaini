@@ -9,6 +9,7 @@ import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
 
 export const metadata: Metadata = { title: "Layar TV" };
+export const instant = false;
 
 export default async function Halaman() {
   await wajibAdminHalaman();

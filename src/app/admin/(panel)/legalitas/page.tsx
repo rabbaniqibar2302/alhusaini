@@ -9,6 +9,7 @@ import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
 
 export const metadata: Metadata = { title: "Legalitas" };
+export const instant = false;
 
 const INFO = {
   kemenag: { judul: "Registrasi Kementerian Agama (SIMAS)", labelNomor: "Nomor ID / registrasi masjid Kemenag" },

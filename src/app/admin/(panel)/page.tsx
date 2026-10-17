@@ -14,6 +14,7 @@ import { bacaSemuaKonten, redisTersedia } from "@/server/store";
 import { blobTerkonfigurasi } from "@/server/unggah-foto";
 
 export const metadata: Metadata = { title: "Dasbor" };
+export const instant = false;
 
 export default async function Dasbor() {
   const sesi = await wajibAdminHalaman();

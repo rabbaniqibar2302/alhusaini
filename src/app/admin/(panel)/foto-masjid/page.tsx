@@ -8,6 +8,7 @@ import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
 
 export const metadata: Metadata = { title: "Logo & Foto Masjid" };
+export const instant = false;
 
 export default async function HalamanFotoMasjid() {
   await wajibAdminHalaman();

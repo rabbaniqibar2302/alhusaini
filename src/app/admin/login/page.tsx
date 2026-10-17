@@ -9,6 +9,9 @@ import { FormLogin } from "./form-login";
 
 export const metadata: Metadata = { title: "Login" };
 
+// Halaman login memeriksa sesi (cookie) dan pesan di URL sebelum tampil.
+export const instant = false;
+
 async function sudahLogin(): Promise<boolean> {
   try {
     return (await bacaSesi()) !== null;

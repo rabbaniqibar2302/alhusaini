@@ -6,6 +6,7 @@ import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
 
 export const metadata: Metadata = { title: "Pengajian Rabu" };
+export const instant = false;
 
 export default async function Halaman() {
   await wajibAdminHalaman();
