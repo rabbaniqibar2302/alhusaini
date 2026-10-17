@@ -5,6 +5,7 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import type { HasilAksi } from "@/lib/hasil-aksi";
 import { originSama } from "@/lib/origin";
+import { AudioTidakValid } from "../audio-adzan";
 import { RedisBelumDikonfigurasi } from "../redis";
 import { TAG_KONTEN } from "../store";
 import { FotoTidakValid } from "../unggah-foto";
@@ -49,7 +50,7 @@ export async function jalankanAksiAdmin(aksi: (sesi: SesiAdmin) => Promise<Hasil
     return { ...hasil, kunci: Date.now() };
   } catch (err) {
     unstable_rethrow(err);
-    if (err instanceof FotoTidakValid || err instanceof RedisBelumDikonfigurasi) {
+    if (err instanceof FotoTidakValid || err instanceof AudioTidakValid || err instanceof RedisBelumDikonfigurasi) {
       return { ok: false, pesan: err.message, kunci: Date.now() };
     }
     console.error("[aksi-admin] Gagal:", err);

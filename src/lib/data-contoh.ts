@@ -133,5 +133,6 @@ export function dataContoh(hariIni: string): Konten {
     sejarah: { narasi: "", foto: [] },
     logo: null,
     tv: SETELAN_TV_BAWAAN,
+    adzan: { umum: null, subuh: null },
   };
 }

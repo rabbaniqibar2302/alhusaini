@@ -16,4 +16,5 @@ export const KUNCI_REDIS: Record<KunciKonten, string> = {
   sejarah: "konten:sejarah",
   logo: "media:logo",
   tv: "setting:tv",
+  adzan: "media:adzan",
 };

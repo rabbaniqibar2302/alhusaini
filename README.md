@@ -33,7 +33,8 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 - Sejarah masjid: narasi beberapa paragraf dan hingga 30 foto berketerangan yang urutannya bisa diatur.
 - Menetapkan tanggal 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah sesuai sidang isbat, plus koreksi kalender Hijriah ±2 hari.
 - Upload/ganti logo masjid, foto masjid, foto bukti registrasi Kemenag & DMI, dan foto kegiatan ambulans.
-- Pengaturan layar TV: jeda iqomah per waktu sholat, lama layar sholat/Jumat, dan lama tiap tampilan.
+- Pengaturan layar TV: jeda iqomah per waktu sholat, lama layar sholat/Jumat, lama tiap tampilan, serta
+  suara adzan (upload file, pilih waktu sholat yang berbunyi, dan volume).
 - Mengubah kontak (telepon, WhatsApp, email, Instagram).
 - Perubahan langsung tampil di halaman depan dan layar TV, karena cache halaman diperbarui setiap kali admin menyimpan.
 
@@ -45,6 +46,7 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 | Tampilan | Tailwind CSS 4, font Plus Jakarta Sans & Amiri (`next/font`) |
 | Data teks | Upstash Redis (`@upstash/redis`): JSON per kunci, tanpa SQL |
 | Foto | Vercel Blob (`@vercel/blob`), diproses dengan `sharp` |
+| Suara adzan | Vercel Blob, diunggah langsung dari browser (*client upload*) |
 | Keamanan | `jose` (JWT), `bcryptjs`, `@upstash/ratelimit`, `otpauth` (TOTP), `zod` |
 | Jadwal sholat | API myQuran (Kemenag), cadangan perhitungan lokal dengan `adhan` |
 
@@ -124,6 +126,7 @@ Kunci Redis yang dipakai (nilai disimpan sebagai JSON):
 | `media:logo` | logo masjid |
 | `media:hero` | foto masjid |
 | `media:galeri-ambulans` | galeri kegiatan ambulans |
+| `media:adzan` | file suara adzan (umum & Subuh) |
 
 Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`,
 dan `cadangan:*` (salinan otomatis bila data lama di Redis tidak lolos validasi saat akan ditimpa, disimpan 180 hari).
@@ -142,6 +145,7 @@ dianggap **rutin setiap pekan**; formatnya diperbarui saat jadwal itu disimpan u
 | Proteksi rute | `src/proxy.ts` (nama baru *middleware* di Next.js 16) menjaga seluruh `/admin`, halaman maupun server action, dengan memeriksa JWT dan sesi aktif. Pemeriksaan ulang dilakukan **di server** pada setiap halaman admin dan setiap aksi tulis (`jalankanAksiAdmin`). |
 | Validasi | Semua input divalidasi `zod`: panjang maksimal, format tanggal/jam, karakter kontrol ditolak. Data dari Redis juga divalidasi ulang. Output di-escape React, dan aturan ESLint `react/no-danger` melarang `dangerouslySetInnerHTML`. |
 | Upload foto | Hanya JPG/PNG/WEBP, maks. 5 MB. Tipe asli dicek dari *magic bytes*. Gambar di-decode ulang dengan `sharp`, diputar sesuai EXIF, diperkecil maks. 2000 px, **metadata/GPS dibuang**, disimpan sebagai WEBP dengan nama UUID acak. |
+| Upload suara adzan | Hanya MP3/M4A/OGG, maks. 15 MB. Browser meminta token unggah ke `/admin/unggah-audio` (wajib sesi admin + `Origin` sama); token hanya berlaku 10 menit untuk satu nama `masjid/audio/<UUID acak>.<format>`, dengan tipe konten dan ukuran dibatasi, tanpa menimpa file lain. Setelah terunggah, server membaca ulang awal file dari Blob, mencocokkan *magic bytes* dengan formatnya, dan memeriksa ukurannya. File yang tidak lolos langsung dihapus. |
 | CSRF | Header `Origin` wajib sama persis dengan situs untuk setiap request pengubah data, dicek di proxy **dan** di setiap server action/route. Halaman publik bersifat baca-saja (POST di luar `/admin` ditolak 405). |
 | Security headers | Diatur di `next.config.ts`: CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP. |
 | Token hanya di server | Modul yang memakai Redis, Blob, atau secret ditandai `import "server-only"`. Tidak ada variabel `NEXT_PUBLIC_*` yang berisi rahasia. |
@@ -154,6 +158,9 @@ Catatan teknis:
   Perlindungan XSS bertumpu pada escaping React, larangan `dangerouslySetInnerHTML`, dan validasi zod.
 - **Batas upload Vercel**: body request fungsi Vercel maksimal 4,5 MB. Foto berukuran 4–5 MB otomatis
   diperkecil di browser sebelum dikirim, dan server tetap menegakkan batas 5 MB beserta pengecekan magic bytes.
+- **Suara adzan** (bisa lebih dari 4,5 MB) tidak lewat fungsi Vercel, melainkan diunggah langsung dari browser ke
+  Vercel Blob. Karena itu CSP `connect-src` mengizinkan `https://vercel.com` (API unggah Blob), dan `media-src`
+  mengizinkan domain `*.public.blob.vercel-storage.com`.
 - **IP untuk rate limit** diambil dari header `x-real-ip`/`x-forwarded-for` yang ditetapkan Vercel. Bila di-host
   di luar Vercel, pastikan reverse proxy menimpa header tersebut.
 
@@ -196,10 +203,32 @@ Cara memasang:
 2. Buka `https://domain-anda/tv`, lalu tekan tombol **Layar penuh** (muncul saat mouse/remote digerakkan) atau tombol F.
 3. Matikan mode tidur/screensaver di perangkat tersebut. Halaman juga meminta agar layar tetap menyala (bila didukung).
 
+4. Klik layar atau tekan tombol OK pada remote (Enter pada keyboard) **sekali** supaya suara adzan boleh berbunyi
+   (lihat [Suara adzan](#suara-adzan)).
+
 Layar TV tidak perlu login dan tidak bisa mengubah data. Datanya diperbarui sendiri tiap 5 menit, jam disamakan
 dengan jam server (bila jam TV box meleset), dan bila internet putus jadwal sholat tetap dihitung di perangkat.
 Data contoh jadwal (khotib & kajian) tidak ditampilkan di TV. Jeda iqomah dan durasi lainnya diatur di
 *Panel admin → Layar TV*.
+
+### Suara adzan
+
+- Unggah file adzan di *Panel admin → Layar TV → Suara adzan*: MP3 (disarankan, didukung semua perangkat),
+  M4A, atau OGG, maks. 15 MB. File **Suara adzan Subuh** bersifat opsional; bila kosong (atau tidak bisa
+  diputar di perangkat TV), Subuh memakai file adzan biasa.
+- Admin memilih waktu sholat yang adzannya diputar (bawaan: Subuh, Dzuhur, Ashar, Maghrib, Isya) dan volumenya.
+  **Jumat** bawaan *tidak* berbunyi, karena adzan Jumat dikumandangkan saat khotib naik mimbar. Matikan juga
+  waktu yang adzannya dikumandangkan langsung oleh muadzin supaya tidak bersamaan.
+- Adzan mulai tepat saat masuk waktu (bila layar baru dibuka/terlambat, masih diputar hingga 2 menit sesudahnya),
+  ditandai tulisan *"Adzan … sedang berkumandang"*, dan otomatis berhenti saat layar sholat dimulai.
+- **Izin suara dari browser.** Browser tidak mengizinkan halaman membunyikan suara sebelum ada klik/tombol dari
+  pengguna. Selama belum diizinkan, layar TV menampilkan pengingat kuning; cukup klik layar atau tekan tombol OK
+  di remote sekali, dan izin berlaku sampai halaman ditutup/dimuat ulang. Karena itu layar TV tidak memuat ulang
+  dirinya sendiri (data diperbarui tanpa reload). Ulangi setiap kali TV box dinyalakan ulang.
+- Supaya tidak perlu klik sama sekali: pakai browser kios seperti **Fully Kiosk Browser** (Android) dengan opsi
+  autoplay diaktifkan, atau jalankan Chrome di mini PC dengan
+  `chrome --kiosk --autoplay-policy=no-user-gesture-required https://domain-anda/tv`.
+- Tombol **Tes suara adzan** (muncul di pojok kanan atas saat mouse/remote digerakkan) untuk memeriksa volume.
 
 ## Mengubah identitas masjid
 
@@ -212,7 +241,7 @@ Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, validasi) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
@@ -246,3 +275,8 @@ tests/                 unit test (node:test)
 - **Layar TV tampil kecil/terpotong**: pastikan zoom browser 100% dan gunakan mode layar penuh.
   Pada layar yang rasionya bukan 16:9, tampilan diberi pinggiran hitam supaya tidak terpotong.
 - **Layar TV belum menampilkan perubahan**: tunggu hingga 5 menit, atau muat ulang halaman `/tv`.
+- **Adzan tidak berbunyi**: pastikan pengingat kuning "Suara adzan belum aktif" tidak tampil (bila tampil, klik
+  layar sekali), waktu sholat tersebut dicentang di pengaturan, dan volume TV tidak dibisukan. Coba tombol
+  *Tes suara adzan*. Bila file M4A tidak berbunyi di TV box tertentu, unggah ulang dalam format MP3.
+- **Upload suara adzan gagal**: pastikan Blob store terhubung dan aksesnya *Public*. Bila memakai jaringan kantor
+  yang memblokir `vercel.com`, coba jaringan lain.

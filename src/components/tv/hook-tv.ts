@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { WIB_OFFSET_MS } from "@/lib/time";
 
 const MENIT = 60_000;
 
@@ -40,8 +39,8 @@ export function useSelisihWaktuServer(): number {
 
 /**
  * Data diperbarui otomatis: tiap 5 menit, saat internet tersambung kembali,
- * dan saat data hari ini belum ada. Sekali sehari (dini hari) halaman dimuat
- * ulang penuh agar ikut versi website terbaru, hanya bila server terjangkau.
+ * dan saat data hari ini belum ada. Halaman sengaja tidak dimuat ulang penuh,
+ * karena izin suara adzan dari browser hilang setiap kali halaman dimuat ulang.
  */
 export function usePembaruanOtomatis(dataUsang: boolean, tanggal: string) {
   const router = useRouter();
@@ -59,21 +58,6 @@ export function usePembaruanOtomatis(dataUsang: boolean, tanggal: string) {
   useEffect(() => {
     if (dataUsang) router.refresh();
   }, [dataUsang, tanggal, router]);
-
-  useEffect(() => {
-    const dimuat = Date.now();
-    const t = setInterval(async () => {
-      const jam = new Date(Date.now() + WIB_OFFSET_MS).getUTCHours();
-      if (Date.now() - dimuat < 20 * 60 * MENIT || jam < 1 || jam >= 3) return;
-      try {
-        const res = await fetch("/tv/waktu", { cache: "no-store" });
-        if (res.ok) window.location.reload();
-      } catch {
-        // Server tidak terjangkau: jangan muat ulang supaya layar tidak kosong.
-      }
-    }, 5 * MENIT);
-    return () => clearInterval(t);
-  }, []);
 }
 
 /** Mencegah layar TV mati/redup (Screen Wake Lock API, bila didukung). */

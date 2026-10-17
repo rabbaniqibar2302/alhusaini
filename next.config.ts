@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
+ * File adzan diunggah langsung dari browser admin ke API Vercel Blob
+ * (https://vercel.com/api/blob), lalu diputar dari domain publik Blob.
+ * NEXT_PUBLIC_VERCEL_BLOB_API_URL hanya dipakai untuk emulator lokal.
+ */
+const apiBlob = process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL
+  ? new URL(process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL).origin
+  : "https://vercel.com";
+
+/**
  * Content-Security-Policy statis (tanpa nonce).
  *
  * Nonce tidak bisa dipakai bersama Partial Prerendering / Cache Components
@@ -17,8 +26,8 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
   "font-src 'self'",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
-  "media-src 'self'",
+  `connect-src 'self' ${apiBlob}${isDev ? " ws: wss:" : ""}`,
+  "media-src 'self' blob: https://*.public.blob.vercel-storage.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "object-src 'none'",

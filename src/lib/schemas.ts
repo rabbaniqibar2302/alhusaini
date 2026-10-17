@@ -10,6 +10,7 @@ import {
   MAKS_PENETAPAN,
   MAKS_PENGUMUMAN,
 } from "./batas";
+import { POLA_PATHNAME_AUDIO, UKURAN_MAKS_AUDIO } from "./audio";
 import { JENIS_KAJIAN, POLA_JADWAL } from "./kajian";
 import { HARI_PEKAN, JAM_REGEX } from "./time";
 
@@ -322,6 +323,25 @@ export const pengumumanInput = pengumumanDasar.refine((x) => !x.mulai || !x.samp
 export const pengumumanItem = pengumumanDasar.extend({ id, contoh });
 export type PengumumanItem = z.infer<typeof pengumumanItem>;
 
+/* ------------------------------ Suara adzan ------------------------------ */
+
+const POLA_URL_AUDIO =
+  /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/masjid\/audio\/[0-9a-f-]{36}\.(mp3|m4a|ogg)$/i;
+
+export const urlAudioSchema = z.string().max(300).regex(POLA_URL_AUDIO, "Alamat file audio tidak valid");
+
+export const audioAdzanSchema = z.object({
+  url: urlAudioSchema,
+  pathname: z.string().max(200).regex(POLA_PATHNAME_AUDIO),
+  ukuran: z.int().positive().max(UKURAN_MAKS_AUDIO),
+  /** Nama file asli, hanya untuk ditampilkan di panel admin. */
+  nama: teks("Nama file", { min: 1, max: 120 }),
+});
+export type AudioAdzan = z.infer<typeof audioAdzanSchema>;
+
+export const adzanSchema = z.object({ umum: audioAdzanSchema.nullable(), subuh: audioAdzanSchema.nullable() });
+export type Adzan = z.infer<typeof adzanSchema>;
+
 /* ------------------------------ Layar TV ------------------------------ */
 
 function menit(label: string, min: number, max: number, satuan = "menit") {
@@ -344,6 +364,16 @@ export const setelanTvSchema = z.object({
   durasiSholat: menit("Lama layar sholat", 0, 30),
   durasiJumat: menit("Lama layar Jumat", 0, 90),
   detikSlide: menit("Lama tiap tampilan", 5, 120, "detik"),
+  // Field suara adzan ditambahkan belakangan: nilai bawaan dipakai bila
+  // pengaturan lama di Redis belum memilikinya.
+  adzanSubuh: z.boolean().default(true),
+  adzanDzuhur: z.boolean().default(true),
+  adzanAshar: z.boolean().default(true),
+  adzanMaghrib: z.boolean().default(true),
+  adzanIsya: z.boolean().default(true),
+  /** Dzuhur hari Jumat: adzan biasanya dikumandangkan langsung saat khotib naik mimbar. */
+  adzanJumat: z.boolean().default(false),
+  volumeAdzan: menit("Volume adzan", 10, 100, "%").default(100),
 });
 
 export type SetelanTv = z.output<typeof setelanTvSchema>;
@@ -365,6 +395,7 @@ export const skemaKonten = {
   sejarah: sejarahSchema,
   logo: logoSchema,
   tv: setelanTvSchema,
+  adzan: adzanSchema,
 } as const;
 
 export type KunciKonten = keyof typeof skemaKonten;

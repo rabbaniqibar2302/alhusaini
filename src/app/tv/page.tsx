@@ -72,6 +72,7 @@ export default async function HalamanTv() {
       .map((k) => ({ id: k.id, judul: k.judul, tanggal: k.tanggal, foto: k.foto[0] })),
     hariBesar,
     setelan: konten.tv,
+    adzan: { umum: konten.adzan.umum?.url ?? null, subuh: konten.adzan.subuh?.url ?? null },
   };
 
   return <LayarTv data={data} />;

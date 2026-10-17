@@ -288,3 +288,17 @@ export const IkonBuka = (p: IkonProps) => (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </Dasar>
 );
+
+export const IkonSuara = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5L8 9H5a1 1 0 0 0-1 1Z" />
+    <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+  </Dasar>
+);
+
+export const IkonSuaraMati = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5L8 9H5a1 1 0 0 0-1 1Z" />
+    <path d="m16.5 9.5 5 5M21.5 9.5l-5 5" />
+  </Dasar>
+);

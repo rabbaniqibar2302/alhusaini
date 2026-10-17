@@ -12,7 +12,7 @@
     "generate-secret": "node scripts/generate-secret.mjs",
     "totp-setup": "node scripts/totp-setup.mjs",
     "seed": "tsx scripts/seed.mts",
-    "test": "tsx --conditions=react-server --test tests/logika.test.mts tests/jadwal-sholat.test.mts tests/fitur-baru.test.mts"
+    "test": "tsx --conditions=react-server --test tests/logika.test.mts tests/jadwal-sholat.test.mts tests/fitur-baru.test.mts tests/adzan.test.mts"
   },
   "dependencies": {
     "@upstash/ratelimit": "^2.2.0",

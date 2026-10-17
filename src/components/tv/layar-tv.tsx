@@ -11,6 +11,8 @@ import {
   IkonPengumuman,
   IkonPin,
   IkonSenja,
+  IkonSuara,
+  IkonSuaraMati,
 } from "@/components/ikon";
 import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
 import { useSekarang } from "@/hooks/use-sekarang";
@@ -33,6 +35,7 @@ import {
 } from "./hook-tv";
 import { JamAnalog } from "./jam-analog";
 import { IsiSlide, type GambarTv, type HariBesarTv, type SlideTv } from "./slide-tv";
+import { useSuaraAdzan, type AdzanTv } from "./suara-adzan";
 
 export type DataTv = {
   /** Jadwal sholat hari ini & besok saat halaman dibuat. */
@@ -47,6 +50,8 @@ export type DataTv = {
   kegiatan: { id: string; judul: string; tanggal: string; foto: GambarTv }[];
   hariBesar: DataHariBesar[];
   setelan: SetelanTv;
+  /** URL file adzan (umum & Subuh) di Vercel Blob. */
+  adzan: AdzanTv;
 };
 
 const DAFTAR_WAKTU = [
@@ -125,14 +130,25 @@ function JamDigital({ sekarang, kecil = false }: { sekarang: number | null; keci
   );
 }
 
+function AdzanBerkumandang({ label, gelap = false }: { label: string; gelap?: boolean }) {
+  return (
+    <p className={`mb-6 flex items-center gap-3 text-[2.4rem] font-semibold ${gelap ? "text-white/70" : "text-hijau-50"}`}>
+      <IkonSuara className="size-[2.6rem] animate-pulse text-emas-300" /> Adzan {label} sedang berkumandang
+    </p>
+  );
+}
+
 function LayarFase({
   fase,
   sekarang,
   logo,
+  adzan,
 }: {
   fase: Exclude<FaseTv, { jenis: "normal" }>;
   sekarang: number;
   logo: LogoTampil | null;
+  /** Label waktu sholat bila adzannya sedang diputar. */
+  adzan: string | null;
 }) {
   const gelap = fase.jenis !== "iqomah";
   return (
@@ -149,6 +165,7 @@ function LayarFase({
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         {fase.jenis === "iqomah" && (
           <>
+            {adzan && <AdzanBerkumandang label={adzan} />}
             <p className="text-[3rem] font-semibold text-emas-300">Waktu Sholat {fase.sholat.label} · {fase.sholat.jam}</p>
             <p className="mt-4 text-[4.4rem] font-extrabold tracking-[0.35em]">IQOMAH</p>
             <p className="mt-2 text-[17rem] leading-none font-extrabold text-emas-200 tabular-nums">
@@ -165,6 +182,7 @@ function LayarFase({
         )}
         {fase.jenis === "jumat" && (
           <>
+            {adzan && <AdzanBerkumandang label={adzan} gelap />}
             <p className="text-[2.4rem] font-semibold tracking-[0.3em] text-emas-300/80 uppercase">Sholat Jumat</p>
             <p className="mt-4 text-[4.2rem] font-bold">Khutbah sedang berlangsung</p>
             <p className="mt-6 text-[2.2rem] text-white/50">Harap tenang, tidak berbicara, dan nonaktifkan HP</p>
@@ -216,6 +234,7 @@ export function LayarTv({ data }: { data: DataTv }) {
   }, [data.pengumuman, tanggal]);
 
   const fase = sekarang === null ? null : hitungFase(sekarang, jadwal, besok, data.setelan);
+  const suara = useSuaraAdzan({ adzan: data.adzan, setelan: data.setelan, jadwal, tanggal, sekarang, fase });
   const indeksSlide = sekarang === null ? 0 : Math.floor(sekarang / (data.setelan.detikSlide * 1000)) % slide.length;
   const jumat = hariKe(tanggal) === 5;
 
@@ -230,6 +249,7 @@ export function LayarTv({ data }: { data: DataTv }) {
   return (
     <div
       data-layar-tv
+      data-suara={suara.adzanBerkumandang ? "adzan" : suara.sedangUji ? "uji" : undefined}
       className={`fixed inset-0 grid place-items-center overflow-hidden bg-black text-white select-none ${
         interaksi ? "" : "cursor-none"
       }`}
@@ -281,7 +301,14 @@ export function LayarTv({ data }: { data: DataTv }) {
                 </div>
               ))}
 
-              {fase?.jenis === "normal" && sisaMenuju !== null && sisaMenuju <= 5 * 60_000 && (
+              {fase?.jenis === "normal" && suara.adzanBerkumandang && (
+                <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-hijau-950 text-center">
+                  <IkonSuara className="size-[6rem] animate-pulse text-emas-300" />
+                  <p className="mt-4 text-[4rem] font-extrabold">Adzan {suara.adzanBerkumandang}</p>
+                  <p className="mt-2 text-[2.1rem] text-hijau-50">sedang berkumandang</p>
+                </div>
+              )}
+              {fase?.jenis === "normal" && !suara.adzanBerkumandang && sisaMenuju !== null && sisaMenuju <= 5 * 60_000 && (
                 <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-hijau-950 text-center">
                   <p className="text-[2.6rem] font-semibold text-emas-300">Sebentar lagi adzan {fase.berikut.label}</p>
                   <p className="mt-2 text-[13rem] leading-none font-extrabold text-emas-200 tabular-nums">
@@ -355,18 +382,42 @@ export function LayarTv({ data }: { data: DataTv }) {
         </div>
 
         {fase && fase.jenis !== "normal" && sekarang !== null && (
-          <LayarFase fase={fase} sekarang={sekarang} logo={data.logo} />
+          <LayarFase fase={fase} sekarang={sekarang} logo={data.logo} adzan={suara.adzanBerkumandang} />
         )}
 
-        <button
-          type="button"
-          onClick={alihkanLayarPenuh}
-          className={`absolute top-5 right-5 z-30 flex items-center gap-2 rounded-full bg-black/60 px-5 py-3 text-[1.3rem] font-semibold text-white ring-1 ring-white/30 transition-opacity ${
+        {suara.perluIzin && (
+          <p
+            role="status"
+            className="absolute bottom-[7rem] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full bg-emas-400 px-8 py-3.5 text-[1.6rem] font-semibold whitespace-nowrap text-hijau-950 shadow-2xl ring-4 ring-emas-200/60"
+          >
+            <IkonSuaraMati className="size-[2.2rem] shrink-0" />
+            Suara adzan belum aktif — klik layar atau tekan tombol OK pada remote (Enter pada keyboard)
+          </p>
+        )}
+
+        <div
+          className={`absolute top-5 right-5 z-30 flex gap-3 transition-opacity ${
             interaksi ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          <IkonLayarPenuh className="size-[1.8rem]" /> Layar penuh (F)
-        </button>
+          {suara.adaFile && (
+            <button
+              type="button"
+              onClick={suara.uji}
+              className="flex items-center gap-2 rounded-full bg-black/60 px-5 py-3 text-[1.3rem] font-semibold text-white ring-1 ring-white/30"
+            >
+              <IkonSuara className="size-[1.8rem]" />
+              {suara.sedangUji || suara.adzanBerkumandang ? "Hentikan suara" : "Tes suara adzan"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={alihkanLayarPenuh}
+            className="flex items-center gap-2 rounded-full bg-black/60 px-5 py-3 text-[1.3rem] font-semibold text-white ring-1 ring-white/30"
+          >
+            <IkonLayarPenuh className="size-[1.8rem]" /> Layar penuh (F)
+          </button>
+        </div>
       </div>
     </div>
   );

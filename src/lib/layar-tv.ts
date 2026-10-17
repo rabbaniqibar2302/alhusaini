@@ -17,14 +17,21 @@ export const SETELAN_TV_BAWAAN: SetelanTv = {
   durasiSholat: 10,
   durasiJumat: 45,
   detikSlide: 15,
+  adzanSubuh: true,
+  adzanDzuhur: true,
+  adzanAshar: true,
+  adzanMaghrib: true,
+  adzanIsya: true,
+  adzanJumat: false,
+  volumeAdzan: 100,
 };
 
 export const WAKTU_SHOLAT = [
-  { kunci: "subuh", label: "Subuh", iqomah: "iqomahSubuh" },
-  { kunci: "dzuhur", label: "Dzuhur", iqomah: "iqomahDzuhur" },
-  { kunci: "ashar", label: "Ashar", iqomah: "iqomahAshar" },
-  { kunci: "maghrib", label: "Maghrib", iqomah: "iqomahMaghrib" },
-  { kunci: "isya", label: "Isya", iqomah: "iqomahIsya" },
+  { kunci: "subuh", label: "Subuh", iqomah: "iqomahSubuh", adzan: "adzanSubuh" },
+  { kunci: "dzuhur", label: "Dzuhur", iqomah: "iqomahDzuhur", adzan: "adzanDzuhur" },
+  { kunci: "ashar", label: "Ashar", iqomah: "iqomahAshar", adzan: "adzanAshar" },
+  { kunci: "maghrib", label: "Maghrib", iqomah: "iqomahMaghrib", adzan: "adzanMaghrib" },
+  { kunci: "isya", label: "Isya", iqomah: "iqomahIsya", adzan: "adzanIsya" },
 ] as const;
 
 export type KunciSholat = (typeof WAKTU_SHOLAT)[number]["kunci"];
@@ -71,6 +78,27 @@ export function hitungFase(
     jenis: "normal",
     berikut: { kunci: "subuh", label: "Subuh", jam: jamSubuh, epoch: epochWIB(tanggalBesok, jamSubuh) },
   };
+}
+
+/** Adzan diputar bila layar baru menyadari waktunya dalam rentang ini (mis. setelah layar dinyalakan). */
+export const JENDELA_ADZAN_MS = 2 * MENIT;
+
+/**
+ * Waktu sholat yang adzannya perlu diputar sekarang: baru masuk (≤ 2 menit)
+ * dan suaranya diaktifkan di pengaturan. Dzuhur hari Jumat memakai
+ * pengaturan "Jumat".
+ */
+export function adzanJatuhTempo(sekarang: number, hariIni: JadwalHarian, setelan: SetelanTv): SholatTerjadwal | null {
+  const jumat = hariKe(hariIni.tanggal) === 5;
+  for (const w of WAKTU_SHOLAT) {
+    const jam = hariIni[w.kunci];
+    const epoch = epochWIB(hariIni.tanggal, jam);
+    if (sekarang < epoch || sekarang >= epoch + JENDELA_ADZAN_MS) continue;
+    const sholatJumat = jumat && w.kunci === "dzuhur";
+    if (!(sholatJumat ? setelan.adzanJumat : setelan[w.adzan])) return null;
+    return { kunci: w.kunci, label: sholatJumat ? "Jumat" : w.label, jam, epoch };
+  }
+  return null;
 }
 
 /** "01:23:45" (atau "23:45" bila kurang dari satu jam dan `ringkas`). */
