@@ -68,6 +68,30 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Layar TV (/tv) dirancang untuk 1920×1080 dengan 1rem = 16px. Ukuran huruf
+ * dasar mengikuti layar sehingga seluruh tampilan ikut membesar/mengecil
+ * (16:9 penuh; layar dengan rasio lain mendapat pinggiran hitam).
+ */
+html:has([data-layar-tv]) {
+  font-size: min(calc(100vw / 120), calc(100vh / 67.5));
+  overflow: hidden;
+  background: #000;
+}
+
+@keyframes teks-berjalan {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility teks-berjalan {
+  animation: teks-berjalan linear infinite;
+}
+
 dialog::backdrop {
   background: rgb(7 34 25 / 0.85);
   backdrop-filter: blur(2px);

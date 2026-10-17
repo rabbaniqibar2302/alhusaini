@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { del, put } from "@vercel/blob";
 import sharp, { type OutputInfo } from "sharp";
-import type { Foto } from "@/lib/schemas";
+import type { Foto, FolderFoto } from "@/lib/schemas";
 
 /**
  * Validasi & penyimpanan foto upload admin:
@@ -43,7 +43,8 @@ export function blobTerkonfigurasi(): boolean {
 
 export async function prosesDanUnggahFoto(
   file: FormDataEntryValue | null,
-  folder: "hero" | "legalitas" | "galeri",
+  folder: FolderFoto,
+  opsi: { sisiMaks?: number; logo?: boolean } = {},
 ): Promise<Foto> {
   if (!(file instanceof File) || file.size === 0) {
     throw new FotoTidakValid("Pilih file foto terlebih dahulu.");
@@ -62,10 +63,12 @@ export async function prosesDanUnggahFoto(
     const gambar = sharp(masukan, { limitInputPixels: 50_000_000, failOn: "error" });
     const meta = await gambar.metadata();
     if (meta.format !== tipe) throw new Error(`format ${meta.format} tidak sesuai magic bytes ${tipe}`);
+    const sisi = opsi.sisiMaks ?? SISI_MAKS;
     hasil = await gambar
       .rotate()
-      .resize({ width: SISI_MAKS, height: SISI_MAKS, fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 82 })
+      .resize({ width: sisi, height: sisi, fit: "inside", withoutEnlargement: true })
+      // Logo: kualitas tinggi dan transparansi (PNG/WEBP) dipertahankan.
+      .webp(opsi.logo ? { quality: 92, alphaQuality: 100, smartSubsample: true } : { quality: 82 })
       .toBuffer({ resolveWithObject: true });
   } catch (err) {
     console.warn("[unggah-foto] Gambar ditolak:", (err as Error).message);

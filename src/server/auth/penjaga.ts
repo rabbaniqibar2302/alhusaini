@@ -66,8 +66,10 @@ export function hasilValidasiGagal(error: z.ZodError): HasilAksi {
   };
 }
 
-/** Segarkan cache halaman depan supaya perubahan langsung tampil. */
+const HALAMAN_PUBLIK = ["/", "/kegiatan", "/sejarah", "/tv"] as const;
+
+/** Segarkan cache halaman publik (termasuk layar TV) supaya perubahan langsung tampil. */
 export function segarkanHalamanPublik(): void {
   updateTag(TAG_KONTEN);
-  revalidatePath("/");
+  for (const jalur of HALAMAN_PUBLIK) revalidatePath(jalur);
 }

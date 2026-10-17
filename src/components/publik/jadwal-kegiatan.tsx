@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
 import { IkonBuku, IkonJam, IkonMatahari, IkonPengguna } from "@/components/ikon";
-import type { KhotibItem, KuliahSubuhItem, PengajianIbuItem, PengajianRabuItem } from "@/lib/schemas";
-import { HARI_PEKAN, formatTanggal } from "@/lib/time";
+import { INFO_KAJIAN, labelJamKajian, labelWaktuKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
+import type { KajianItem, KhotibItem } from "@/lib/schemas";
+import { formatTanggal } from "@/lib/time";
 import { CatatanContoh, InfoKosong } from "./bagian";
-
-const urutanHari = (h: string) => HARI_PEKAN.indexOf(h as (typeof HARI_PEKAN)[number]);
 
 /* ------------------------------ Khotib Jumat ------------------------------ */
 
@@ -101,11 +100,28 @@ function KartuKajian({
   );
 }
 
-function BarisKajian({ waktu, sub, nama, materi, sorot }: { waktu: string; sub?: string; nama: string; materi: string; sorot?: boolean }) {
+function BarisKajian({
+  waktu,
+  sub,
+  nama,
+  materi,
+  sorot,
+  hariIni,
+}: {
+  waktu: string;
+  sub?: string;
+  nama: string;
+  materi: string;
+  sorot?: boolean;
+  hariIni?: boolean;
+}) {
   return (
     <li className={`px-4 py-3 ${sorot ? "bg-emas-50/70" : ""}`}>
       <p className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold text-hijau-800">
         {waktu}
+        {hariIni && (
+          <span className="rounded-full bg-emas-400 px-2 py-0.5 text-[0.7rem] font-semibold text-hijau-950">Hari ini</span>
+        )}
         {sub && <span className="text-xs font-medium text-stone-500">{sub}</span>}
       </p>
       <p className="mt-1 flex items-start gap-1.5 text-sm font-medium text-stone-900">
@@ -126,68 +142,44 @@ export function JadwalKajian({
   pengajianIbu,
   hariIni,
 }: {
-  pengajianRabu: PengajianRabuItem[];
-  kuliahSubuh: KuliahSubuhItem[];
-  pengajianIbu: PengajianIbuItem[];
+  pengajianRabu: KajianItem[];
+  kuliahSubuh: KajianItem[];
+  pengajianIbu: KajianItem[];
   hariIni: string;
 }) {
-  const rabu = pengajianRabu
-    .filter((x) => x.tanggal >= hariIni)
-    .sort((a, b) => a.tanggal.localeCompare(b.tanggal) || a.jam.localeCompare(b.jam))
-    .slice(0, 6);
-  const subuh = [...kuliahSubuh].sort((a, b) => urutanHari(a.hari) - urutanHari(b.hari));
-  const ibu = [...pengajianIbu].sort((a, b) => urutanHari(a.hari) - urutanHari(b.hari) || a.jam.localeCompare(b.jam));
+  const kartu: { jenis: JenisKajian; items: KajianItem[]; ikon: ReactNode }[] = [
+    { jenis: "pengajianRabu", items: pengajianRabu, ikon: <IkonBuku className="size-5" /> },
+    { jenis: "kuliahSubuh", items: kuliahSubuh, ikon: <IkonMatahari className="size-5" /> },
+    { jenis: "pengajianIbu", items: pengajianIbu, ikon: <IkonJam className="size-5" /> },
+  ];
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <KartuKajian
-        judul="Pengajian Rabu"
-        keterangan="Kajian rutin setiap Rabu malam"
-        ikon={<IkonBuku className="size-5" />}
-        kosong={rabu.length === 0}
-        contoh={rabu.some((x) => x.contoh)}
-      >
-        {rabu.map((x, i) => (
-          <BarisKajian
-            key={x.id}
-            waktu={formatTanggal(x.tanggal, { hari: true })}
-            sub={`Pukul ${x.jam} WIB`}
-            nama={x.ustadz}
-            materi={x.materi}
-            sorot={i === 0}
-          />
-        ))}
-      </KartuKajian>
-
-      <KartuKajian
-        judul="Kuliah Subuh"
-        keterangan="Ba'da sholat Subuh berjamaah"
-        ikon={<IkonMatahari className="size-5" />}
-        kosong={subuh.length === 0}
-        contoh={subuh.some((x) => x.contoh)}
-      >
-        {subuh.map((x) => (
-          <BarisKajian key={x.id} waktu={`Setiap ${x.hari}`} nama={x.ustadz} materi={x.materi} />
-        ))}
-      </KartuKajian>
-
-      <KartuKajian
-        judul="Pengajian Kaum Ibu"
-        keterangan="Majelis taklim muslimah"
-        ikon={<IkonJam className="size-5" />}
-        kosong={ibu.length === 0}
-        contoh={ibu.some((x) => x.contoh)}
-      >
-        {ibu.map((x) => (
-          <BarisKajian
-            key={x.id}
-            waktu={`Setiap ${x.hari}`}
-            sub={`Pukul ${x.jam} WIB`}
-            nama={x.ustadzah}
-            materi={x.materi}
-          />
-        ))}
-      </KartuKajian>
+      {kartu.map(({ jenis, items, ikon }) => {
+        const daftar = susunKajian(items, hariIni);
+        return (
+          <KartuKajian
+            key={jenis}
+            judul={INFO_KAJIAN[jenis].judul}
+            keterangan={INFO_KAJIAN[jenis].keterangan}
+            ikon={ikon}
+            kosong={daftar.length === 0}
+            contoh={daftar.some((x) => x.contoh)}
+          >
+            {daftar.map((x, i) => (
+              <BarisKajian
+                key={x.id}
+                waktu={labelWaktuKajian(x)}
+                sub={labelJamKajian(jenis, x)}
+                nama={x.ustadz}
+                materi={x.materi}
+                sorot={i === 0 && x.pola === "tanggal"}
+                hariIni={x.pola === "tanggal" && x.tanggal === hariIni}
+              />
+            ))}
+          </KartuKajian>
+        );
+      })}
     </div>
   );
 }

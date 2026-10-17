@@ -13,7 +13,7 @@ export default async function Halaman() {
   const items = await bacaKonten("kuliahSubuh", hariIni);
   return (
     <>
-      <JudulHalaman judul="Jadwal Kuliah Subuh" deskripsi="Jadwal pekanan kajian ba'da Subuh." />
+      <JudulHalaman judul="Jadwal Kuliah Subuh" deskripsi="Kajian ba'da Subuh pada tanggal tertentu atau rutin setiap pekan, di hari apa saja." />
       <KelolaJadwal jenis="kuliahSubuh" items={items} hariIni={hariIni} />
     </>
   );

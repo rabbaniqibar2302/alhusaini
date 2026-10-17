@@ -11,11 +11,13 @@ import { ubahKonten } from "@/server/store";
 const jenisSchema = z.enum(JENIS_JADWAL);
 const idSchema = z.uuid();
 
+const FIELD_KAJIAN = ["pola", "tanggal", "hari", "jam", "ustadz", "materi"] as const;
+
 const FIELD_JADWAL: Record<JenisJadwal, readonly string[]> = {
   khotib: ["tanggal", "khotib", "imam", "tema"],
-  pengajianRabu: ["tanggal", "jam", "ustadz", "materi"],
-  kuliahSubuh: ["hari", "ustadz", "materi"],
-  pengajianIbu: ["hari", "jam", "ustadzah", "materi"],
+  pengajianRabu: FIELD_KAJIAN,
+  kuliahSubuh: FIELD_KAJIAN,
+  pengajianIbu: FIELD_KAJIAN,
 };
 
 type ItemJadwal = { id: string; tanggal?: string; hari?: string; jam?: string };
@@ -95,15 +97,15 @@ export async function hapusJadwal(_sebelumnya: HasilAksi, formData: FormData): P
   });
 }
 
-/** Membersihkan jadwal bertanggal (khotib & pengajian Rabu) yang sudah lewat. */
+/** Membersihkan jadwal bertanggal yang sudah lewat (jadwal rutin mingguan tidak tersentuh). */
 export async function hapusJadwalLewat(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
-    const jenis = z.enum(["khotib", "pengajianRabu"]).safeParse(formData.get("jenis"));
+    const jenis = jenisSchema.safeParse(formData.get("jenis"));
     if (!jenis.success) return { ok: false, pesan: "Permintaan tidak valid." };
     const hariIni = tanggalWIB();
     let jumlah = 0;
     await ubahDaftar(jenis.data, (lama) => {
-      const baru = lama.filter((x) => (x.tanggal ?? "") >= hariIni);
+      const baru = lama.filter((x) => !x.tanggal || x.tanggal >= hariIni);
       jumlah = lama.length - baru.length;
       return baru;
     });

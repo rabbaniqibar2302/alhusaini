@@ -229,3 +229,62 @@ export const IkonPengguna = (p: IkonProps) => (
     <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
   </Dasar>
 );
+
+export const IkonBintang = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z" />
+  </Dasar>
+);
+
+export const IkonPengumuman = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z" />
+    <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+  </Dasar>
+);
+
+export const IkonTv = (p: IkonProps) => (
+  <Dasar {...p}>
+    <rect x="2.5" y="5" width="19" height="12.5" rx="2" />
+    <path d="M8 21h8M12 17.5V21" />
+  </Dasar>
+);
+
+export const IkonSejarah = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M3 5.5c2.5-1 5.5-1 9 1 3.5-2 6.5-2 9-1v13c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1Z" />
+    <path d="M12 6.5v13" />
+  </Dasar>
+);
+
+export const IkonLayarPenuh = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </Dasar>
+);
+
+export const IkonFajar = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0" />
+    <path d="M12 8V4M9.5 6 12 3.5 14.5 6M4.2 12.2l1.4 1.4M19.8 12.2l-1.4 1.4" />
+  </Dasar>
+);
+
+export const IkonSenja = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0" />
+    <path d="M12 3.5v4M9.5 5 12 7.5 14.5 5M4.2 12.2l1.4 1.4M19.8 12.2l-1.4 1.4" />
+  </Dasar>
+);
+
+export const IkonBulan = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" />
+  </Dasar>
+);
+
+export const IkonBuka = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </Dasar>
+);

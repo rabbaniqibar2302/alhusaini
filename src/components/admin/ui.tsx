@@ -96,9 +96,10 @@ export function Bidang({
   name,
   galat,
   petunjuk,
+  id: idKustom,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; name: string; galat?: string[]; petunjuk?: string }) {
-  const id = `bidang-${name}`;
+  const id = idKustom ?? `bidang-${name}`;
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-stone-700">
@@ -128,6 +129,7 @@ export function Pilihan({
   name,
   galat,
   opsi,
+  id: idKustom,
   ...props
 }: SelectHTMLAttributes<HTMLSelectElement> & {
   label: string;
@@ -135,7 +137,7 @@ export function Pilihan({
   galat?: string[];
   opsi: readonly (string | { nilai: string; label: string })[];
 }) {
-  const id = `bidang-${name}`;
+  const id = idKustom ?? `bidang-${name}`;
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-stone-700">
@@ -163,11 +165,54 @@ export function Pilihan({
   );
 }
 
-export function Lencana({ children, warna = "emas" }: { children: ReactNode; warna?: "emas" | "abu" | "hijau" }) {
+export function Centang({
+  label,
+  name,
+  petunjuk,
+  defaultChecked,
+  id: idKustom,
+}: {
+  label: string;
+  name: string;
+  petunjuk?: string;
+  defaultChecked?: boolean;
+  id?: string;
+}) {
+  const id = idKustom ?? `bidang-${name}`;
+  return (
+    <div className="flex items-start gap-3">
+      <input
+        id={id}
+        name={name}
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        aria-describedby={petunjuk ? `${id}-petunjuk` : undefined}
+        className="mt-0.5 size-5 shrink-0 rounded border-stone-300 accent-hijau-700"
+      />
+      <label htmlFor={id} className="text-sm text-stone-700">
+        <span className="font-medium">{label}</span>
+        {petunjuk && (
+          <span id={`${id}-petunjuk`} className="block text-xs text-stone-500">
+            {petunjuk}
+          </span>
+        )}
+      </label>
+    </div>
+  );
+}
+
+export function Lencana({
+  children,
+  warna = "emas",
+}: {
+  children: ReactNode;
+  warna?: "emas" | "abu" | "hijau" | "biru";
+}) {
   const gaya = {
     emas: "bg-emas-100 text-emas-800 ring-emas-200",
     abu: "bg-stone-100 text-stone-600 ring-stone-200",
     hijau: "bg-hijau-50 text-hijau-700 ring-hijau-200",
+    biru: "bg-sky-50 text-sky-800 ring-sky-200",
   }[warna];
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ${gaya}`}>

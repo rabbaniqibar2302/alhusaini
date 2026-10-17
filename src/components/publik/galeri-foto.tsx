@@ -6,12 +6,18 @@ import { IkonPerbesar } from "@/components/ikon";
 import { PenampilFoto, type ItemFoto } from "./penampil-foto";
 
 /** Grid foto; klik/ketuk untuk memperbesar, geser untuk berpindah foto. */
-export function GaleriFoto({ items }: { items: (ItemFoto & { tanggalTampil?: string })[] }) {
+export function GaleriFoto({
+  items,
+  kolom = "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+}: {
+  items: (ItemFoto & { tanggalTampil?: string })[];
+  kolom?: string;
+}) {
   const [indeks, setIndeks] = useState<number | null>(null);
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className={`grid gap-3 ${kolom}`}>
         {items.map((item, i) => (
           <li key={item.id}>
             <button
@@ -32,10 +38,14 @@ export function GaleriFoto({ items }: { items: (ItemFoto & { tanggalTampil?: str
                   <IkonPerbesar className="size-4" />
                 </span>
               </span>
-              <span className="block p-3">
-                <span className="line-clamp-2 text-sm font-medium text-stone-800">{item.keterangan}</span>
-                {item.tanggalTampil && <span className="mt-1 block text-xs text-stone-500">{item.tanggalTampil}</span>}
-              </span>
+              {(item.keterangan || item.tanggalTampil) && (
+                <span className="block p-3">
+                  {item.keterangan && (
+                    <span className="line-clamp-2 text-sm font-medium text-stone-800">{item.keterangan}</span>
+                  )}
+                  {item.tanggalTampil && <span className="mt-1 block text-xs text-stone-500">{item.tanggalTampil}</span>}
+                </span>
+              )}
             </button>
           </li>
         ))}

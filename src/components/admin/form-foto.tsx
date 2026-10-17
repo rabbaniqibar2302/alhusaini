@@ -9,10 +9,12 @@ import {
   hapusFotoGaleri,
   hapusFotoLegalitas,
   hapusFotoMasjid,
+  hapusLogo,
   simpanLegalitas,
   tambahFotoGaleri,
   ubahFotoGaleri,
   unggahFotoMasjid,
+  unggahLogo,
 } from "@/server/aksi/foto";
 import { InputFoto } from "./input-foto";
 import { Bidang, Lencana, PesanHasil, TombolKirim } from "./ui";
@@ -53,6 +55,40 @@ export function TombolHapusFotoMasjid() {
   return (
     <form onSubmit={form.onSubmit} className="space-y-2">
       <TombolHapusKecil pending={form.pending} label="Hapus foto" />
+      <PesanHasil hasil={form.hasil} />
+    </form>
+  );
+}
+
+/* --------------------------------- Logo --------------------------------- */
+
+export function FormLogo() {
+  const form = useFormAksi(unggahLogo);
+  return (
+    <form onSubmit={form.onSubmit} className="space-y-4">
+      <InputFoto
+        name="foto"
+        id="foto-logo"
+        label="Pilih file logo"
+        wajib
+        petunjuk="PNG dengan latar transparan paling bagus. JPG/WEBP juga bisa, maks. 5 MB."
+      />
+      <PesanHasil hasil={form.hasil} />
+      <TombolKirim pending={form.pending}>
+        <IkonUnggah className="size-4" /> {form.pending ? "Mengunggah…" : "Unggah & ganti logo"}
+      </TombolKirim>
+    </form>
+  );
+}
+
+export function TombolHapusLogo() {
+  const form = useFormAksi(hapusLogo, {
+    resetSaatSukses: false,
+    konfirmasi: "Hapus logo? Situs akan memakai ikon masjid bawaan.",
+  });
+  return (
+    <form onSubmit={form.onSubmit} className="space-y-2">
+      <TombolHapusKecil pending={form.pending} label="Hapus logo" />
       <PesanHasil hasil={form.hasil} />
     </form>
   );

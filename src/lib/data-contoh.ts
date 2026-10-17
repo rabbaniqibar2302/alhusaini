@@ -1,4 +1,5 @@
-import type { Konten } from "./schemas";
+import { SETELAN_TV_BAWAAN } from "./layar-tv";
+import type { KajianItem, Konten } from "./schemas";
 import { tanggalBerikutnya } from "./time";
 
 /**
@@ -6,8 +7,8 @@ import { tanggalBerikutnya } from "./time";
  * Dipakai otomatis selama kunci di Redis belum pernah diisi, dan dapat
  * ditulis ke Redis dengan `npm run seed`. Setiap item diberi `contoh: true`
  * sehingga halaman menampilkan keterangan "data contoh" sampai admin
- * menggantinya. Nomor registrasi legalitas sengaja dikosongkan karena
- * merupakan data resmi yang tidak boleh dikarang.
+ * menggantinya. Nomor registrasi legalitas, sejarah, dan kegiatan masjid
+ * sengaja dikosongkan karena merupakan data asli yang tidak boleh dikarang.
  */
 
 function idContoh(kelompok: number, n: number): string {
@@ -39,44 +40,58 @@ export function dataContoh(hariIni: string): Konten {
     ["Ust. Muhammad Ilyas", "Tafsir Juz 'Amma"],
     ["Ust. Hamdan Fikri", "Fiqih Ibadah: Thaharah dan Sholat"],
     ["Ust. Saiful Anwar", "Sirah Nabawiyah"],
-  ].map(([ustadz, materi], i) => ({
-    id: idContoh(2, i + 1),
-    tanggal: rabu[i],
-    jam: "19:30",
-    ustadz,
-    materi,
-    contoh: true,
-  }));
+  ].map(
+    ([ustadz, materi], i): KajianItem => ({
+      id: idContoh(2, i + 1),
+      pola: "tanggal",
+      tanggal: rabu[i],
+      hari: "",
+      jam: "19:30",
+      ustadz,
+      materi,
+      contoh: true,
+    }),
+  );
 
+  // Hari: 0 = Ahad ... 6 = Sabtu.
   const kuliahSubuh = (
     [
-      ["Ahad", "Ust. Ahmad Syarifuddin", "Tafsir Al-Qur'an Tematik"],
-      ["Selasa", "Ust. Hamdan Fikri", "Hadits Arba'in An-Nawawi"],
-      ["Kamis", "Ust. Muhammad Ilyas", "Fiqih Muamalah Sehari-hari"],
-      ["Sabtu", "Ust. Saiful Anwar", "Akhlak dan Adab Seorang Muslim"],
+      [0, "Ust. Ahmad Syarifuddin", "Tafsir Al-Qur'an Tematik"],
+      [2, "Ust. Hamdan Fikri", "Hadits Arba'in An-Nawawi"],
+      [4, "Ust. Muhammad Ilyas", "Fiqih Muamalah Sehari-hari"],
+      [6, "Ust. Saiful Anwar", "Akhlak dan Adab Seorang Muslim"],
     ] as const
-  ).map(([hari, ustadz, materi], i) => ({
-    id: idContoh(3, i + 1),
-    hari,
-    ustadz,
-    materi,
-    contoh: true,
-  }));
+  ).map(
+    ([hari, ustadz, materi], i): KajianItem => ({
+      id: idContoh(3, i + 1),
+      pola: "tanggal",
+      tanggal: tanggalBerikutnya(hariIni, hari, 1)[0],
+      hari: "",
+      jam: "",
+      ustadz,
+      materi,
+      contoh: true,
+    }),
+  );
 
   const pengajianIbu = (
     [
-      ["Selasa", "09:00", "Ustadzah Hj. Siti Aminah", "Tahsin dan Tajwid Al-Qur'an"],
-      ["Kamis", "13:30", "Ustadzah Nur Hasanah, S.Pd.I.", "Fiqih Wanita"],
-      ["Sabtu", "15:30", "Ustadzah Rahmawati", "Parenting Islami: Mendidik Anak Shalih"],
+      [2, "09:00", "Ustadzah Hj. Siti Aminah", "Tahsin dan Tajwid Al-Qur'an"],
+      [4, "13:30", "Ust. H. Abdul Karim, Lc.", "Fiqih Wanita: Thaharah dan Ibadah"],
+      [6, "15:30", "Ustadzah Rahmawati", "Parenting Islami: Mendidik Anak Shalih"],
     ] as const
-  ).map(([hari, jam, ustadzah, materi], i) => ({
-    id: idContoh(4, i + 1),
-    hari,
-    jam,
-    ustadzah,
-    materi,
-    contoh: true,
-  }));
+  ).map(
+    ([hari, jam, ustadz, materi], i): KajianItem => ({
+      id: idContoh(4, i + 1),
+      pola: "tanggal",
+      tanggal: tanggalBerikutnya(hariIni, hari, 1)[0],
+      hari: "",
+      jam,
+      ustadz,
+      materi,
+      contoh: true,
+    }),
+  );
 
   const galeri = [
     ["/images/contoh-ambulans-1.svg", "Layanan ambulans untuk warga sekitar masjid"],
@@ -103,5 +118,20 @@ export function dataContoh(hariIni: string): Konten {
     },
     hero: null,
     galeri,
+    pengumuman: [
+      "Mohon nonaktifkan atau senyapkan HP selama berada di dalam masjid.",
+      "Jagalah kebersihan masjid dan simpan alas kaki di tempat yang telah disediakan.",
+    ].map((teks, i) => ({
+      id: idContoh(6, i + 1),
+      teks,
+      mulai: "",
+      sampai: "",
+      diWebsite: false,
+      contoh: true,
+    })),
+    kegiatan: [],
+    sejarah: { narasi: "", foto: [] },
+    logo: null,
+    tv: SETELAN_TV_BAWAAN,
   };
 }

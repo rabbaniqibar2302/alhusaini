@@ -24,13 +24,19 @@ function nilaiKosong<K extends KunciKonten>(kunci: K, contoh: Konten): Konten[K]
   return (Array.isArray(c) ? [] : c) as Konten[K];
 }
 
-function uraikan<K extends KunciKonten>(kunci: K, mentah: unknown, contoh: Konten): Konten[K] {
-  if (mentah === null || mentah === undefined) return contoh[kunci];
+type HasilUrai<K extends KunciKonten> = { nilai: Konten[K]; valid: boolean };
+
+function urai<K extends KunciKonten>(kunci: K, mentah: unknown, contoh: Konten): HasilUrai<K> {
+  if (mentah === null || mentah === undefined) return { nilai: contoh[kunci], valid: true };
   const hasil = skemaKonten[kunci].safeParse(mentah);
-  if (hasil.success) return hasil.data as Konten[K];
+  if (hasil.success) return { nilai: hasil.data as Konten[K], valid: true };
   // Jangan tampilkan data contoh menggantikan data asli yang rusak.
   console.error(`[store] Nilai kunci "${KUNCI_REDIS[kunci]}" tidak valid dan diabaikan.`, hasil.error.issues);
-  return nilaiKosong(kunci, contoh);
+  return { nilai: nilaiKosong(kunci, contoh), valid: false };
+}
+
+function uraikan<K extends KunciKonten>(kunci: K, mentah: unknown, contoh: Konten): Konten[K] {
+  return urai(kunci, mentah, contoh).nilai;
 }
 
 function peringatkanTanpaRedis() {
@@ -83,13 +89,26 @@ export async function simpanKonten<K extends KunciKonten>(kunci: K, nilai: Konte
   await wajibRedis().set(KUNCI_REDIS[kunci], data);
 }
 
-/** Baca-ubah-tulis untuk satu kunci (admin hanya satu, jadi tanpa locking). */
+const TTL_CADANGAN = 180 * 24 * 60 * 60; // 180 hari
+
+/**
+ * Baca-ubah-tulis untuk satu kunci (admin hanya satu, jadi tanpa locking).
+ * Bila nilai lama di Redis tidak lolos validasi, nilai mentahnya disalin dulu
+ * ke kunci `cadangan:*` supaya tidak hilang tertimpa.
+ */
 export async function ubahKonten<K extends KunciKonten>(
   kunci: K,
   ubah: (lama: Konten[K]) => Konten[K],
 ): Promise<Konten[K]> {
-  wajibRedis();
-  const baru = ubah(await bacaKonten(kunci));
+  const redis = wajibRedis();
+  const mentah = await redis.get(KUNCI_REDIS[kunci]);
+  const lama = urai(kunci, mentah, dataContoh(tanggalWIB()));
+  if (!lama.valid) {
+    const kunciCadangan = `cadangan:${KUNCI_REDIS[kunci]}:${Date.now()}`;
+    await redis.set(kunciCadangan, mentah, { ex: TTL_CADANGAN });
+    console.error(`[store] Nilai lama disalin ke "${kunciCadangan}" sebelum ditimpa.`);
+  }
+  const baru = ubah(lama.nilai);
   await simpanKonten(kunci, baru);
   return baru;
 }

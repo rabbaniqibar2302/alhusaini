@@ -8,23 +8,34 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 
 **Halaman depan (publik)**
 
+- Header dan footer memakai logo masjid yang diunggah admin (atau ikon bawaan).
 - Hero berisi foto masjid (atau ilustrasi bawaan), nama, alamat, dan tombol petunjuk arah.
 - Jadwal sholat hari ini (Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, Isya) dari data Kemenag
   melalui API myQuran untuk wilayah Jakarta Pusat. Sholat berikutnya disorot, lengkap dengan hitung mundur.
+- Pengumuman (yang ditandai admin untuk website).
 - Hitung mundur (hari, jam, menit, detik) menuju 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah.
-- Jadwal Khotib Jumat, Pengajian Rabu, Kuliah Subuh, dan Pengajian Kaum Ibu.
+- Jadwal Khotib Jumat, Pengajian Rabu, Kuliah Subuh, dan Pengajian Kaum Ibu. Setiap kajian bisa dijadwalkan
+  pada **tanggal tertentu** atau **rutin setiap pekan**, dengan pengisi ustadz maupun ustadzah.
+- Kegiatan masjid: kartu kegiatan terbaru (foto, tanggal, keterangan) dan halaman `/kegiatan` berisi semua kegiatan.
+- Sejarah masjid: cuplikan di halaman depan dan halaman `/sejarah` berisi narasi lengkap beserta foto.
 - Legalitas: kartu bukti registrasi Kemenag (SIMAS) dan DMI beserta nomornya. Foto bisa diperbesar.
 - Galeri kegiatan ambulans masjid: grid foto, klik untuk memperbesar, geser untuk berpindah foto.
 - Footer berisi alamat, kontak, dan tautan Google Maps.
+
+**Layar TV masjid (`/tv`)** — lihat [Layar TV masjid](#layar-tv-masjid).
 
 **Panel admin (`/admin`)**
 
 - Hanya ada satu akun admin dan tidak ada halaman pendaftaran.
 - Tambah, edit, dan hapus keempat jadwal. Ada juga tombol untuk membersihkan jadwal yang sudah lewat.
+- Pengumuman dengan periode tampil (mulai/sampai), opsional tampil juga di website.
+- Kegiatan masjid: nama, tanggal, keterangan, dan hingga 12 foto per kegiatan (bisa pilih beberapa foto sekaligus).
+- Sejarah masjid: narasi beberapa paragraf dan hingga 30 foto berketerangan yang urutannya bisa diatur.
 - Menetapkan tanggal 1 Ramadhan, 1 Syawwal, dan 10 Dzulhijjah sesuai sidang isbat, plus koreksi kalender Hijriah ±2 hari.
-- Upload/ganti foto masjid, foto bukti registrasi Kemenag & DMI, dan foto kegiatan ambulans.
+- Upload/ganti logo masjid, foto masjid, foto bukti registrasi Kemenag & DMI, dan foto kegiatan ambulans.
+- Pengaturan layar TV: jeda iqomah per waktu sholat, lama layar sholat/Jumat, dan lama tiap tampilan.
 - Mengubah kontak (telepon, WhatsApp, email, Instagram).
-- Perubahan langsung tampil di halaman depan, karena cache halaman diperbarui setiap kali admin menyimpan.
+- Perubahan langsung tampil di halaman depan dan layar TV, karena cache halaman diperbarui setiap kali admin menyimpan.
 
 ## Teknologi
 
@@ -101,15 +112,24 @@ Kunci Redis yang dipakai (nilai disimpan sebagai JSON):
 | --- | --- |
 | `jadwal:khotib` | jadwal khotib & imam Jumat |
 | `jadwal:pengajian-rabu` | pengajian Rabu |
-| `jadwal:kuliah-subuh` | kuliah Subuh pekanan |
+| `jadwal:kuliah-subuh` | kuliah Subuh |
 | `jadwal:pengajian-ibu` | pengajian kaum ibu |
+| `konten:pengumuman` | pengumuman (layar TV & website) |
+| `konten:kegiatan` | kegiatan masjid beserta fotonya |
+| `konten:sejarah` | narasi & foto sejarah masjid |
 | `setting:countdown` | koreksi kalender Hijriah & tanggal penetapan sidang isbat |
 | `setting:kontak` | telepon, WhatsApp, email, Instagram |
 | `setting:legalitas` | nomor & foto registrasi Kemenag dan DMI |
+| `setting:tv` | pengaturan layar TV (iqomah, durasi) |
+| `media:logo` | logo masjid |
 | `media:hero` | foto masjid |
 | `media:galeri-ambulans` | galeri kegiatan ambulans |
 
-Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`.
+Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`,
+dan `cadangan:*` (salinan otomatis bila data lama di Redis tidak lolos validasi saat akan ditimpa, disimpan 180 hari).
+
+Jadwal kajian yang tersimpan dengan format lama (sebelum ada pilihan tanggal/rutin) tetap terbaca dan otomatis
+dianggap **rutin setiap pekan**; formatnya diperbarui saat jadwal itu disimpan ulang dari panel admin.
 
 ## Keamanan
 
@@ -156,10 +176,35 @@ Catatan teknis:
   *Koreksi kalender Hijriah* ke +1 agar tanggal Hijriah harian dan perkiraan otomatis ikut bergeser.
 - Pada harinya ditampilkan ucapan, dan keesokan harinya hitung mundur otomatis pindah ke tahun Hijriah berikutnya.
 
+## Layar TV masjid
+
+Halaman `/tv` dirancang untuk TV di dalam masjid (16:9, Full HD, dan otomatis menyesuaikan ukuran layar):
+
+- logo, nama, dan alamat masjid; tanggal Masehi & Hijriah; jam analog dan digital (WIB);
+- jadwal sholat dengan sorotan waktu berikutnya dan hitung mundur menuju adzan
+  (10 menit terakhir berkedip, 5 menit terakhir tampil besar);
+- setelah adzan: **hitung mundur iqomah**, lalu layar diredupkan selama **sholat berlangsung**;
+  hari Jumat: layar **khutbah Jumat** sejak masuk waktu Dzuhur;
+- tampilan bergantian: foto masjid, pengumuman, jadwal kajian 7 hari ke depan, khotib Jumat,
+  hitung mundur hari besar, dan foto kegiatan terbaru;
+- teks berjalan berisi semua pengumuman yang aktif.
+
+Cara memasang:
+
+1. Pakai perangkat dengan browser Chrome/Edge versi terbaru: Android TV / TV box, mini PC, atau laptop yang
+   disambungkan ke TV. Browser bawaan Smart TV lama sering tidak mendukung tampilan modern.
+2. Buka `https://domain-anda/tv`, lalu tekan tombol **Layar penuh** (muncul saat mouse/remote digerakkan) atau tombol F.
+3. Matikan mode tidur/screensaver di perangkat tersebut. Halaman juga meminta agar layar tetap menyala (bila didukung).
+
+Layar TV tidak perlu login dan tidak bisa mengubah data. Datanya diperbarui sendiri tiap 5 menit, jam disamakan
+dengan jam server (bila jam TV box meleset), dan bila internet putus jadwal sholat tetap dihitung di perangkat.
+Data contoh jadwal (khotib & kajian) tidak ditampilkan di TV. Jeda iqomah dan durasi lainnya diatur di
+*Panel admin → Layar TV*.
+
 ## Mengubah identitas masjid
 
 Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal sholat) ada di
-`src/lib/site.ts`. Kontak dan legalitas diubah lewat panel admin.
+`src/lib/site.ts`. Logo, kontak, dan legalitas diubah lewat panel admin.
 
 ## Perintah
 
@@ -167,7 +212,7 @@ Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
@@ -177,10 +222,11 @@ Nama, nama Arab, alamat, dan koordinat masjid (untuk perhitungan cadangan jadwal
 
 ```
 src/
-  app/                 halaman (beranda, admin, login, logout)
-  components/publik/   komponen halaman depan
+  app/                 halaman (beranda, kegiatan, sejarah, tv, admin, login, logout)
+  components/publik/   komponen halaman publik
+  components/tv/       layar TV masjid
   components/admin/    form & komponen panel admin
-  lib/                 kode bersama (skema zod, waktu WIB, kalender Hijriah, hitung mundur)
+  lib/                 kode bersama (skema zod, waktu WIB, kalender Hijriah, hitung mundur, kajian, fase layar TV)
   server/              kode khusus server (Redis, auth, rate limit, upload, jadwal sholat, server action)
   proxy.ts             proteksi /admin + CSRF (pengganti middleware di Next.js 16)
 scripts/               hash password, secret, TOTP, seed
@@ -197,3 +243,6 @@ tests/                 unit test (node:test)
 - **Ponsel 2FA hilang**: kosongkan atau ganti `ADMIN_TOTP_SECRET` (`npm run totp-setup`), lalu redeploy.
 - **Upload gagal "Penyimpanan foto belum dikonfigurasi"**: hubungkan Blob store ke proyek.
   Pastikan aksesnya *Public*, karena foto ditampilkan ke publik.
+- **Layar TV tampil kecil/terpotong**: pastikan zoom browser 100% dan gunakan mode layar penuh.
+  Pada layar yang rasionya bukan 16:9, tampilan diberi pinggiran hitam supaya tidak terpotong.
+- **Layar TV belum menampilkan perubahan**: tunggu hingga 5 menit, atau muat ulang halaman `/tv`.

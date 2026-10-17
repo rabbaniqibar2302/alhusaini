@@ -67,6 +67,29 @@ export async function hapusFotoMasjid(_sebelumnya: HasilAksi): Promise<HasilAksi
   });
 }
 
+/* --------------------------------- Logo --------------------------------- */
+
+export async function unggahLogo(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
+  return jalankanAksiAdmin(async () => {
+    const lama = await bacaKonten("logo");
+    const baru = await prosesDanUnggahFoto(formData.get("foto"), "logo", { sisiMaks: 600, logo: true });
+    await simpanAtauBersihkan(baru, () => simpanKonten("logo", baru));
+    await hapusFoto(lama);
+    segarkanHalamanPublik();
+    return { ok: true, pesan: "Logo masjid diperbarui." };
+  });
+}
+
+export async function hapusLogo(_sebelumnya: HasilAksi): Promise<HasilAksi> {
+  return jalankanAksiAdmin(async () => {
+    const lama = await bacaKonten("logo");
+    await simpanKonten("logo", null);
+    await hapusFoto(lama);
+    segarkanHalamanPublik();
+    return { ok: true, pesan: "Logo dihapus; situs memakai ikon masjid bawaan." };
+  });
+}
+
 /* ------------------------------ Legalitas ------------------------------ */
 
 export async function simpanLegalitas(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {

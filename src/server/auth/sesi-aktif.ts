@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { getRedis } from "../redis";
 import { verifikasiToken } from "./token";
 
@@ -19,6 +20,8 @@ export async function verifikasiSesiDariToken(token: string | undefined): Promis
   try {
     return (await redis.exists(kunciSesi(isi.sid))) ? { sid: isi.sid, username: isi.username } : null;
   } catch (err) {
+    // Galat internal Next.js (mis. prerender dihentikan) diteruskan, bukan dicatat sebagai gangguan Redis.
+    unstable_rethrow(err);
     console.error("[auth] Gagal memeriksa sesi di Redis:", (err as Error).message);
     return null;
   }

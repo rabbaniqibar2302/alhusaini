@@ -1,8 +1,8 @@
 import "server-only";
-import { CalculationParameters, Coordinates, Madhab, PrayerTimes, Rounding } from "adhan";
 import { z } from "zod";
+import { hitungJadwalLokal, jadwalPerhitungan, type WaktuSholat } from "@/lib/hitung-sholat";
 import { SITE } from "@/lib/site";
-import { JAM_REGEX, WIB_OFFSET_MS } from "@/lib/time";
+import { JAM_REGEX } from "@/lib/time";
 import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
 import { getRedis } from "./redis";
 
@@ -16,8 +16,7 @@ import { getRedis } from "./redis";
  */
 
 export type { JadwalHarian };
-
-type WaktuSholat = Omit<JadwalHarian, "tanggal" | "sumber" | "lokasi">;
+export { hitungJadwalLokal };
 
 const API_V3 = "https://api.myquran.com/v3";
 const API_V2 = "https://api.myquran.com/v2";
@@ -166,30 +165,6 @@ async function ambilDariApi(versi: "v3" | "v2", tanggal: string) {
   return { ...hasil, lokasi: hasil.lokasi || kota.lokasi };
 }
 
-function jamWIB(t: Date): string {
-  return new Date(t.getTime() + WIB_OFFSET_MS).toISOString().slice(11, 16);
-}
-
-/** Perhitungan cadangan dengan parameter Kemenag (dikalibrasi ±1 menit). */
-export function hitungJadwalLokal(tanggal: string): WaktuSholat {
-  const [y, m, d] = tanggal.split("-").map(Number);
-  const p = new CalculationParameters("Other", 20, 18);
-  p.madhab = Madhab.Shafi;
-  p.rounding = Rounding.Up;
-  p.adjustments = { fajr: 0, sunrise: -2, dhuhr: 1, asr: 0, maghrib: 1, isha: 0 };
-  // adhan membaca komponen tanggal lokal, jadi bentuk Date lokal y/m/d.
-  const w = new PrayerTimes(new Coordinates(SITE.koordinat.lat, SITE.koordinat.lng), new Date(y, m - 1, d), p);
-  return {
-    imsak: jamWIB(new Date(w.fajr.getTime() - 10 * 60 * 1000)),
-    subuh: jamWIB(w.fajr),
-    terbit: jamWIB(w.sunrise),
-    dzuhur: jamWIB(w.dhuhr),
-    ashar: jamWIB(w.asr),
-    maghrib: jamWIB(w.maghrib),
-    isya: jamWIB(w.isha),
-  };
-}
-
 export async function getJadwalSholat(tanggal: string): Promise<JadwalHarian> {
   const redis = getRedis();
   const kunci = `cache:jadwal-sholat:${VERSI_CACHE}:${tanggal}`;
@@ -213,12 +188,7 @@ export async function getJadwalSholat(tanggal: string): Promise<JadwalHarian> {
     }
   }
 
-  const cadangan: JadwalHarian = {
-    tanggal,
-    ...hitungJadwalLokal(tanggal),
-    sumber: "perhitungan",
-    lokasi: SITE.kotaJadwalSholat,
-  };
+  const cadangan = jadwalPerhitungan(tanggal);
   await redis?.set(kunci, cadangan, { ex: TTL_JADWAL_CADANGAN }).catch(() => {});
   return cadangan;
 }

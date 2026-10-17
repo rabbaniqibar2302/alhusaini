@@ -3,14 +3,95 @@
 import { useState } from "react";
 import { IkonPensil, IkonPeringatan, IkonSampah } from "@/components/ikon";
 import { HASIL_AWAL, type HasilAksi } from "@/lib/hasil-aksi";
+import type { PolaJadwal } from "@/lib/kajian";
 import type { JenisJadwal } from "@/lib/schemas";
-import { HARI_PEKAN } from "@/lib/time";
+import { HARI_PEKAN, isTanggalValid, namaHari } from "@/lib/time";
 import { hapusJadwal, hapusJadwalLewat, simpanJadwal } from "@/server/aksi/jadwal";
 import { KONFIGURASI_JADWAL, OPSI_HARI, peringatanHari, type ItemJadwalUmum } from "./konfigurasi-jadwal";
 import { Bidang, Kartu, Lencana, PesanHasil, Pilihan, TombolKirim } from "./ui";
 import { useFormAksi } from "./use-form-aksi";
 
 const teks = (v: unknown) => (typeof v === "string" ? v : "");
+
+const PILIHAN_POLA: [PolaJadwal, string][] = [
+  ["tanggal", "Tanggal tertentu"],
+  ["mingguan", "Rutin setiap pekan"],
+];
+
+/** Pilihan waktu kajian: tanggal tertentu, atau rutin setiap pekan pada hari tertentu. */
+function PilihWaktu({
+  pola,
+  onPola,
+  tanggal,
+  onTanggal,
+  hari,
+  onHari,
+  galat,
+}: {
+  pola: PolaJadwal;
+  onPola: (p: PolaJadwal) => void;
+  tanggal: string;
+  onTanggal: (t: string) => void;
+  hari: string;
+  onHari: (h: string) => void;
+  galat: Record<string, string[] | undefined>;
+}) {
+  return (
+    <fieldset>
+      <legend className="block text-sm font-medium text-stone-700">
+        Waktu pelaksanaan<span className="text-red-600"> *</span>
+      </legend>
+      <div className="mt-1 grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1 ring-1 ring-stone-200">
+        {PILIHAN_POLA.map(([nilai, label]) => (
+          <label
+            key={nilai}
+            className={`cursor-pointer rounded-lg px-2 py-2 text-center text-sm font-medium transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-emas-400 ${
+              pola === nilai ? "bg-white text-hijau-900 shadow-sm ring-1 ring-stone-200" : "text-stone-600 hover:text-stone-900"
+            }`}
+          >
+            <input
+              type="radio"
+              name="pola"
+              value={nilai}
+              checked={pola === nilai}
+              onChange={() => onPola(nilai)}
+              className="sr-only"
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+      {/* Keduanya tetap ada supaya isian tidak hilang saat berpindah pilihan; yang disembunyikan tidak dikirim. */}
+      <div className="mt-3">
+        <div hidden={pola !== "tanggal"}>
+          <Bidang
+            label="Tanggal"
+            name="tanggal"
+            type="date"
+            required={pola === "tanggal"}
+            disabled={pola !== "tanggal"}
+            defaultValue={tanggal}
+            onChange={(e) => onTanggal(e.currentTarget.value)}
+            petunjuk={isTanggalValid(tanggal) ? `Hari ${namaHari(tanggal)}` : undefined}
+            galat={galat.tanggal}
+          />
+        </div>
+        <div hidden={pola !== "mingguan"}>
+          <Pilihan
+            label="Setiap hari"
+            name="hari"
+            required={pola === "mingguan"}
+            disabled={pola !== "mingguan"}
+            defaultValue={hari}
+            onChange={(e) => onHari(e.currentTarget.value)}
+            opsi={OPSI_HARI}
+            galat={galat.hari}
+          />
+        </div>
+      </div>
+    </fieldset>
+  );
+}
 
 function FormJadwal({
   jenis,
@@ -27,29 +108,32 @@ function FormJadwal({
 }) {
   const k = KONFIGURASI_JADWAL[jenis];
   const awal = (nama: string) => (item ? teks(item[nama]) : (nilaiAwal[nama] ?? ""));
-  const [tanggal, setTanggal] = useState(awal("tanggal"));
+  const [pola, setPola] = useState<PolaJadwal>(awal("pola") === "mingguan" ? "mingguan" : "tanggal");
+  const [tanggal, setTanggal] = useState(awal("tanggal") || nilaiAwal.tanggal || "");
+  const [hari, setHari] = useState(awal("hari") || nilaiAwal.hari || HARI_PEKAN[0]);
   const form = useFormAksi(simpanJadwal, {
     onSelesai: (h) => {
       if (h.ok) onSelesai(h);
     },
   });
   const galat = form.hasil.galat ?? {};
-  const peringatan = k.bertanggal ? peringatanHari(jenis, tanggal) : null;
+  const peringatan = peringatanHari(jenis, { pola, tanggal, hari });
 
   return (
     <form onSubmit={form.onSubmit} className="space-y-4" noValidate>
       <input type="hidden" name="jenis" value={jenis} />
       {item && <input type="hidden" name="id" value={item.id} />}
       {k.field.map((f) =>
-        f.tipe === "hari" ? (
-          <Pilihan
+        f.tipe === "waktu" ? (
+          <PilihWaktu
             key={f.nama}
-            label={f.label}
-            name={f.nama}
-            required={f.wajib}
-            defaultValue={awal(f.nama) || HARI_PEKAN[0]}
-            opsi={OPSI_HARI}
-            galat={galat[f.nama]}
+            pola={pola}
+            onPola={setPola}
+            tanggal={tanggal}
+            onTanggal={setTanggal}
+            hari={hari}
+            onHari={setHari}
+            galat={galat}
           />
         ) : (
           <Bidang
@@ -138,13 +222,15 @@ export function KelolaJadwal({
   const [pesan, setPesan] = useState<HasilAksi>(HASIL_AWAL);
 
   const urutanHari = (x: ItemJadwalUmum) => HARI_PEKAN.indexOf(teks(x.hari) as (typeof HARI_PEKAN)[number]);
+  // Jadwal rutin mingguan (tanpa tanggal) di atas, lalu jadwal bertanggal dari yang terdekat.
   const daftar = [...items].sort(
     (a, b) =>
       teks(a.tanggal).localeCompare(teks(b.tanggal)) ||
       urutanHari(a) - urutanHari(b) ||
       teks(a.jam).localeCompare(teks(b.jam)),
   );
-  const jumlahLewat = k.bertanggal ? daftar.filter((x) => teks(x.tanggal) < hariIni).length : 0;
+  const sudahLewat = (x: ItemJadwalUmum) => teks(x.tanggal) !== "" && teks(x.tanggal) < hariIni;
+  const jumlahLewat = daftar.filter(sudahLewat).length;
   const nilaiAwal = k.nilaiAwal(items, hariIni);
 
   const mulaiEdit = (item: ItemJadwalUmum) => {
@@ -198,7 +284,7 @@ export function KelolaJadwal({
           <ul className="divide-y divide-stone-100">
             {daftar.map((item) => {
               const r = k.ringkasan(item);
-              const lewat = k.bertanggal && teks(item.tanggal) < hariIni;
+              const lewat = sudahLewat(item);
               return (
                 <li
                   key={item.id}
@@ -210,6 +296,7 @@ export function KelolaJadwal({
                     <p className="flex flex-wrap items-center gap-1.5 font-semibold text-hijau-900">
                       {r.judul}
                       {item.contoh && <Lencana>Contoh</Lencana>}
+                      {item.pola === "mingguan" && <Lencana warna="hijau">Rutin</Lencana>}
                       {lewat && <Lencana warna="abu">Sudah lewat</Lencana>}
                     </p>
                     <dl className="mt-1 space-y-0.5 text-sm">

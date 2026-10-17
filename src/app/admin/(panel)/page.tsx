@@ -5,6 +5,7 @@ import { Kartu, Lencana } from "@/components/admin/ui";
 import { IkonCentang, IkonPeringatan } from "@/components/ikon";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
 import { formatHijriah, keHijriah } from "@/lib/hijri";
+import { pengumumanAktif } from "@/lib/pengumuman";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { formatTanggal, selisihHari, tanggalWIB } from "@/lib/time";
 import { totpAktif } from "@/server/auth/kredensial";
@@ -37,19 +38,60 @@ export default async function Dasbor() {
     },
   ];
 
-  const ringkasan = [
-    { label: "Khotib Jumat", href: "/admin/khotib", data: konten.khotib, bertanggal: true },
-    { label: "Pengajian Rabu", href: "/admin/pengajian-rabu", data: konten.pengajianRabu, bertanggal: true },
-    { label: "Kuliah Subuh", href: "/admin/kuliah-subuh", data: konten.kuliahSubuh, bertanggal: false },
-    { label: "Pengajian Ibu", href: "/admin/pengajian-ibu", data: konten.pengajianIbu, bertanggal: false },
-    { label: "Galeri Ambulans", href: "/admin/galeri", data: konten.galeri, bertanggal: false },
-  ].map((r) => ({
-    ...r,
-    jumlah: r.bertanggal
-      ? r.data.filter((x) => "tanggal" in x && typeof x.tanggal === "string" && x.tanggal >= hariIni).length
-      : r.data.length,
-    contoh: r.data.some((x) => x.contoh),
-  }));
+  const mendatang = (items: { tanggal: string; pola?: string }[]) =>
+    items.filter((x) => x.pola === "mingguan" || x.tanggal >= hariIni).length;
+  const adaContoh = (items: { contoh?: boolean }[]) => items.some((x) => x.contoh);
+
+  const ringkasan: { label: string; href: string; ket: string; contoh?: boolean }[] = [
+    {
+      label: "Pengumuman",
+      href: "/admin/pengumuman",
+      ket: `${pengumumanAktif(konten.pengumuman, hariIni).length} aktif`,
+      contoh: adaContoh(konten.pengumuman),
+    },
+    {
+      label: "Khotib Jumat",
+      href: "/admin/khotib",
+      ket: `${mendatang(konten.khotib)} jadwal mendatang`,
+      contoh: adaContoh(konten.khotib),
+    },
+    {
+      label: "Pengajian Rabu",
+      href: "/admin/pengajian-rabu",
+      ket: `${mendatang(konten.pengajianRabu)} jadwal mendatang/rutin`,
+      contoh: adaContoh(konten.pengajianRabu),
+    },
+    {
+      label: "Kuliah Subuh",
+      href: "/admin/kuliah-subuh",
+      ket: `${mendatang(konten.kuliahSubuh)} jadwal mendatang/rutin`,
+      contoh: adaContoh(konten.kuliahSubuh),
+    },
+    {
+      label: "Pengajian Ibu",
+      href: "/admin/pengajian-ibu",
+      ket: `${mendatang(konten.pengajianIbu)} jadwal mendatang/rutin`,
+      contoh: adaContoh(konten.pengajianIbu),
+    },
+    { label: "Kegiatan Masjid", href: "/admin/kegiatan", ket: `${konten.kegiatan.length} kegiatan` },
+    {
+      label: "Sejarah Masjid",
+      href: "/admin/sejarah",
+      ket: `${konten.sejarah.narasi ? "Narasi terisi" : "Narasi belum diisi"} · ${konten.sejarah.foto.length} foto`,
+    },
+    {
+      label: "Logo & Foto Masjid",
+      href: "/admin/foto-masjid",
+      ket: `${konten.logo ? "Logo terpasang" : "Belum ada logo"} · ${konten.hero ? "foto utama terpasang" : "belum ada foto utama"}`,
+    },
+    {
+      label: "Galeri Ambulans",
+      href: "/admin/galeri",
+      ket: `${konten.galeri.length} foto`,
+      contoh: adaContoh(konten.galeri),
+    },
+    { label: "Layar TV", href: "/admin/tv", ket: "Iqomah, tampilan, dan cara pasang di TV" },
+  ];
 
   const khotibBerikut = [...konten.khotib]
     .filter((x) => x.tanggal >= hariIni)
@@ -125,9 +167,7 @@ export default async function Dasbor() {
                 <span className="font-semibold text-hijau-900">{r.label}</span>
                 {r.contoh && <Lencana>Masih data contoh</Lencana>}
               </span>
-              <span className="mt-1 text-sm text-stone-600">
-                {r.jumlah} {r.bertanggal ? "jadwal mendatang" : "entri"}
-              </span>
+              <span className="mt-1 text-sm text-stone-600">{r.ket}</span>
             </Link>
           </li>
         ))}

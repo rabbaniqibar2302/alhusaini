@@ -33,7 +33,8 @@ export function useFormAksi(
     if (pending) return;
     if (opsi.konfirmasi && !window.confirm(opsi.konfirmasi)) return;
     formTerakhir.current = e.currentTarget;
-    const formData = new FormData(e.currentTarget);
+    // Sertakan name/value tombol yang ditekan (mis. tombol geser kiri/kanan).
+    const formData = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
     startTransition(() => jalankan(formData));
   };
 

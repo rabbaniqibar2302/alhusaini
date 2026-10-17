@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { IkonEmail, IkonInstagram, IkonMasjid, IkonPin, IkonTautanLuar, IkonTelepon, IkonWhatsApp } from "@/components/ikon";
+import { IkonEmail, IkonInstagram, IkonPin, IkonTautanLuar, IkonTelepon, IkonWhatsApp } from "@/components/ikon";
+import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
 import { tautanWhatsApp } from "@/lib/kontak";
 import type { Kontak } from "@/lib/schemas";
 import { MAPS_URL, SITE } from "@/lib/site";
 
-export function FooterSitus({ kontak, tahun }: { kontak: Kontak; tahun: number }) {
+export function FooterSitus({ kontak, tahun, logo }: { kontak: Kontak; tahun: number; logo: LogoTampil | null }) {
   const daftar: { ikon: ReactNode; label: string; href: string }[] = [];
   if (kontak.telepon) {
     daftar.push({
@@ -38,9 +39,7 @@ export function FooterSitus({ kontak, tahun }: { kontak: Kontak; tahun: number }
       <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:py-14 md:grid-cols-[1.3fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-full bg-emas-400 text-hijau-950">
-              <IkonMasjid className="size-6" />
-            </span>
+            <LogoMasjid logo={logo} className="size-12" ikonClassName="size-6" />
             <div>
               <p className="text-lg font-bold text-white">{SITE.nama}</p>
               <p lang="ar" dir="rtl" className="w-fit font-arab text-emas-300">

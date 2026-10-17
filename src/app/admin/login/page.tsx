@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { IkonGembok, IkonMasjid } from "@/components/ikon";
 import { SITE } from "@/lib/site";
 import { totpAktif } from "@/server/auth/kredensial";
@@ -12,7 +12,8 @@ export const metadata: Metadata = { title: "Login" };
 async function sudahLogin(): Promise<boolean> {
   try {
     return (await bacaSesi()) !== null;
-  } catch {
+  } catch (err) {
+    unstable_rethrow(err);
     return false;
   }
 }

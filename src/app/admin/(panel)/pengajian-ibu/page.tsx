@@ -13,7 +13,7 @@ export default async function Halaman() {
   const items = await bacaKonten("pengajianIbu", hariIni);
   return (
     <>
-      <JudulHalaman judul="Jadwal Pengajian Kaum Ibu" deskripsi="Jadwal pekanan majelis taklim muslimah." />
+      <JudulHalaman judul="Jadwal Pengajian Kaum Ibu" deskripsi="Majelis taklim muslimah per tanggal atau rutin setiap pekan. Pengisi bisa ustadzah maupun ustadz." />
       <KelolaJadwal jenis="pengajianIbu" items={items} hariIni={hariIni} />
     </>
   );

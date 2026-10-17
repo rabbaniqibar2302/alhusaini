@@ -3,44 +3,18 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { IkonFoto } from "@/components/ikon";
-
-const UKURAN_MAKS = 5 * 1024 * 1024;
-// Batas body request fungsi Vercel adalah 4,5 MB, jadi foto di atas 4 MB
-// diperkecil dulu di browser. Validasi utama tetap dilakukan di server.
-const BATAS_KIRIM = 4 * 1024 * 1024;
-const TIPE_DIIZINKAN = ["image/jpeg", "image/png", "image/webp"];
-
-const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1).replace(".", ",")} MB`;
-
-async function perkecilFoto(file: File): Promise<File> {
-  const gambar = await createImageBitmap(file);
-  const skala = Math.min(1, 2560 / Math.max(gambar.width, gambar.height));
-  const kanvas = document.createElement("canvas");
-  kanvas.width = Math.round(gambar.width * skala);
-  kanvas.height = Math.round(gambar.height * skala);
-  const ctx = kanvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas tidak tersedia");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, kanvas.width, kanvas.height);
-  ctx.drawImage(gambar, 0, 0, kanvas.width, kanvas.height);
-  gambar.close();
-  for (const kualitas of [0.88, 0.8, 0.7, 0.6]) {
-    const blob = await new Promise<Blob | null>((r) => kanvas.toBlob(r, "image/jpeg", kualitas));
-    if (blob && blob.size <= BATAS_KIRIM) {
-      return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" });
-    }
-  }
-  throw new Error("Foto masih terlalu besar");
-}
+import { ACCEPT_FOTO, siapkanFoto } from "./foto-klien";
 
 export function InputFoto({
   name = "foto",
+  id: idKustom,
   label,
   wajib = false,
   galat,
   petunjuk = "JPG, PNG, atau WEBP, maksimal 5 MB.",
 }: {
   name?: string;
+  id?: string;
   label: string;
   wajib?: boolean;
   galat?: string[];
@@ -51,7 +25,7 @@ export function InputFoto({
   const [info, setInfo] = useState("");
   const [salah, setSalah] = useState("");
   const [memproses, setMemproses] = useState(false);
-  const id = `foto-${name}`;
+  const id = idKustom ?? `foto-${name}`;
 
   useEffect(() => {
     return () => {
@@ -81,36 +55,23 @@ export function InputFoto({
     input.setCustomValidity("");
     if (!file) return;
 
-    if (!TIPE_DIIZINKAN.includes(file.type)) {
+    setMemproses(true);
+    input.setCustomValidity("Tunggu, foto sedang diproses.");
+    const hasil = await siapkanFoto(file);
+    input.setCustomValidity("");
+    setMemproses(false);
+    if ("galat" in hasil) {
       input.value = "";
-      setSalah("File harus berupa foto JPG, PNG, atau WEBP.");
+      setSalah(hasil.galat);
       return;
     }
-    if (file.size > UKURAN_MAKS) {
-      input.value = "";
-      setSalah(`Ukuran foto ${mb(file.size)} melebihi batas 5 MB.`);
-      return;
+    const akhir = hasil.file;
+    if (akhir !== file) {
+      const dt = new DataTransfer();
+      dt.items.add(akhir);
+      input.files = dt.files;
     }
-
-    let akhir = file;
-    if (file.size > BATAS_KIRIM) {
-      setMemproses(true);
-      input.setCustomValidity("Tunggu, foto sedang diproses.");
-      try {
-        akhir = await perkecilFoto(file);
-        const dt = new DataTransfer();
-        dt.items.add(akhir);
-        input.files = dt.files;
-        setInfo(`Foto diperkecil otomatis dari ${mb(file.size)} menjadi ${mb(akhir.size)}.`);
-      } catch {
-        input.value = "";
-        setSalah("Foto gagal diperkecil di perangkat ini. Gunakan foto berukuran di bawah 4 MB.");
-        return;
-      } finally {
-        input.setCustomValidity("");
-        setMemproses(false);
-      }
-    }
+    if (hasil.info) setInfo(hasil.info);
     setPratinjau(URL.createObjectURL(akhir));
   }
 
@@ -135,7 +96,7 @@ export function InputFoto({
           id={id}
           name={name}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept={ACCEPT_FOTO}
           required={wajib}
           onChange={saatPilih}
           aria-invalid={pesanGalat ? true : undefined}
