@@ -1,9 +1,11 @@
 import Image from "next/image";
 import { IkonJam, IkonKalender, IkonPin } from "@/components/ikon";
 import { hitungMundurAgenda, labelTanggalAgenda } from "@/lib/agenda";
+import { posterAgenda, tautanPoster, type KonteksPoster } from "@/lib/poster";
 import type { AgendaItem } from "@/lib/schemas";
 import { NAMA_BULAN } from "@/lib/time";
 import { FotoDiperbesar } from "./galeri-foto";
+import { TombolPoster } from "./tombol-poster";
 
 const BATAS_RINGKAS = 180;
 
@@ -20,7 +22,7 @@ function TanpaPoster({ tanggal }: { tanggal: string }) {
   );
 }
 
-function KartuAgenda({ item, hariIni }: { item: AgendaItem; hariIni: string }) {
+function KartuAgenda({ item, hariIni, poster }: { item: AgendaItem; hariIni: string; poster: KonteksPoster }) {
   const mundur = hitungMundurAgenda(item, hariIni);
   const dekat = item.tanggal <= hariIni || mundur === "Besok";
   const panjang = item.keterangan.length > BATAS_RINGKAS;
@@ -86,17 +88,30 @@ function KartuAgenda({ item, hariIni }: { item: AgendaItem; hariIni: string }) {
           ) : (
             <p className="mt-3 text-sm whitespace-pre-line text-stone-700">{item.keterangan}</p>
           ))}
+        {!item.contoh && (
+          <div className="mt-auto pt-4">
+            <TombolPoster poster={tautanPoster(posterAgenda(item, poster))} />
+          </div>
+        )}
       </div>
     </article>
   );
 }
 
-export function DaftarAgenda({ items, hariIni }: { items: AgendaItem[]; hariIni: string }) {
+export function DaftarAgenda({
+  items,
+  hariIni,
+  poster,
+}: {
+  items: AgendaItem[];
+  hariIni: string;
+  poster: KonteksPoster;
+}) {
   return (
     <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((x) => (
         <li key={x.id}>
-          <KartuAgenda item={x} hariIni={hariIni} />
+          <KartuAgenda item={x} hariIni={hariIni} poster={poster} />
         </li>
       ))}
     </ul>

@@ -20,6 +20,9 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
   foto khotib/ustadz/ustadzah (latar belakang sudah dihapus), nama, tanggal atau hari rutin, jam, serta materi/tema.
   Di HP kartu bisa digeser ke samping. Penceramah yang belum punya foto ditampilkan dengan inisial namanya.
   Setiap kajian bisa dijadwalkan pada **tanggal tertentu** atau **rutin setiap pekan**.
+- **Poster story untuk WhatsApp**: setiap kartu khotib Jumat, kajian, dan agenda punya tombol *Bagikan poster*.
+  Pengunjung melihat pratinjau poster ukuran story (1080×1920) lalu bisa langsung membagikannya lewat menu
+  bagikan HP (Status WhatsApp, grup, dll.) atau mengunduh gambarnya. Lihat [Poster story](#poster-story).
 - **Infak & sedekah**: gambar QRIS (bisa diperbesar) dan/atau daftar rekening bank dengan tombol *Salin* nomor rekening.
 - **Laporan kas masjid**: saldo kas, pemasukan & pengeluaran selama periode yang dipilih admin (1–12 bulan
   terakhir), dan rincian transaksi per bulan.
@@ -64,6 +67,7 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 | Tampilan | Tailwind CSS 4, font Plus Jakarta Sans & Amiri (`next/font`) |
 | Data teks | Upstash Redis (`@upstash/redis`): JSON per kunci, tanpa SQL |
 | Foto | Vercel Blob (`@vercel/blob`), diproses dengan `sharp` |
+| Poster story | `next/og` (Satori), hasil akhir JPEG lewat `sharp` |
 | Suara adzan | Vercel Blob, diunggah langsung dari browser (*client upload*) |
 | Keamanan | `jose` (JWT), `bcryptjs`, `@upstash/ratelimit`, `otpauth` (TOTP), `zod` |
 | Jadwal sholat | API myQuran (Kemenag), cadangan perhitungan lokal dengan `adhan` |
@@ -286,6 +290,28 @@ sebelum menyimpan. Server tetap memvalidasi dan meng-encode ulang foto seperti f
 Tips: pakai foto setengah badan yang menghadap kamera, terang, dan tidak buram. Latar polos memberi hasil paling rapi.
 Bila browser tidak mendukung (misalnya Safari lama), foto asli yang dipakai.
 
+## Poster story
+
+Tombol **Bagikan poster** ada di setiap kartu khotib Jumat, kajian, dan agenda di halaman depan (kecuali data
+contoh). Posternya dibuat otomatis dari data jadwal, jadi admin tidak perlu mendesain apa pun:
+
+- ukuran story 1080×1920 (JPEG ±300 KB), warna dan pola mengikuti website;
+- berisi logo & nama masjid, jenis kegiatan, materi/tema/nama acara, foto penceramah (tanpa latar, berbingkai,
+  atau inisial bila belum ada foto) atau poster acara (agenda tanpa poster memakai kalender besar), waktu, lokasi,
+  dan alamat situs;
+- di HP, tombol **Bagikan ke WhatsApp, dll.** membuka menu bagikan bawaan (pilih WhatsApp → *Status saya*, atau
+  kirim ke grup) beserta teks keterangan dan tautan ke website. Tombol **Unduh gambar** selalu tersedia.
+
+Gambar dibuat di server oleh `src/app/poster/[jenis]/[id]/[versi]/route.ts` (desain di
+`src/server/poster/gambar.tsx`). URL memuat versi isi poster: begitu admin mengubah jadwal, foto, logo, atau
+identitas masjid, tombol di website menunjuk ke URL baru, dan URL lama dialihkan ke versi terbaru. Karena isi satu
+URL tidak pernah berubah, gambar di-cache CDN dan browser selama setahun, jadi server cukup menggambar sekali per
+versi. Alamat situs di poster diambil dari `SITE_URL` bila diisi, atau dari domain produksi Vercel.
+
+Catatan: `next/og` tidak bisa menyambung huruf Arab, jadi huruf Arab di materi/tema tidak ikut digambar di poster
+(di website dan teks bagikan tetap utuh). Ligatur ﷺ dan ﷻ tetap tampil. Font Plus Jakarta Sans untuk poster
+(SIL Open Font License) ada di `src/server/poster/font/`.
+
 ## Mengubah identitas masjid
 
 Nama, nama Arab, wilayah, alamat lengkap, dan alamat singkat diubah lewat *Panel admin → Identitas Masjid*.
@@ -316,7 +342,7 @@ WIB, jadi masjid di zona WITA/WIT butuh penyesuaian lebih lanjut.
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, laporan kas, agenda, infak, validasi) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, laporan kas, agenda, infak, poster story, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
@@ -326,12 +352,12 @@ WIB, jadi masjid di zona WITA/WIT butuh penyesuaian lebih lanjut.
 
 ```
 src/
-  app/                 halaman (beranda, kegiatan, sejarah, tv, admin, login, logout)
+  app/                 halaman & route (beranda, kegiatan, sejarah, tv, poster story, admin, login, logout)
   components/publik/   komponen halaman publik
   components/tv/       layar TV masjid
   components/admin/    form & komponen panel admin
   lib/                 kode bersama (skema zod, waktu WIB, kalender Hijriah, hitung mundur, kajian, fase layar TV)
-  server/              kode khusus server (Redis, auth, rate limit, upload, jadwal sholat, server action)
+  server/              kode khusus server (Redis, auth, rate limit, upload, jadwal sholat, poster story, server action)
   proxy.ts             proteksi /admin + CSRF (pengganti middleware di Next.js 16)
 scripts/               hash password, secret, TOTP, seed
 tests/                 unit test (node:test)

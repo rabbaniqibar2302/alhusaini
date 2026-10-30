@@ -3,8 +3,10 @@ import { IkonBuku, IkonJam, IkonMatahari, IkonMikrofon } from "@/components/ikon
 import { KartuPenceramah, waktuTanggal } from "@/components/kartu-penceramah";
 import { INFO_KAJIAN, labelJamKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
 import { fotoUntuk, type PetaFotoPenceramah } from "@/lib/penceramah";
+import { posterKajian, posterKhotib, tautanPoster, type KonteksPoster } from "@/lib/poster";
 import type { KajianItem, KhotibItem } from "@/lib/schemas";
 import { CatatanContoh, InfoKosong } from "./bagian";
+import { TombolPoster } from "./tombol-poster";
 
 /** Di HP kartu bergeser ke samping; di layar lebar tersusun dalam grid. */
 function DeretKartu({ label, children }: { label: string; children: ReactNode }) {
@@ -30,10 +32,12 @@ export function JadwalKhotib({
   items,
   hariIni,
   penceramah,
+  poster,
 }: {
   items: KhotibItem[];
   hariIni: string;
   penceramah: PetaFotoPenceramah;
+  poster: KonteksPoster;
 }) {
   const mendatang = items
     .filter((x) => x.tanggal >= hariIni)
@@ -47,27 +51,31 @@ export function JadwalKhotib({
   return (
     <div>
       <DeretKartu label="Jadwal khotib Jumat">
-        {mendatang.map((x, i) => (
-          <ItemDeret key={x.id}>
-            <KartuPenceramah
-              nama={x.khotib}
-              peran="Khotib"
-              kategori={i === 0 ? "Jumat terdekat" : "Sholat Jumat"}
-              ikonKategori={<IkonMikrofon className="size-3.5 shrink-0 text-emas-300" />}
-              foto={fotoUntuk(penceramah, x.khotib)}
-              waktu={waktuTanggal(x.tanggal)}
-              hariIni={x.tanggal === hariIni}
-              materi={x.tema ? `“${x.tema}”` : undefined}
-              tambahan={
-                x.imam ? (
-                  <>
-                    Imam: <span className="font-semibold text-stone-700">{x.imam}</span>
-                  </>
-                ) : undefined
-              }
-            />
-          </ItemDeret>
-        ))}
+        {mendatang.map((x, i) => {
+          const foto = fotoUntuk(penceramah, x.khotib);
+          return (
+            <ItemDeret key={x.id}>
+              <KartuPenceramah
+                nama={x.khotib}
+                peran="Khotib"
+                kategori={i === 0 ? "Jumat terdekat" : "Sholat Jumat"}
+                ikonKategori={<IkonMikrofon className="size-3.5 shrink-0 text-emas-300" />}
+                foto={foto}
+                waktu={waktuTanggal(x.tanggal)}
+                hariIni={x.tanggal === hariIni}
+                materi={x.tema ? `“${x.tema}”` : undefined}
+                tambahan={
+                  x.imam ? (
+                    <>
+                      Imam: <span className="font-semibold text-stone-700">{x.imam}</span>
+                    </>
+                  ) : undefined
+                }
+                aksi={x.contoh ? undefined : <TombolPoster poster={tautanPoster(posterKhotib(x, foto, poster))} />}
+              />
+            </ItemDeret>
+          );
+        })}
       </DeretKartu>
       {mendatang.some((x) => x.contoh) && <CatatanContoh />}
     </div>
@@ -88,12 +96,14 @@ export function JadwalKajian({
   pengajianIbu,
   hariIni,
   penceramah,
+  poster,
 }: {
   pengajianRabu: KajianItem[];
   kuliahSubuh: KajianItem[];
   pengajianIbu: KajianItem[];
   hariIni: string;
   penceramah: PetaFotoPenceramah;
+  poster: KonteksPoster;
 }) {
   const kelompok: { jenis: JenisKajian; items: KajianItem[] }[] = [
     { jenis: "pengajianRabu", items: pengajianRabu },
@@ -125,21 +135,29 @@ export function JadwalKajian({
             ) : (
               <>
                 <DeretKartu label={`Jadwal ${info.judul}`}>
-                  {daftar.map((x) => (
-                    <ItemDeret key={x.id}>
-                      <KartuPenceramah
-                        nama={x.ustadz}
-                        peran="Pemateri"
-                        kategori={info.singkat}
-                        ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
-                        foto={fotoUntuk(penceramah, x.ustadz)}
-                        waktu={x.pola === "mingguan" ? { pola: "mingguan", hari: x.hari } : waktuTanggal(x.tanggal)}
-                        hariIni={x.pola === "tanggal" && x.tanggal === hariIni}
-                        jam={labelJamKajian(jenis, x)?.replace(/^Pukul /, "")}
-                        materi={x.materi}
-                      />
-                    </ItemDeret>
-                  ))}
+                  {daftar.map((x) => {
+                    const foto = fotoUntuk(penceramah, x.ustadz);
+                    return (
+                      <ItemDeret key={x.id}>
+                        <KartuPenceramah
+                          nama={x.ustadz}
+                          peran="Pemateri"
+                          kategori={info.singkat}
+                          ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
+                          foto={foto}
+                          waktu={x.pola === "mingguan" ? { pola: "mingguan", hari: x.hari } : waktuTanggal(x.tanggal)}
+                          hariIni={x.pola === "tanggal" && x.tanggal === hariIni}
+                          jam={labelJamKajian(jenis, x)?.replace(/^Pukul /, "")}
+                          materi={x.materi}
+                          aksi={
+                            x.contoh ? undefined : (
+                              <TombolPoster poster={tautanPoster(posterKajian(jenis, x, foto, poster))} />
+                            )
+                          }
+                        />
+                      </ItemDeret>
+                    );
+                  })}
                 </DeretKartu>
                 {daftar.some((x) => x.contoh) && <CatatanContoh />}
               </>

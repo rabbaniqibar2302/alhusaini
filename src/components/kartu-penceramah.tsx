@@ -121,6 +121,7 @@ export function KartuPenceramah({
   materi,
   tambahan,
   hariIni,
+  aksi,
   sizes = "(min-width: 1024px) 270px, (min-width: 640px) 45vw, 75vw",
 }: {
   nama: string;
@@ -135,6 +136,8 @@ export function KartuPenceramah({
   /** Baris kecil tambahan, mis. "Imam: ...". */
   tambahan?: ReactNode;
   hariIni?: boolean;
+  /** Tombol di dasar kartu, mis. "Bagikan poster". */
+  aksi?: ReactNode;
   sizes?: string;
 }) {
   return (
@@ -177,6 +180,7 @@ export function KartuPenceramah({
             </span>
           )}
         </div>
+        {aksi && <div className="mt-2.5">{aksi}</div>}
       </div>
     </article>
   );

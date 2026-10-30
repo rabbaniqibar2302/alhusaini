@@ -181,6 +181,19 @@ export const IkonUnggah = (p: IkonProps) => (
   </Dasar>
 );
 
+export const IkonUnduh = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M12 4v12M7 11l5 5 5-5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+  </Dasar>
+);
+
+export const IkonBagikan = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M12 15V3M8 7l4-4 4 4" />
+    <path d="M8.5 10.5H6a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8.5a1 1 0 0 0-1-1h-2.5" />
+  </Dasar>
+);
+
 export const IkonKeluar = (p: IkonProps) => (
   <Dasar {...p}>
     <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11" />

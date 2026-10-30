@@ -64,6 +64,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Font poster story dibaca dari disk saat gambar dibuat (lihat src/server/poster).
+  outputFileTracingIncludes: {
+    "/poster/**": ["./src/server/poster/font/**"],
+  },
   turbopack: {
     rules: {
       "*.css": {

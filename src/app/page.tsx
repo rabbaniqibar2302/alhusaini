@@ -38,10 +38,12 @@ import { ringkasanKas } from "@/lib/kas";
 import { tautanWhatsApp } from "@/lib/kontak";
 import { petaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
+import { konteksPoster } from "@/lib/poster";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { formatTanggal, tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
 import { bacaKontenPublik, bagianTambahan, kegiatanTampil } from "@/server/konten-publik";
+import { urlSitus } from "@/server/situs";
 import { TAG_KONTEN } from "@/server/store";
 
 const KEGIATAN_DI_BERANDA = 6;
@@ -120,6 +122,7 @@ export default async function Beranda() {
   }));
 
   const fotoPenceramah = petaFotoPenceramah(konten.penceramah);
+  const poster = konteksPoster(identitas, konten.logo, urlSitus().origin);
   const tambahan = bagianTambahan(konten, hariIni);
   const agenda = agendaMendatang(konten.agenda, hariIni).slice(0, AGENDA_DI_BERANDA);
   const kas = tambahan.kas ? ringkasanKas(konten.kas, konten.setelanKas, hariIni) : null;
@@ -143,7 +146,7 @@ export default async function Beranda() {
       judul: "Agenda Mendatang",
       subjudul: `Acara yang akan datang di ${identitas.nama}. Ketuk poster untuk memperbesar.`,
       ikon: <IkonKalender className="size-4" />,
-      isi: <DaftarAgenda items={agenda} hariIni={hariIni} />,
+      isi: <DaftarAgenda items={agenda} hariIni={hariIni} poster={poster} />,
     },
     {
       id: "hari-besar",
@@ -159,7 +162,7 @@ export default async function Beranda() {
       judul: "Jadwal Khotib Jumat",
       subjudul: `Khotib, imam, dan tema khutbah sholat Jumat di ${identitas.nama}.`,
       ikon: <IkonMikrofon className="size-4" />,
-      isi: <JadwalKhotib items={konten.khotib} hariIni={hariIni} penceramah={fotoPenceramah} />,
+      isi: <JadwalKhotib items={konten.khotib} hariIni={hariIni} penceramah={fotoPenceramah} poster={poster} />,
     },
     {
       id: "kajian",
@@ -174,6 +177,7 @@ export default async function Beranda() {
           pengajianIbu={konten.pengajianIbu}
           hariIni={hariIni}
           penceramah={fotoPenceramah}
+          poster={poster}
         />
       ),
     },

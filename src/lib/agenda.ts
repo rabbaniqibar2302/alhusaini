@@ -12,10 +12,16 @@ export function agendaLewat(x: Pick<AgendaItem, "tanggal" | "tanggalSelesai">, h
   return (x.tanggalSelesai || x.tanggal) < hariIni;
 }
 
-/** "Sabtu, 24 Okt 2026" atau "24–26 Okt 2026" / "30 Okt – 1 Nov 2026". */
-export function labelTanggalAgenda(x: Pick<AgendaItem, "tanggal" | "tanggalSelesai">): string {
-  if (!x.tanggalSelesai || x.tanggalSelesai === x.tanggal) return formatTanggal(x.tanggal, { hari: true, singkat: true });
-  const [a, b] = [formatTanggal(x.tanggal, { singkat: true }), formatTanggal(x.tanggalSelesai, { singkat: true })];
+/**
+ * "Sabtu, 24 Okt 2026" atau "24–26 Okt 2026" / "30 Okt – 1 Nov 2026";
+ * dengan `singkat: false` nama bulan ditulis lengkap.
+ */
+export function labelTanggalAgenda(
+  x: Pick<AgendaItem, "tanggal" | "tanggalSelesai">,
+  { singkat = true }: { singkat?: boolean } = {},
+): string {
+  if (!x.tanggalSelesai || x.tanggalSelesai === x.tanggal) return formatTanggal(x.tanggal, { hari: true, singkat });
+  const [a, b] = [formatTanggal(x.tanggal, { singkat }), formatTanggal(x.tanggalSelesai, { singkat })];
   const [ta, ba, ya] = a.split(" ");
   const [, bb, yb] = b.split(" ");
   if (ya !== yb) return `${a} – ${b}`;
