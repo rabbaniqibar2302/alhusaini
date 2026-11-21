@@ -6,6 +6,7 @@ import {
   posterAgenda,
   posterKajian,
   posterKhotib,
+  posterSholatKhusus,
   type IsiPoster,
   type JenisPoster,
 } from "@/lib/poster";
@@ -30,6 +31,7 @@ async function kontenPoster() {
     pengajianRabu: konten.pengajianRabu,
     kuliahSubuh: konten.kuliahSubuh,
     pengajianIbu: konten.pengajianIbu,
+    sholatKhusus: konten.sholatKhusus,
     agenda: konten.agenda,
     penceramah: konten.penceramah,
     konteks: konteksPoster(konten.identitas, konten.logo, urlSitus().origin),
@@ -44,6 +46,10 @@ export async function cariIsiPoster(jenis: JenisPoster, id: string): Promise<Isi
   if (jenis === "khotib") {
     const x = k.khotib.find((i) => i.id === id && !i.contoh);
     return x ? posterKhotib(x, fotoUntuk(foto, x.khotib), k.konteks) : null;
+  }
+  if (jenis === "sholatKhusus") {
+    const x = k.sholatKhusus.find((i) => i.id === id && !i.contoh);
+    return x ? posterSholatKhusus(x, fotoUntuk(foto, x.khotib), k.konteks) : null;
   }
   if (jenis === "agenda") {
     const x = k.agenda.find((i) => i.id === id && !i.contoh);

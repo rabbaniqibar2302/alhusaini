@@ -25,7 +25,7 @@ import { HeaderSitus } from "@/components/publik/header-situs";
 import { Hero } from "@/components/publik/hero";
 import { HitungMundurHariBesar, type DataHariBesar } from "@/components/publik/hitung-mundur-hari-besar";
 import { InfoInfak } from "@/components/publik/infak";
-import { JadwalKajian, JadwalKhotib } from "@/components/publik/jadwal-kegiatan";
+import { JadwalKajian, JadwalKhotib, JadwalSholatKhusus } from "@/components/publik/jadwal-kegiatan";
 import { JadwalSholatLangsung } from "@/components/publik/jadwal-sholat-langsung";
 import { LaporanKas } from "@/components/publik/laporan-kas";
 import { KartuLegalitas } from "@/components/publik/legalitas";
@@ -42,7 +42,7 @@ import { konteksPoster } from "@/lib/poster";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { formatTanggal, tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
-import { bacaKontenPublik, bagianTambahan, kegiatanTampil } from "@/server/konten-publik";
+import { bacaKontenPublik, bagianTambahan, kegiatanTampil, sholatKhususTampil } from "@/server/konten-publik";
 import { urlSitus } from "@/server/situs";
 import { TAG_KONTEN } from "@/server/store";
 
@@ -125,6 +125,7 @@ export default async function Beranda() {
   const poster = konteksPoster(identitas, konten.logo, urlSitus().origin);
   const tambahan = bagianTambahan(konten, hariIni);
   const agenda = agendaMendatang(konten.agenda, hariIni).slice(0, AGENDA_DI_BERANDA);
+  const sholatKhusus = sholatKhususTampil(konten, hariIni);
   const kas = tambahan.kas ? ringkasanKas(konten.kas, konten.setelanKas, hariIni) : null;
   const pengumuman = pengumumanAktif(konten.pengumuman, hariIni).filter((x) => x.diWebsite);
   const kegiatan = kegiatanTampil(konten.kegiatan.slice(0, KEGIATAN_DI_BERANDA), hariIni);
@@ -139,6 +140,14 @@ export default async function Beranda() {
       judul: "Pengumuman",
       ikon: <IkonPengumuman className="size-4" />,
       isi: <DaftarPengumuman items={pengumuman} />,
+    },
+    tambahan.sholatKhusus !== null && {
+      id: "sholat-khusus",
+      kicker: "Sholat Berjamaah",
+      judul: `Jadwal ${tambahan.sholatKhusus}`,
+      subjudul: `Waktu, tempat, khotib, dan imam di ${identitas.nama}. Mari datang lebih awal dan ajak keluarga.`,
+      ikon: <IkonBulanSabit className="size-4" />,
+      isi: <JadwalSholatKhusus items={sholatKhusus} hariIni={hariIni} penceramah={fotoPenceramah} poster={poster} />,
     },
     agenda.length > 0 && {
       id: "agenda",

@@ -3,6 +3,7 @@ import { JudulHalaman } from "@/components/admin/judul-halaman";
 import { KelolaPenceramah, type OrangPenceramah } from "@/components/admin/kelola-penceramah";
 import { INFO_KAJIAN, JENIS_KAJIAN, kajianLewat } from "@/lib/kajian";
 import { kunciNama } from "@/lib/penceramah";
+import { INFO_SHOLAT_KHUSUS } from "@/lib/sholat-khusus";
 import { tanggalWIB } from "@/lib/time";
 import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
@@ -13,9 +14,10 @@ export const instant = false;
 export default async function HalamanPenceramah() {
   await wajibAdminHalaman();
   const hariIni = tanggalWIB();
-  const [penceramah, khotib, ...kajian] = await Promise.all([
+  const [penceramah, khotib, sholatKhusus, ...kajian] = await Promise.all([
     bacaKonten("penceramah", hariIni),
     bacaKonten("khotib", hariIni),
+    bacaKonten("sholatKhusus", hariIni),
     ...JENIS_KAJIAN.map((j) => bacaKonten(j, hariIni)),
   ]);
 
@@ -42,6 +44,7 @@ export default async function HalamanPenceramah() {
     o.hitung.set(label, (o.hitung.get(label) ?? 0) + 1);
   };
   for (const x of khotib) if (!x.contoh && x.tanggal >= hariIni) catat(x.khotib, "Khotib Jumat");
+  for (const x of sholatKhusus) if (x.tanggal >= hariIni) catat(x.khotib, INFO_SHOLAT_KHUSUS[x.jenis].singkat);
   JENIS_KAJIAN.forEach((j, i) => {
     for (const x of kajian[i]) if (!x.contoh && !kajianLewat(x, hariIni)) catat(x.ustadz, INFO_KAJIAN[j].singkat);
   });

@@ -18,6 +18,7 @@ import {
 } from "./batas";
 import { POLA_PATHNAME_AUDIO, UKURAN_MAKS_AUDIO } from "./audio";
 import { JENIS_KAJIAN, POLA_JADWAL } from "./kajian";
+import { JENIS_SHOLAT_KHUSUS } from "./sholat-khusus";
 import { HARI_PEKAN, JAM_REGEX } from "./time";
 
 /**
@@ -165,7 +166,24 @@ export const kajianItem = z.preprocess(
 );
 export type KajianItem = z.output<typeof kajianItem>;
 
-export const JENIS_JADWAL = ["khotib", ...JENIS_KAJIAN] as const;
+/* -------------------- Sholat Ied & sholat gerhana -------------------- */
+
+export const sholatKhususInput = z.object({
+  jenis: z.enum(JENIS_SHOLAT_KHUSUS, { error: "Pilih jenis sholat" }),
+  tanggal,
+  jam,
+  khotib: teks("Nama khotib", { min: 3, max: 100 }),
+  imam: teks("Nama imam", { max: 100 }),
+  tema: teks("Tema khutbah", { max: 150 }),
+  /** Kosong berarti di masjid. */
+  lokasi: teks("Lokasi", { max: 120 }),
+  catatan: teks("Catatan", { max: 200 }),
+});
+
+export const sholatKhususItem = sholatKhususInput.extend({ id, contoh });
+export type SholatKhususItem = z.infer<typeof sholatKhususItem>;
+
+export const JENIS_JADWAL = ["khotib", ...JENIS_KAJIAN, "sholatKhusus"] as const;
 export type JenisJadwal = (typeof JENIS_JADWAL)[number];
 
 export const inputJadwal = {
@@ -173,6 +191,7 @@ export const inputJadwal = {
   pengajianRabu: kajianInput("wajib"),
   kuliahSubuh: kajianInput("tanpa"),
   pengajianIbu: kajianInput("wajib"),
+  sholatKhusus: sholatKhususInput,
 } as const;
 
 /* ---------------------------- Hitung mundur ---------------------------- */
@@ -529,6 +548,7 @@ export const skemaKonten = {
   pengajianRabu: z.array(kajianItem).max(MAKS_JADWAL),
   kuliahSubuh: z.array(kajianItem).max(MAKS_JADWAL),
   pengajianIbu: z.array(kajianItem).max(MAKS_JADWAL),
+  sholatKhusus: z.array(sholatKhususItem).max(MAKS_JADWAL),
   countdown: countdownSchema,
   kontak: kontakSchema,
   legalitas: legalitasSchema,

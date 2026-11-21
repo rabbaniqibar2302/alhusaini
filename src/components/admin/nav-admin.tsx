@@ -19,6 +19,7 @@ export const MENU_ADMIN = [
       { href: "/admin/pengajian-rabu", label: "Pengajian Rabu" },
       { href: "/admin/kuliah-subuh", label: "Kuliah Subuh" },
       { href: "/admin/pengajian-ibu", label: "Pengajian Ibu" },
+      { href: "/admin/sholat-khusus", label: "Sholat Ied & Gerhana" },
       { href: "/admin/penceramah", label: "Foto Penceramah" },
       { href: "/admin/hitung-mundur", label: "Hitung Mundur" },
     ],

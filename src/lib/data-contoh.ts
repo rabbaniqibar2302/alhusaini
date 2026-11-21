@@ -140,10 +140,11 @@ export function dataContoh(hariIni: string): Konten {
     identitas: IDENTITAS_BAWAAN,
     // Foto orang sungguhan tidak boleh dikarang; kartu memakai inisial nama.
     penceramah: [],
-    // Data keuangan, agenda, dan rekening adalah data asli; tidak ada contohnya.
+    // Data keuangan, agenda, sholat Ied/gerhana, dan rekening adalah data asli; tidak ada contohnya.
     kas: [],
     setelanKas: SETELAN_KAS_BAWAAN,
     agenda: [],
+    sholatKhusus: [],
     infak: INFAK_KOSONG,
   };
 }

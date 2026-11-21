@@ -22,7 +22,7 @@ import { JENIS_KAJIAN, kajianDalamRentang, type JenisKajian } from "@/lib/kajian
 import { formatHitungMundur, hitungFase, type FaseTv } from "@/lib/layar-tv";
 import { fotoUntuk, type PetaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
-import type { KajianItem, KhotibItem, PengumumanItem, SetelanTv } from "@/lib/schemas";
+import type { KajianItem, KhotibItem, PengumumanItem, SetelanTv, SholatKhususItem } from "@/lib/schemas";
 import { LOKASI_SHOLAT } from "@/lib/site";
 import { WIB_OFFSET_MS, epochWIB, formatTanggal, hariKe, tambahHari, tanggalWIB } from "@/lib/time";
 import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
@@ -57,6 +57,8 @@ export type DataTv = {
   fotoMasjid: GambarTv | null;
   pengumuman: PengumumanItem[];
   khotib: KhotibItem[];
+  /** Sholat Ied & gerhana yang belum lewat (terdekat dulu, tanpa data contoh). */
+  sholatKhusus: SholatKhususItem[];
   kajian: Record<JenisKajian, KajianItem[]>;
   /** Foto penceramah per kunci nama (lihat kunciNama). */
   penceramah: PetaFotoPenceramah;
@@ -95,6 +97,8 @@ function halaman(i: number, total: number) {
   return total > 1 ? `${i + 1} / ${total}` : "";
 }
 
+const HARI_TAMPIL_SHOLAT_KHUSUS = 30;
+
 /** Urutan tampilan yang bergantian di area utama layar. */
 function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
   const { nama, namaArab } = data.identitas;
@@ -103,6 +107,19 @@ function susunSlide(data: DataTv, tanggal: string): SlideTv[] {
   const pengumuman = potong(pengumumanAktif(data.pengumuman, tanggal), 3).slice(0, 3);
   pengumuman.forEach((items, i) =>
     slide.push({ jenis: "pengumuman", kunci: `pengumuman-${i}`, items, halaman: halaman(i, pengumuman.length) }),
+  );
+
+  // Sholat Ied & gerhana mulai tampil 30 hari sebelumnya, paling banyak 2 jadwal.
+  const sholatKhusus = data.sholatKhusus
+    .filter((x) => x.tanggal >= tanggal && x.tanggal <= tambahHari(tanggal, HARI_TAMPIL_SHOLAT_KHUSUS))
+    .slice(0, 2);
+  sholatKhusus.forEach((x, i) =>
+    slide.push({
+      jenis: "sholat-khusus",
+      kunci: `sholat-khusus-${x.id}`,
+      item: { ...x, foto: fotoUntuk(data.penceramah, x.khotib) },
+      halaman: halaman(i, sholatKhusus.length),
+    }),
   );
 
   // Data contoh tidak ditampilkan di TV supaya jamaah tidak salah informasi.

@@ -3,6 +3,8 @@ import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
 import type { Identitas } from "@/lib/schemas";
 
 export type BagianOpsional = {
+  /** Label menu, mis. "Sholat Ied"; null/kosong bila tidak ada jadwal. */
+  sholatKhusus?: string | null;
   kegiatan?: boolean;
   sejarah?: boolean;
   agenda?: boolean;
@@ -13,6 +15,7 @@ export type BagianOpsional = {
 function navigasi(ada: BagianOpsional): [string, string][] {
   const daftar: [string, string, boolean?][] = [
     ["/#jadwal-sholat", "Jadwal Sholat"],
+    ["/#sholat-khusus", ada.sholatKhusus ?? "", Boolean(ada.sholatKhusus)],
     ["/#agenda", "Agenda", ada.agenda === true],
     ["/#hari-besar", "Hari Besar"],
     ["/#khotib", "Khotib Jumat"],

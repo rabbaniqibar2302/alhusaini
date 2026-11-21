@@ -1,4 +1,5 @@
 import { labelJamKajian, labelWaktuKajian, type JenisKajian, type PolaJadwal } from "@/lib/kajian";
+import { INFO_SHOLAT_KHUSUS, JENIS_SHOLAT_KHUSUS, labelSholatKhusus, type JenisSholatKhusus } from "@/lib/sholat-khusus";
 import type { JenisJadwal } from "@/lib/schemas";
 import { HARI_PEKAN, formatTanggal, hariKe, tambahHari, tanggalBerikutnya } from "@/lib/time";
 
@@ -6,7 +7,9 @@ export type FieldJadwal = {
   nama: string;
   label: string;
   /** "waktu": pilihan tanggal tertentu / rutin setiap pekan (field pola, tanggal, hari). */
-  tipe: "date" | "time" | "text" | "waktu";
+  tipe: "date" | "time" | "text" | "waktu" | "pilihan";
+  /** Untuk tipe "pilihan". */
+  opsi?: { nilai: string; label: string }[];
   wajib: boolean;
   maks?: number;
   placeholder?: string;
@@ -125,6 +128,55 @@ export const KONFIGURASI_JADWAL: Record<JenisJadwal, Konfigurasi> = {
       hari: "Selasa",
       jam: "09:00",
     }),
+  },
+  sholatKhusus: {
+    judul: "Sholat Ied & Gerhana",
+    deskripsi: "Sholat Idul Fitri, Idul Adha, dan sholat gerhana: tanggal, jam, khotib, imam, dan tempat.",
+    field: [
+      {
+        nama: "jenis",
+        label: "Jenis sholat",
+        tipe: "pilihan",
+        wajib: true,
+        opsi: JENIS_SHOLAT_KHUSUS.map((j) => ({ nilai: j, label: INFO_SHOLAT_KHUSUS[j].nama })),
+      },
+      { nama: "tanggal", label: "Tanggal", tipe: "date", wajib: true },
+      { nama: "jam", label: "Jam mulai sholat (WIB)", tipe: "time", wajib: true },
+      { nama: "khotib", label: "Nama khotib", tipe: "text", wajib: true, maks: 100, placeholder: "Ust. ...", penceramah: true },
+      { nama: "imam", label: "Nama imam", tipe: "text", wajib: false, maks: 100, placeholder: "Boleh dikosongkan" },
+      { nama: "tema", label: "Tema khutbah", tipe: "text", wajib: false, maks: 150, placeholder: "Boleh dikosongkan" },
+      {
+        nama: "lokasi",
+        label: "Tempat",
+        tipe: "text",
+        wajib: false,
+        maks: 120,
+        placeholder: "Kosongkan bila di masjid, mis. Lapangan RW 05",
+      },
+      {
+        nama: "catatan",
+        label: "Catatan untuk jamaah",
+        tipe: "text",
+        wajib: false,
+        maks: 200,
+        placeholder: "mis. Takbir mulai 06.00 WIB, bawa sajadah",
+      },
+    ],
+    ringkasan: (x) => {
+      const jenis = (JENIS_SHOLAT_KHUSUS as readonly string[]).includes(teks(x.jenis))
+        ? (teks(x.jenis) as JenisSholatKhusus)
+        : "idulFitri";
+      return {
+        judul: `${labelSholatKhusus({ jenis, tanggal: teks(x.tanggal) })} · ${formatTanggal(teks(x.tanggal), { hari: true })} · ${teks(x.jam)}`,
+        baris: [
+          ["Khotib", teks(x.khotib)],
+          ["Imam", teks(x.imam) || "—"],
+          ["Tempat", teks(x.lokasi) || "Masjid"],
+          ["Tema", teks(x.tema) || "—"],
+        ],
+      };
+    },
+    nilaiAwal: () => ({ jenis: "idulFitri", jam: "06:30" }),
   },
 };
 

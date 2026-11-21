@@ -10,6 +10,7 @@ import { pasangFotoPenceramah, unggahFotoPenceramah } from "@/server/penceramah"
 import { ubahKonten } from "@/server/store";
 import { hapusFoto } from "@/server/unggah-foto";
 
+// Dikirim sebagai "jenisJadwal" karena "jenis" dipakai isian jadwal sholat Ied & gerhana.
 const jenisSchema = z.enum(JENIS_JADWAL);
 const idSchema = z.uuid();
 
@@ -20,6 +21,7 @@ const FIELD_JADWAL: Record<JenisJadwal, readonly string[]> = {
   pengajianRabu: FIELD_KAJIAN,
   kuliahSubuh: FIELD_KAJIAN,
   pengajianIbu: FIELD_KAJIAN,
+  sholatKhusus: ["jenis", "tanggal", "jam", "khotib", "imam", "tema", "lokasi", "catatan"],
 };
 
 type ItemJadwal = { id: string; tanggal?: string; hari?: string; jam?: string };
@@ -51,7 +53,7 @@ function adaFile(formData: FormData, nama: string): boolean {
 
 export async function simpanJadwal(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
-    const jenis = jenisSchema.safeParse(formData.get("jenis"));
+    const jenis = jenisSchema.safeParse(formData.get("jenisJadwal"));
     if (!jenis.success) return { ok: false, pesan: "Jenis jadwal tidak dikenal." };
 
     const idMentah = teksForm(formData, "id");
@@ -111,7 +113,7 @@ export async function simpanJadwal(_sebelumnya: HasilAksi, formData: FormData): 
 
 export async function hapusJadwal(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
-    const jenis = jenisSchema.safeParse(formData.get("jenis"));
+    const jenis = jenisSchema.safeParse(formData.get("jenisJadwal"));
     const id = idSchema.safeParse(formData.get("id"));
     if (!jenis.success || !id.success) return { ok: false, pesan: "Permintaan tidak valid." };
 
@@ -130,7 +132,7 @@ export async function hapusJadwal(_sebelumnya: HasilAksi, formData: FormData): P
 /** Membersihkan jadwal bertanggal yang sudah lewat (jadwal rutin mingguan tidak tersentuh). */
 export async function hapusJadwalLewat(_sebelumnya: HasilAksi, formData: FormData): Promise<HasilAksi> {
   return jalankanAksiAdmin(async () => {
-    const jenis = jenisSchema.safeParse(formData.get("jenis"));
+    const jenis = jenisSchema.safeParse(formData.get("jenisJadwal"));
     if (!jenis.success) return { ok: false, pesan: "Permintaan tidak valid." };
     const hariIni = tanggalWIB();
     let jumlah = 0;

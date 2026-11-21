@@ -4,6 +4,7 @@ import type { KegiatanTampil } from "@/components/publik/daftar-kegiatan";
 import { agendaMendatang } from "@/lib/agenda";
 import { adaInfak } from "@/lib/infak";
 import { adaLaporanKas } from "@/lib/kas";
+import { judulBagianSholatKhusus, sholatKhususMendatang } from "@/lib/sholat-khusus";
 import type { KegiatanItem, Konten } from "@/lib/schemas";
 import { formatTanggal } from "@/lib/time";
 import { bacaSemuaKonten, kontenCadangan } from "./store";
@@ -23,9 +24,23 @@ export async function bacaKontenPublik(hariIni: string): Promise<{ konten: Konte
   }
 }
 
-/** Bagian agenda, infak, dan laporan kas hanya tampil (beserta menunya) bila ada isinya. */
+/** Jadwal sholat Ied & gerhana yang tampil di website (tanpa data contoh). */
+export function sholatKhususTampil(konten: Konten, hariIni: string) {
+  return sholatKhususMendatang(
+    konten.sholatKhusus.filter((x) => !x.contoh),
+    hariIni,
+  );
+}
+
+/**
+ * Bagian sholat Ied & gerhana, agenda, infak, dan laporan kas hanya tampil
+ * (beserta menunya) bila ada isinya. Untuk sholat Ied & gerhana yang dikirim
+ * adalah label menunya.
+ */
 export function bagianTambahan(konten: Konten, hariIni: string) {
+  const sholatKhusus = sholatKhususTampil(konten, hariIni);
   return {
+    sholatKhusus: sholatKhusus.length > 0 ? judulBagianSholatKhusus(sholatKhusus) : null,
     agenda: agendaMendatang(konten.agenda, hariIni).length > 0,
     infak: adaInfak(konten.infak),
     kas: konten.setelanKas.tampilWebsite && adaLaporanKas(konten.kas, konten.setelanKas),

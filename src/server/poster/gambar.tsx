@@ -6,6 +6,7 @@ import { ImageResponse } from "next/og";
 import type { CSSProperties, ReactNode, SVGProps } from "react";
 import sharp from "sharp";
 import {
+  IkonBulanSabit,
   IkonBuku,
   IkonJam,
   IkonKalender,
@@ -177,6 +178,7 @@ const IKON_JENIS: Record<JenisPoster, Ikon> = {
   pengajianRabu: IkonBuku,
   kuliahSubuh: IkonMatahari,
   pengajianIbu: IkonJam,
+  sholatKhusus: IkonBulanSabit,
   agenda: IkonKalender,
 };
 

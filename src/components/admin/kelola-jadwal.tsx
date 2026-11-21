@@ -131,7 +131,7 @@ function FormJadwal({
 
   return (
     <form onSubmit={form.onSubmit} className="space-y-4" noValidate>
-      <input type="hidden" name="jenis" value={jenis} />
+      <input type="hidden" name="jenisJadwal" value={jenis} />
       {item && <input type="hidden" name="id" value={item.id} />}
       {k.field.map((f) =>
         f.tipe === "waktu" ? (
@@ -167,6 +167,16 @@ function FormJadwal({
               onSibuk={setOlahFoto}
             />
           </div>
+        ) : f.tipe === "pilihan" ? (
+          <Pilihan
+            key={f.nama}
+            label={f.label}
+            name={f.nama}
+            required={f.wajib}
+            defaultValue={awal(f.nama)}
+            opsi={f.opsi ?? []}
+            galat={galat[f.nama]}
+          />
         ) : (
           <Bidang
             key={f.nama}
@@ -215,7 +225,7 @@ function TombolHapus({ jenis, id, nama }: { jenis: JenisJadwal; id: string; nama
   const form = useFormAksi(hapusJadwal, { konfirmasi: `Hapus jadwal "${nama}"?`, resetSaatSukses: false });
   return (
     <form onSubmit={form.onSubmit}>
-      <input type="hidden" name="jenis" value={jenis} />
+      <input type="hidden" name="jenisJadwal" value={jenis} />
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"
@@ -236,7 +246,7 @@ function TombolHapusLewat({ jenis, jumlah }: { jenis: JenisJadwal; jumlah: numbe
   });
   return (
     <form onSubmit={form.onSubmit} className="text-right">
-      <input type="hidden" name="jenis" value={jenis} />
+      <input type="hidden" name="jenisJadwal" value={jenis} />
       <TombolKirim pending={form.pending} varian="sekunder" className="py-1.5 text-xs">
         Bersihkan {jumlah} jadwal lama
       </TombolKirim>

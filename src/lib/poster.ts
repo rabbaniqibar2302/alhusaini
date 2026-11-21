@@ -1,7 +1,8 @@
 import { labelTanggalAgenda } from "./agenda";
 import { INFO_KAJIAN, JENIS_KAJIAN, labelJamKajian, type JenisKajian } from "./kajian";
 import type { FotoPenceramah } from "./penceramah";
-import type { AgendaItem, Identitas, KajianItem, KhotibItem } from "./schemas";
+import type { AgendaItem, Identitas, KajianItem, KhotibItem, SholatKhususItem } from "./schemas";
+import { INFO_SHOLAT_KHUSUS, labelSholatKhusus } from "./sholat-khusus";
 import { alamatPendek } from "./site";
 import { formatTanggal } from "./time";
 
@@ -17,7 +18,7 @@ export const UKURAN_POSTER = { lebar: 1080, tinggi: 1920 } as const;
 /** Naikkan setiap kali desain poster diubah, supaya tautan (dan cache) poster ikut berganti. */
 const VERSI_DESAIN = 1;
 
-export const JENIS_POSTER = ["khotib", ...JENIS_KAJIAN, "agenda"] as const;
+export const JENIS_POSTER = ["khotib", ...JENIS_KAJIAN, "sholatKhusus", "agenda"] as const;
 export type JenisPoster = (typeof JENIS_POSTER)[number];
 
 /** Potongan URL per jenis, mis. /poster/pengajian-rabu/... */
@@ -26,6 +27,7 @@ const SLUG_POSTER: Record<JenisPoster, string> = {
   pengajianRabu: "pengajian-rabu",
   kuliahSubuh: "kuliah-subuh",
   pengajianIbu: "pengajian-ibu",
+  sholatKhusus: "sholat-ied-gerhana",
   agenda: "agenda",
 };
 
@@ -35,6 +37,7 @@ const BAGIAN_POSTER: Record<JenisPoster, string> = {
   pengajianRabu: "kajian",
   kuliahSubuh: "kajian",
   pengajianIbu: "kajian",
+  sholatKhusus: "sholat-khusus",
   agenda: "agenda",
 };
 
@@ -160,6 +163,31 @@ export function posterKajian(
       jenis === "pengajianIbu" ? "Mari hadir dan ajak sesama muslimah" : "Terbuka untuk umum · Ajak keluarga & sahabat",
     ...dariKonteks(k),
     namaBerkas: `poster-${SLUG_POSTER[jenis]}-${rutin ? `setiap-${slugTeks(x.hari)}` : x.tanggal}.jpg`,
+  };
+}
+
+export function posterSholatKhusus(x: SholatKhususItem, foto: FotoPenceramah | null, k: KonteksPoster): IsiPoster {
+  const info = INFO_SHOLAT_KHUSUS[x.jenis];
+  return {
+    jenis: "sholatKhusus",
+    id: x.id,
+    kategori: labelSholatKhusus(x),
+    judul: x.tema ? `“${x.tema}”` : info.nama,
+    pengisi: { peran: "Khotib", nama: x.khotib, tambahan: x.imam ? `Imam: ${x.imam}` : "", foto: fotoPengisi(foto) },
+    gambarAcara: null,
+    tanggal: x.tanggal,
+    tanggalSelesai: "",
+    baris: [
+      {
+        ikon: "kalender",
+        teks: formatTanggal(x.tanggal, { hari: true }),
+        sub: [`Pukul ${x.jam} WIB`, x.catatan].filter(Boolean).join(" · "),
+      },
+      x.lokasi ? { ikon: "lokasi", teks: x.lokasi, sub: "" } : barisMasjid(k),
+    ],
+    ajakan: info.ied ? "Mari sholat Ied berjamaah bersama keluarga" : "Mari sholat gerhana berjamaah",
+    ...dariKonteks(k),
+    namaBerkas: `poster-${slugTeks(info.nama)}-${x.tanggal}.jpg`,
   };
 }
 

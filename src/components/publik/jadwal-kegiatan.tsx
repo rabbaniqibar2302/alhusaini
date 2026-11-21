@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { IkonBuku, IkonJam, IkonMatahari, IkonMikrofon } from "@/components/ikon";
+import { IkonBulan, IkonBulanSabit, IkonBuku, IkonJam, IkonMatahari, IkonMikrofon, IkonPin } from "@/components/ikon";
 import { KartuPenceramah, waktuTanggal } from "@/components/kartu-penceramah";
 import { INFO_KAJIAN, labelJamKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
 import { fotoUntuk, type PetaFotoPenceramah } from "@/lib/penceramah";
-import { posterKajian, posterKhotib, tautanPoster, type KonteksPoster } from "@/lib/poster";
-import type { KajianItem, KhotibItem } from "@/lib/schemas";
+import { posterKajian, posterKhotib, posterSholatKhusus, tautanPoster, type KonteksPoster } from "@/lib/poster";
+import type { KajianItem, KhotibItem, SholatKhususItem } from "@/lib/schemas";
+import { INFO_SHOLAT_KHUSUS, labelSholatKhusus, type JenisSholatKhusus } from "@/lib/sholat-khusus";
 import { CatatanContoh, InfoKosong } from "./bagian";
 import { TombolPoster } from "./tombol-poster";
 
@@ -79,6 +80,72 @@ export function JadwalKhotib({
       </DeretKartu>
       {mendatang.some((x) => x.contoh) && <CatatanContoh />}
     </div>
+  );
+}
+
+/* ---------------------- Sholat Ied & sholat gerhana ---------------------- */
+
+const IKON_SHOLAT_KHUSUS: Record<JenisSholatKhusus, (p: { className?: string }) => ReactNode> = {
+  idulFitri: IkonBulanSabit,
+  idulAdha: IkonBulanSabit,
+  gerhanaBulan: IkonBulan,
+  gerhanaMatahari: IkonMatahari,
+};
+
+/** `items`: jadwal mendatang (sudah disaring & diurutkan, tanpa data contoh). */
+export function JadwalSholatKhusus({
+  items,
+  hariIni,
+  penceramah,
+  poster,
+}: {
+  items: SholatKhususItem[];
+  hariIni: string;
+  penceramah: PetaFotoPenceramah;
+  poster: KonteksPoster;
+}) {
+  return (
+    <DeretKartu label="Jadwal sholat Ied dan gerhana">
+      {items.map((x) => {
+        const foto = fotoUntuk(penceramah, x.khotib);
+        const Ikon = IKON_SHOLAT_KHUSUS[x.jenis];
+        const ada = x.imam || x.lokasi || x.catatan;
+        return (
+          <ItemDeret key={x.id}>
+            <KartuPenceramah
+              nama={x.khotib}
+              peran="Khotib"
+              kategori={labelSholatKhusus(x)}
+              ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
+              foto={foto}
+              waktu={waktuTanggal(x.tanggal)}
+              hariIni={x.tanggal === hariIni}
+              jam={`${x.jam} WIB`}
+              materi={x.tema ? `“${x.tema}”` : INFO_SHOLAT_KHUSUS[x.jenis].nama}
+              tambahan={
+                ada ? (
+                  <div className="space-y-0.5">
+                    {x.imam && (
+                      <p>
+                        Imam: <span className="font-semibold text-stone-700">{x.imam}</span>
+                      </p>
+                    )}
+                    {x.lokasi && (
+                      <p className="flex items-start gap-1">
+                        <IkonPin className="mt-px size-3.5 shrink-0 text-emas-600" />
+                        <span className="font-semibold text-stone-700">{x.lokasi}</span>
+                      </p>
+                    )}
+                    {x.catatan && <p className="italic">{x.catatan}</p>}
+                  </div>
+                ) : undefined
+              }
+              aksi={<TombolPoster poster={tautanPoster(posterSholatKhusus(x, foto, poster))} />}
+            />
+          </ItemDeret>
+        );
+      })}
+    </DeretKartu>
   );
 }
 

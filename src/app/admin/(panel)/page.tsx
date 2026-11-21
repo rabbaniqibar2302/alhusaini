@@ -97,6 +97,11 @@ export default async function Dasbor() {
       ket: `${mendatang(konten.pengajianIbu)} jadwal mendatang/rutin`,
       contoh: adaContoh(konten.pengajianIbu),
     },
+    {
+      label: "Sholat Ied & Gerhana",
+      href: "/admin/sholat-khusus",
+      ket: `${mendatang(konten.sholatKhusus)} jadwal mendatang`,
+    },
     { label: "Foto Penceramah", href: "/admin/penceramah", ket: `${konten.penceramah.length} foto tersimpan` },
     { label: "Kegiatan Masjid", href: "/admin/kegiatan", ket: `${konten.kegiatan.length} kegiatan` },
     {

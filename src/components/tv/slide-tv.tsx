@@ -17,7 +17,8 @@ import { hitungMundurAgenda, labelTanggalAgenda } from "@/lib/agenda";
 import { INFO_KAJIAN, type KejadianKajian } from "@/lib/kajian";
 import { formatRupiah } from "@/lib/kas";
 import type { FotoPenceramah } from "@/lib/penceramah";
-import type { JenisTransaksi, KhotibItem, Rekening } from "@/lib/schemas";
+import type { JenisTransaksi, KhotibItem, Rekening, SholatKhususItem } from "@/lib/schemas";
+import { INFO_SHOLAT_KHUSUS, labelSholatKhusus } from "@/lib/sholat-khusus";
 import { NAMA_BULAN, formatTanggal, namaHari, selisihHari, tambahHari } from "@/lib/time";
 
 export type GambarTv = { url: string; lebar: number; tinggi: number };
@@ -50,6 +51,7 @@ export type SlideTv =
   | { jenis: "pengumuman"; kunci: string; items: { id: string; teks: string }[]; halaman: string }
   | { jenis: "kajian"; kunci: string; items: (KejadianKajian & { foto: FotoPenceramah | null })[]; halaman: string }
   | { jenis: "khotib"; kunci: string; items: (KhotibItem & { foto: FotoPenceramah | null })[] }
+  | { jenis: "sholat-khusus"; kunci: string; item: SholatKhususItem & { foto: FotoPenceramah | null }; halaman: string }
   | { jenis: "hari-besar"; kunci: string; acara: HariBesarTv[] }
   | { jenis: "kegiatan"; kunci: string; judul: string; tanggal: string; foto: GambarTv }
   | { jenis: "agenda"; kunci: string; item: AgendaTv; halaman: string }
@@ -269,6 +271,66 @@ export function IsiSlide({ slide, hariIni }: { slide: SlideTv; hariIni: string }
                 </p>
               </div>
             )}
+          </div>
+        </div>
+      );
+    }
+
+    case "sholat-khusus": {
+      const x = slide.item;
+      const sisa = selisihHari(hariIni, x.tanggal);
+      const mundur = sisa <= 0 ? "Hari ini" : sisa === 1 ? "Besok" : `${sisa} hari lagi`;
+      return (
+        <div className="flex h-full bg-hijau-900">
+          <PanggungPenceramah
+            foto={x.foto}
+            nama={x.khotib}
+            sizes="700px"
+            kelasInisial="text-[7rem]"
+            className="h-full w-[36%] shrink-0"
+          >
+            <p className="absolute top-8 left-8 flex items-center gap-3 rounded-full bg-hijau-950/55 px-5 py-2 text-[1.4rem] font-semibold tracking-wider text-white uppercase ring-1 ring-white/15">
+              <IkonBulanSabit className="size-[1.6rem] text-emas-300" /> {labelSholatKhusus(x)}
+            </p>
+          </PanggungPenceramah>
+          <div className="pola-islami flex min-w-0 flex-1 flex-col p-12">
+            <Judul ikon={<IkonBulanSabit className="size-[2.4rem]" />} teks={INFO_SHOLAT_KHUSUS[x.jenis].nama} sub={slide.halaman} />
+            <div className="flex min-h-0 flex-1 flex-col justify-center">
+              <p className="text-[2.8rem] leading-tight font-extrabold">{formatTanggal(x.tanggal, { hari: true })}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-5">
+                <p className="flex items-center gap-3 text-[2.4rem] font-bold text-emas-300 tabular-nums">
+                  <IkonJam className="size-[2.3rem] shrink-0" />
+                  Pukul {x.jam} WIB
+                </p>
+                <p
+                  className={`rounded-full px-6 py-2 text-[1.9rem] font-bold ${
+                    sisa <= 1 ? "bg-emas-400 text-hijau-950" : "bg-white/10 text-emas-200 ring-1 ring-white/15"
+                  }`}
+                >
+                  {mundur}
+                </p>
+              </div>
+              {x.lokasi && (
+                <p className="mt-4 flex items-center gap-4 text-[2.1rem] text-hijau-50">
+                  <IkonPin className="size-[2.2rem] shrink-0 text-emas-300" />
+                  <span className="truncate">{x.lokasi}</span>
+                </p>
+              )}
+              <p className="mt-8 text-[1.6rem] font-semibold tracking-[0.2em] text-emas-300 uppercase">Khotib</p>
+              <p className="line-clamp-2 text-[3.6rem] leading-tight font-extrabold text-balance">{x.khotib}</p>
+              {x.imam && (
+                <p className="mt-3 text-[2.1rem]">
+                  <span className="text-hijau-100">Imam: </span>
+                  <span className="font-semibold">{x.imam}</span>
+                </p>
+              )}
+              {x.tema && (
+                <p className="mt-5 line-clamp-2 border-l-4 border-emas-400 pl-6 text-[2.3rem] leading-snug text-emas-100 italic">
+                  “{x.tema}”
+                </p>
+              )}
+              {x.catatan && <p className="mt-5 line-clamp-2 text-[1.9rem] text-hijau-50">{x.catatan}</p>}
+            </div>
           </div>
         </div>
       );

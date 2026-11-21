@@ -9,6 +9,7 @@ import {
   posterAgenda,
   posterKajian,
   posterKhotib,
+  posterSholatKhusus,
   slugTeks,
   tautanPoster,
   teksAmanPoster,
@@ -150,6 +151,11 @@ test("slug poster: setiap jenis bisa dibaca balik dari URL", () => {
     pengajianRabu: posterKajian("pengajianRabu", kajian(), null, konteks),
     kuliahSubuh: posterKajian("kuliahSubuh", kajian(), null, konteks),
     pengajianIbu: posterKajian("pengajianIbu", kajian(), null, konteks),
+    sholatKhusus: posterSholatKhusus(
+      { ...khotib(), jenis: "idulAdha", tanggal: "2027-05-16", jam: "06:30", lokasi: "", catatan: "" },
+      null,
+      konteks,
+    ),
     agenda: posterAgenda(agenda(), konteks),
   };
   for (const jenis of JENIS_POSTER) {

@@ -6,6 +6,7 @@ export const KUNCI_REDIS: Record<KunciKonten, string> = {
   pengajianRabu: "jadwal:pengajian-rabu",
   kuliahSubuh: "jadwal:kuliah-subuh",
   pengajianIbu: "jadwal:pengajian-ibu",
+  sholatKhusus: "jadwal:sholat-khusus",
   countdown: "setting:countdown",
   kontak: "setting:kontak",
   legalitas: "setting:legalitas",

@@ -9,6 +9,7 @@ import { adaInfak } from "@/lib/infak";
 import { adaLaporanKas, ringkasanKas, urutkanTransaksi } from "@/lib/kas";
 import { KUNCI_ACARA } from "@/lib/schemas";
 import { petaFotoPenceramah } from "@/lib/penceramah";
+import { sholatKhususMendatang } from "@/lib/sholat-khusus";
 import { alamatPendek } from "@/lib/site";
 import { tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
@@ -76,6 +77,10 @@ export default async function HalamanTv() {
     fotoMasjid: konten.hero,
     pengumuman: konten.pengumuman,
     khotib: konten.khotib.filter((x) => x.tanggal >= hariIni),
+    sholatKhusus: sholatKhususMendatang(
+      konten.sholatKhusus.filter((x) => !x.contoh),
+      hariIni,
+    ),
     kajian: {
       pengajianRabu: konten.pengajianRabu,
       kuliahSubuh: konten.kuliahSubuh,
