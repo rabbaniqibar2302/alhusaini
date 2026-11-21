@@ -86,7 +86,7 @@ export function PilihBanyakFoto({
         onChange={saatPilih}
         disabled={disabled || penuh || memproses}
         aria-describedby={`${id}-info`}
-        className="mt-1 block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-hijau-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-hijau-700 disabled:opacity-60"
+        className="mt-1 block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-utama-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-utama-700 disabled:opacity-60"
       />
       <p id={`${id}-info`} className="mt-1 text-xs text-stone-500">
         {memproses

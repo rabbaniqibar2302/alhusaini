@@ -24,6 +24,7 @@ import {
   type JenisPoster,
   type PengisiPoster,
 } from "@/lib/poster";
+import { TEMA, rgba, urlPolaIslami, warna, type KunciTema } from "@/lib/tema";
 import { NAMA_BULAN, namaHari } from "@/lib/time";
 
 /**
@@ -34,21 +35,29 @@ import { NAMA_BULAN, namaHari } from "@/lib/time";
  * supaya ringan diunduh dari HP.
  */
 
-const WARNA = {
-  hijau950: "#072219",
-  hijau900: "#0f3b2c",
-  hijau700: "#165a41",
-  emas200: "#efd98e",
-  emas300: "#e6c155",
-  emas600: "#a26e18",
-} as const;
+/** Warna poster mengikuti tema situs (src/lib/tema.ts). */
+function paletPoster(kunci: KunciTema) {
+  const tema = TEMA[kunci];
+  return {
+    utama950: warna(tema, "utama", 950),
+    utama900: warna(tema, "utama", 900),
+    utama700: warna(tema, "utama", 700),
+    aksen200: warna(tema, "aksen", 200),
+    aksen300: warna(tema, "aksen", 300),
+    aksen600: warna(tema, "aksen", 600),
+    /** Latar gelap transparan. */
+    gelap: (alfa: number) => rgba(warna(tema, "utama", 950), alfa),
+    /** Cahaya aksen transparan. */
+    cahaya: (alfa: number) => rgba(warna(tema, "aksen", 300), alfa),
+    cahayaPekat: (alfa: number) => rgba(warna(tema, "aksen", 400), alfa),
+    // Pola bintang delapan yang sama dengan website (utilitas pola-islami), diperbesar.
+    pola: urlPolaIslami(warna(tema, "aksen", 400), 0.13),
+  };
+}
+
+type Palet = ReturnType<typeof paletPoster>;
 
 const SISI = 80;
-
-// Pola bintang delapan yang sama dengan website (utilitas pola-islami), diperbesar.
-const POLA = `url("data:image/svg+xml,${encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='#dcaa31' stroke-opacity='0.13' stroke-width='1'><path d='M28 4l7 17 17 7-17 7-7 17-7-17-17-7 17-7z'/><path d='M28 12l11.3 4.7L44 28l-4.7 11.3L28 44l-11.3-4.7L12 28l4.7-11.3z'/></g></svg>",
-)}")`;
 
 /* -------------------------------- Font -------------------------------- */
 
@@ -125,7 +134,7 @@ async function siapkanBingkai(
   return uriPng(hasil);
 }
 
-async function siapkanPanggung(isi: IsiPoster): Promise<GambarPanggung> {
+async function siapkanPanggung(isi: IsiPoster, w: Palet): Promise<GambarPanggung> {
   const foto = isi.pengisi?.foto;
   if (foto) {
     const b = await ambilGambar(foto.url);
@@ -137,7 +146,7 @@ async function siapkanPanggung(isi: IsiPoster): Promise<GambarPanggung> {
             uri: await siapkanBingkai(
               b,
               { lebar: 720, tinggi: 900, muat: "cover" },
-              { radius: 64, tepi: 8, warna: WARNA.emas300 },
+              { radius: 64, tepi: 8, warna: w.aksen300 },
             ),
           };
     }
@@ -206,7 +215,7 @@ const ukuranNama = (nama: string) => (nama.length <= 22 ? 64 : nama.length <= 32
 
 const teksDipotong = (baris: number): CSSProperties => ({ display: "block", lineClamp: baris });
 
-function Kepala({ isi, logo }: { isi: IsiPoster; logo: string | null }) {
+function Kepala({ isi, logo, w }: { isi: IsiPoster; logo: string | null; w: Palet }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 26, padding: `112px ${SISI}px 0` }}>
       {logo ? (
@@ -222,8 +231,8 @@ function Kepala({ isi, logo }: { isi: IsiPoster; logo: string | null }) {
             width: 100,
             height: 100,
             borderRadius: 999,
-            backgroundColor: WARNA.emas300,
-            color: WARNA.hijau950,
+            backgroundColor: w.aksen300,
+            color: w.utama950,
           }}
         >
           <IkonMasjid width={58} height={58} />
@@ -232,7 +241,7 @@ function Kepala({ isi, logo }: { isi: IsiPoster; logo: string | null }) {
       <div style={{ display: "flex", flexDirection: "column", flexShrink: 1, minWidth: 0 }}>
         <div style={{ ...teksDipotong(1), fontSize: 42, fontWeight: 800, lineHeight: 1.15 }}>{isi.masjid.nama}</div>
         {isi.masjid.wilayah ? (
-          <div style={{ ...teksDipotong(1), marginTop: 4, fontSize: 28, fontWeight: 500, color: WARNA.emas200 }}>
+          <div style={{ ...teksDipotong(1), marginTop: 4, fontSize: 28, fontWeight: 500, color: w.aksen200 }}>
             {isi.masjid.wilayah}
           </div>
         ) : null}
@@ -241,7 +250,7 @@ function Kepala({ isi, logo }: { isi: IsiPoster; logo: string | null }) {
   );
 }
 
-function Judul({ isi }: { isi: IsiPoster }) {
+function Judul({ isi, w }: { isi: IsiPoster; w: Palet }) {
   const Ikon = IKON_JENIS[isi.jenis];
   const { fontSize, baris } = ukuranJudul(isi.judul);
   return (
@@ -253,8 +262,8 @@ function Judul({ isi }: { isi: IsiPoster }) {
           gap: 14,
           padding: "12px 30px 12px 22px",
           borderRadius: 999,
-          backgroundColor: WARNA.emas300,
-          color: WARNA.hijau950,
+          backgroundColor: w.aksen300,
+          color: w.utama950,
           fontSize: 28,
           fontWeight: 800,
           letterSpacing: 3,
@@ -271,7 +280,7 @@ function Judul({ isi }: { isi: IsiPoster }) {
   );
 }
 
-function PlatNama({ pengisi, timpa }: { pengisi: PengisiPoster; timpa: boolean }) {
+function PlatNama({ pengisi, timpa, w }: { pengisi: PengisiPoster; timpa: boolean; w: Palet }) {
   return (
     <div
       style={{
@@ -287,9 +296,9 @@ function PlatNama({ pengisi, timpa }: { pengisi: PengisiPoster; timpa: boolean }
           display: "flex",
           padding: "8px 26px",
           borderRadius: 999,
-          border: `2px solid ${WARNA.emas300}`,
-          backgroundColor: "rgba(7,34,25,0.55)",
-          color: WARNA.emas200,
+          border: `2px solid ${w.aksen300}`,
+          backgroundColor: w.gelap(0.55),
+          color: w.aksen200,
           fontSize: 26,
           fontWeight: 800,
           letterSpacing: 6,
@@ -324,7 +333,7 @@ function PlatNama({ pengisi, timpa }: { pengisi: PengisiPoster; timpa: boolean }
  * atas (cahaya tidak terpotong) dan memotong garis bawah lengkung di dasar
  * panggung.
  */
-function LatarPanggung() {
+function LatarPanggung({ w }: { w: Palet }) {
   return (
     <div style={{ position: "absolute", left: 0, right: 0, top: -200, bottom: 0, display: "flex", overflow: "hidden" }}>
       <div
@@ -334,8 +343,7 @@ function LatarPanggung() {
           top: 120,
           width: 1000,
           height: 1000,
-          backgroundImage:
-            "radial-gradient(circle, rgba(230,193,85,0.42) 0%, rgba(220,170,49,0.12) 45%, rgba(220,170,49,0) 70%)",
+          backgroundImage: `radial-gradient(circle, ${w.cahaya(0.42)} 0%, ${w.cahayaPekat(0.12)} 45%, ${w.cahayaPekat(0)} 70%)`,
         }}
       />
       <div
@@ -349,7 +357,7 @@ function LatarPanggung() {
           borderTopRightRadius: 370,
           borderWidth: 3,
           borderStyle: "solid",
-          borderColor: "rgba(230,193,85,0.45)",
+          borderColor: w.cahaya(0.45),
           backgroundColor: "rgba(255,255,255,0.04)",
         }}
       />
@@ -357,7 +365,7 @@ function LatarPanggung() {
   );
 }
 
-function UbinTanggal({ isi }: { isi: IsiPoster }) {
+function UbinTanggal({ isi, w }: { isi: IsiPoster; w: Palet }) {
   const [, bulan, tgl] = isi.tanggal.split("-").map(Number);
   const selesai = isi.tanggalSelesai && isi.tanggalSelesai !== isi.tanggal ? isi.tanggalSelesai : "";
   return (
@@ -370,17 +378,17 @@ function UbinTanggal({ isi }: { isi: IsiPoster }) {
         padding: "40px 0 44px",
         borderRadius: 56,
         backgroundColor: "#ffffff",
-        color: WARNA.hijau900,
+        color: w.utama900,
         boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
       }}
     >
-      <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: 8, color: WARNA.emas600, textTransform: "uppercase" }}>
+      <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: 8, color: w.aksen600, textTransform: "uppercase" }}>
         {namaHari(isi.tanggal)}
       </div>
       <div style={{ fontSize: 230, fontWeight: 800, lineHeight: 1, marginTop: 6 }}>{String(tgl)}</div>
       <div style={{ fontSize: 46, fontWeight: 700, marginTop: 8 }}>{`${NAMA_BULAN[bulan - 1]} ${isi.tanggal.slice(0, 4)}`}</div>
       {selesai ? (
-        <div style={{ fontSize: 30, fontWeight: 700, marginTop: 14, color: WARNA.emas600 }}>
+        <div style={{ fontSize: 30, fontWeight: 700, marginTop: 14, color: w.aksen600 }}>
           {`s.d. ${Number(selesai.slice(8))} ${NAMA_BULAN[Number(selesai.slice(5, 7)) - 1]}`}
         </div>
       ) : null}
@@ -388,7 +396,7 @@ function UbinTanggal({ isi }: { isi: IsiPoster }) {
   );
 }
 
-function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
+function Panggung({ isi, gambar, w }: { isi: IsiPoster; gambar: GambarPanggung; w: Palet }) {
   const isiPenuh: CSSProperties = { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex" };
   const area: CSSProperties = { display: "flex", flexGrow: 1, flexBasis: 0, minHeight: 0, position: "relative" };
 
@@ -396,7 +404,7 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
   if (gambar?.jenis === "potongan" && isi.pengisi) {
     return (
       <div style={{ ...area, marginTop: 40 }}>
-        <LatarPanggung />
+        <LatarPanggung w={w} />
         <div style={{ ...isiPenuh, top: 50 }}>
           <img src={gambar.uri} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom" }} />
         </div>
@@ -407,10 +415,10 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
             right: 0,
             bottom: 0,
             height: "58%",
-            backgroundImage: `linear-gradient(180deg, rgba(7,34,25,0) 0%, rgba(7,34,25,0.82) 48%, ${WARNA.hijau950} 100%)`,
+            backgroundImage: `linear-gradient(180deg, ${w.gelap(0)} 0%, ${w.gelap(0.82)} 48%, ${w.utama950} 100%)`,
           }}
         />
-        <PlatNama pengisi={isi.pengisi} timpa />
+        <PlatNama pengisi={isi.pengisi} timpa w={w} />
       </div>
     );
   }
@@ -418,7 +426,7 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
   return (
     <div style={{ ...area, flexDirection: "column", marginTop: 40 }}>
       <div style={{ ...area, alignItems: "center", justifyContent: "center" }}>
-        {isi.pengisi && <LatarPanggung />}
+        {isi.pengisi && <LatarPanggung w={w} />}
         {isi.pengisi && (
           <div
             style={{
@@ -427,7 +435,7 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
               right: 0,
               bottom: 0,
               height: "30%",
-              backgroundImage: "linear-gradient(180deg, rgba(7,34,25,0) 0%, rgba(7,34,25,0.9) 100%)",
+              backgroundImage: `linear-gradient(180deg, ${w.gelap(0)} 0%, ${w.gelap(0.9)} 100%)`,
             }}
           />
         )}
@@ -444,9 +452,9 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
               width: 400,
               height: 400,
               borderRadius: 999,
-              border: `6px solid ${WARNA.emas300}`,
-              backgroundColor: "rgba(7,34,25,0.55)",
-              color: WARNA.emas200,
+              border: `6px solid ${w.aksen300}`,
+              backgroundColor: w.gelap(0.55),
+              color: w.aksen200,
               fontSize: 160,
               fontWeight: 800,
             }}
@@ -454,15 +462,15 @@ function Panggung({ isi, gambar }: { isi: IsiPoster; gambar: GambarPanggung }) {
             {inisialNama(isi.pengisi.nama) || "?"}
           </div>
         ) : (
-          <UbinTanggal isi={isi} />
+          <UbinTanggal isi={isi} w={w} />
         )}
       </div>
-      {isi.pengisi && <PlatNama pengisi={isi.pengisi} timpa={false} />}
+      {isi.pengisi && <PlatNama pengisi={isi.pengisi} timpa={false} w={w} />}
     </div>
   );
 }
 
-function BarisInfo({ baris }: { baris: BarisPoster }) {
+function BarisInfo({ baris, w }: { baris: BarisPoster; w: Palet }) {
   const Ikon = IKON_BARIS[baris.ikon];
   const waktu = baris.ikon === "kalender";
   return (
@@ -476,8 +484,8 @@ function BarisInfo({ baris }: { baris: BarisPoster }) {
           width: 84,
           height: 84,
           borderRadius: 999,
-          backgroundColor: WARNA.emas300,
-          color: WARNA.hijau950,
+          backgroundColor: w.aksen300,
+          color: w.utama950,
         }}
       >
         <Ikon width={44} height={44} strokeWidth={2} />
@@ -492,7 +500,7 @@ function BarisInfo({ baris }: { baris: BarisPoster }) {
               fontSize: 31,
               lineHeight: 1.3,
               fontWeight: waktu ? 700 : 500,
-              color: waktu ? WARNA.emas200 : "rgba(255,255,255,0.75)",
+              color: waktu ? w.aksen200 : "rgba(255,255,255,0.75)",
             }}
           >
             {baris.sub}
@@ -504,6 +512,7 @@ function BarisInfo({ baris }: { baris: BarisPoster }) {
 }
 
 function Poster({ isi, gambar, logo }: { isi: IsiPoster; gambar: GambarPanggung; logo: string | null }) {
+  const w = paletPoster(isi.tema);
   return (
     <div
       style={{
@@ -514,8 +523,8 @@ function Poster({ isi, gambar, logo }: { isi: IsiPoster; gambar: GambarPanggung;
         height: UKURAN_POSTER.tinggi,
         fontFamily: "Jakarta",
         color: "#ffffff",
-        backgroundColor: WARNA.hijau950,
-        backgroundImage: `linear-gradient(180deg, ${WARNA.hijau700} 0%, ${WARNA.hijau900} 34%, ${WARNA.hijau950} 68%)`,
+        backgroundColor: w.utama950,
+        backgroundImage: `linear-gradient(180deg, ${w.utama700} 0%, ${w.utama900} 34%, ${w.utama950} 68%)`,
       }}
     >
       <div
@@ -525,14 +534,14 @@ function Poster({ isi, gambar, logo }: { isi: IsiPoster; gambar: GambarPanggung;
           left: 0,
           width: UKURAN_POSTER.lebar,
           height: UKURAN_POSTER.tinggi,
-          backgroundImage: POLA,
+          backgroundImage: w.pola,
           backgroundSize: "140px 140px",
           backgroundRepeat: "repeat",
         }}
       />
-      <Kepala isi={isi} logo={logo} />
-      <Judul isi={isi} />
-      <Panggung isi={isi} gambar={gambar} />
+      <Kepala isi={isi} logo={logo} w={w} />
+      <Judul isi={isi} w={w} />
+      <Panggung isi={isi} gambar={gambar} w={w} />
       <div
         style={{
           display: "flex",
@@ -541,16 +550,16 @@ function Poster({ isi, gambar, logo }: { isi: IsiPoster; gambar: GambarPanggung;
           margin: `28px ${SISI - 16}px 0`,
           padding: "34px 40px",
           borderRadius: 44,
-          border: "2px solid rgba(230,193,85,0.35)",
+          border: `2px solid ${w.cahaya(0.35)}`,
           backgroundColor: "rgba(255,255,255,0.06)",
         }}
       >
         {isi.baris.map((b) => (
-          <BarisInfo key={b.ikon} baris={b} />
+          <BarisInfo key={b.ikon} baris={b} w={w} />
         ))}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: `30px ${SISI}px 92px` }}>
-        <div style={{ ...teksDipotong(1), fontSize: 30, fontWeight: 700, color: WARNA.emas200 }}>{isi.ajakan}</div>
+        <div style={{ ...teksDipotong(1), fontSize: 30, fontWeight: 700, color: w.aksen200 }}>{isi.ajakan}</div>
         <div style={{ ...teksDipotong(1), marginTop: 8, fontSize: 26, fontWeight: 500, color: "rgba(255,255,255,0.55)" }}>
           {isi.situs.replace(/^https?:\/\//, "")}
         </div>
@@ -577,7 +586,11 @@ function isiAman(isi: IsiPoster, ketat: boolean): IsiPoster {
 
 /** Poster story dalam format JPEG. */
 export async function buatPoster(isi: IsiPoster): Promise<Buffer> {
-  const [fonts, gambar, logo] = await Promise.all([muatFont(), siapkanPanggung(isi), siapkanLogo(isi.logo)]);
+  const [fonts, gambar, logo] = await Promise.all([
+    muatFont(),
+    siapkanPanggung(isi, paletPoster(isi.tema)),
+    siapkanLogo(isi.logo),
+  ]);
   const gambarkan = (ketat: boolean) =>
     new ImageResponse(<Poster isi={isiAman(isi, ketat)} gambar={gambar} logo={logo} />, {
       width: UKURAN_POSTER.lebar,
@@ -592,6 +605,6 @@ export async function buatPoster(isi: IsiPoster): Promise<Buffer> {
     console.warn("[poster] Menggambar ulang tanpa karakter di luar font:", err);
     png = await gambarkan(true);
   }
-  // 4:4:4 supaya tulisan emas di atas hijau tetap tajam.
+  // 4:4:4 supaya tulisan berwarna aksen di atas latar gelap tetap tajam.
   return sharp(Buffer.from(png)).jpeg({ quality: 88, chromaSubsampling: "4:4:4", mozjpeg: true }).toBuffer();
 }

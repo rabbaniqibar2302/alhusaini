@@ -42,10 +42,10 @@ export default async function HalamanHitungMundur() {
             <ul className="space-y-3">
               {kejadianBerikutnya(a, hariIni, setelan, 2).map((k) => (
                 <li key={k.tahunHijriah} className="rounded-xl bg-stone-50 p-3 ring-1 ring-stone-200">
-                  <p className="text-xs font-semibold text-emas-700">
+                  <p className="text-xs font-semibold text-aksen-700">
                     {ACARA[a].label} {k.tahunHijriah} H
                   </p>
-                  <p className="font-semibold text-hijau-900">{formatTanggal(k.tanggal, { hari: true })}</p>
+                  <p className="font-semibold text-utama-900">{formatTanggal(k.tanggal, { hari: true })}</p>
                   <p className="mt-1">
                     {k.sumber === "penetapan" ? (
                       <Lencana warna="hijau">Ditetapkan</Lencana>
@@ -102,7 +102,7 @@ export default async function HalamanHitungMundur() {
                   return (
                     <li key={`${p.acara}-${p.tahunHijriah}`} className="flex items-start justify-between gap-3 py-2.5">
                       <div className="min-w-0 text-sm">
-                        <p className="font-semibold text-hijau-900">{label}</p>
+                        <p className="font-semibold text-utama-900">{label}</p>
                         <p className="text-stone-700">{formatTanggal(p.tanggal, { hari: true })}</p>
                         {p.catatan && <p className="text-xs break-words text-stone-500">{p.catatan}</p>}
                       </div>

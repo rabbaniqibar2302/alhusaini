@@ -34,7 +34,7 @@ async function kontenPoster() {
     sholatKhusus: konten.sholatKhusus,
     agenda: konten.agenda,
     penceramah: konten.penceramah,
-    konteks: konteksPoster(konten.identitas, konten.logo, urlSitus().origin),
+    konteks: konteksPoster(konten.identitas, konten.logo, urlSitus().origin, konten.tampilan.tema),
   };
 }
 

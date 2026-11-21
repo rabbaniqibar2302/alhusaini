@@ -160,8 +160,8 @@ export function InputFotoPenceramah({
           className="aspect-[4/5] w-28 shrink-0 rounded-xl sm:w-32"
         >
           {sibuk && (
-            <div className="absolute inset-0 grid place-items-center bg-hijau-950/50">
-              <span className="size-7 animate-spin rounded-full border-[3px] border-emas-300 border-t-transparent" />
+            <div className="absolute inset-0 grid place-items-center bg-utama-950/50">
+              <span className="size-7 animate-spin rounded-full border-[3px] border-aksen-300 border-t-transparent" />
             </div>
           )}
         </PanggungPenceramah>
@@ -182,7 +182,7 @@ export function InputFotoPenceramah({
             onChange={saatPilih}
             aria-invalid={pesanGalat ? true : undefined}
             aria-describedby="foto-penceramah-info"
-            className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-hijau-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-hijau-700 disabled:opacity-60"
+            className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-utama-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-utama-700 disabled:opacity-60"
           />
           <input
             type="hidden"
@@ -198,7 +198,7 @@ export function InputFotoPenceramah({
                     Menyiapkan penghapus latar ({Math.round(status.mb)} MB, hanya sekali)… {status.persen}%
                   </p>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-stone-200">
-                    <div className="h-full rounded-full bg-hijau-600 transition-[width]" style={{ width: `${status.persen}%` }} />
+                    <div className="h-full rounded-full bg-utama-600 transition-[width]" style={{ width: `${status.persen}%` }} />
                   </div>
                 </div>
               ) : (
@@ -210,11 +210,11 @@ export function InputFotoPenceramah({
               </p>
             ) : keadaan.tahap === "siap" ? (
               keadaan.catatan ? (
-                <p className="flex items-start gap-1.5 text-emas-700">
+                <p className="flex items-start gap-1.5 text-aksen-700">
                   <IkonPeringatan className="mt-px size-3.5 shrink-0" /> {keadaan.catatan}
                 </p>
               ) : (
-                <p className="flex items-start gap-1.5 text-hijau-800">
+                <p className="flex items-start gap-1.5 text-utama-800">
                   <IkonCentang className="mt-px size-3.5 shrink-0" /> Latar belakang sudah dihapus. Periksa pratinjaunya.
                 </p>
               )
@@ -241,7 +241,7 @@ export function InputFotoPenceramah({
                       aria-pressed={keadaan.pakai === nilai}
                       onClick={() => pakai(nilai)}
                       className={`rounded-md px-2.5 py-1 transition ${
-                        keadaan.pakai === nilai ? "bg-hijau-800 text-white" : "text-stone-600 hover:bg-stone-100"
+                        keadaan.pakai === nilai ? "bg-utama-800 text-white" : "text-stone-600 hover:bg-stone-100"
                       }`}
                     >
                       {label}

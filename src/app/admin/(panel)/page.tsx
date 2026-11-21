@@ -141,9 +141,9 @@ export default async function Dasbor() {
             {status.map((s) => (
               <li key={s.label} className="flex items-start gap-2.5 text-sm">
                 {s.ok ? (
-                  <IkonCentang className="mt-px size-5 shrink-0 text-hijau-600" />
+                  <IkonCentang className="mt-px size-5 shrink-0 text-utama-600" />
                 ) : (
-                  <IkonPeringatan className="mt-px size-5 shrink-0 text-emas-600" />
+                  <IkonPeringatan className="mt-px size-5 shrink-0 text-aksen-600" />
                 )}
                 <span>
                   <span className="block font-semibold text-stone-800">{s.label}</span>
@@ -158,7 +158,7 @@ export default async function Dasbor() {
           <dl className="space-y-3 text-sm">
             <div>
               <dt className="text-stone-500">Khotib Jumat terdekat</dt>
-              <dd className="font-semibold text-hijau-900">
+              <dd className="font-semibold text-utama-900">
                 {khotibBerikut ? `${formatTanggal(khotibBerikut.tanggal, { hari: true })} — ${khotibBerikut.khotib}` : "Belum dijadwalkan"}
               </dd>
             </div>
@@ -167,7 +167,7 @@ export default async function Dasbor() {
               return (
                 <div key={a}>
                   <dt className="text-stone-500">{ACARA[a].judul}</dt>
-                  <dd className="font-semibold text-hijau-900">
+                  <dd className="font-semibold text-utama-900">
                     {k ? (
                       <>
                         {formatTanggal(k.tanggal, { hari: true })}{" "}
@@ -186,16 +186,16 @@ export default async function Dasbor() {
         </Kartu>
       </div>
 
-      <h2 className="mt-8 mb-3 text-lg font-bold text-hijau-900">Konten</h2>
+      <h2 className="mt-8 mb-3 text-lg font-bold text-utama-900">Konten</h2>
       <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {ringkasan.map((r) => (
           <li key={r.href}>
             <Link
               href={r.href}
-              className="flex h-full flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 transition hover:ring-hijau-300"
+              className="flex h-full flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 transition hover:ring-utama-300"
             >
               <span className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-hijau-900">{r.label}</span>
+                <span className="font-semibold text-utama-900">{r.label}</span>
                 {r.contoh && <Lencana>Masih data contoh</Lencana>}
               </span>
               <span className="mt-1 text-sm text-stone-600">{r.ket}</span>

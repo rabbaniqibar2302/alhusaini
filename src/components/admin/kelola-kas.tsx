@@ -74,10 +74,10 @@ function FormTransaksi({
           {PILIHAN_JENIS.map(([nilai, label]) => (
             <label
               key={nilai}
-              className={`cursor-pointer rounded-lg px-2 py-2 text-center text-sm font-semibold transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-emas-400 ${
+              className={`cursor-pointer rounded-lg px-2 py-2 text-center text-sm font-semibold transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-aksen-400 ${
                 jenis === nilai
                   ? nilai === "masuk"
-                    ? "bg-hijau-700 text-white shadow-sm"
+                    ? "bg-utama-700 text-white shadow-sm"
                     : "bg-red-600 text-white shadow-sm"
                   : "text-stone-600 hover:text-stone-900"
               }`}
@@ -195,13 +195,13 @@ export function KelolaKas({
     <div className="space-y-6">
       <section className="space-y-3">
         <p className="text-sm text-stone-600">
-          Periode laporan: <span className="font-semibold text-hijau-900">{r.periodeLabel}</span>
+          Periode laporan: <span className="font-semibold text-utama-900">{r.periodeLabel}</span>
         </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Saldo kas saat ini", formatRupiah(r.saldoAkhir), "text-hijau-900"],
+            ["Saldo kas saat ini", formatRupiah(r.saldoAkhir), "text-utama-900"],
             ["Saldo awal periode", formatRupiah(r.saldoAwal), "text-stone-900"],
-            ["Pemasukan periode ini", `+${formatRupiah(r.masuk)}`, "text-hijau-700"],
+            ["Pemasukan periode ini", `+${formatRupiah(r.masuk)}`, "text-utama-700"],
             ["Pengeluaran periode ini", `−${formatRupiah(r.keluar)}`, "text-red-700"],
           ].map(([label, nilai, warna]) => (
             <div key={label} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
@@ -258,12 +258,12 @@ export function KelolaKas({
                 return (
                   <details key={bulan} open={i === 0} className="group rounded-xl ring-1 ring-stone-200">
                     <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-3 py-2.5 hover:bg-stone-50">
-                      <span className="font-semibold text-hijau-900">
-                        <span className="mr-1.5 inline-block text-emas-600 transition group-open:rotate-90">▸</span>
+                      <span className="font-semibold text-utama-900">
+                        <span className="mr-1.5 inline-block text-aksen-600 transition group-open:rotate-90">▸</span>
                         {labelBulan(bulan)} <span className="text-xs font-normal text-stone-500">({daftar.length})</span>
                       </span>
                       <span className="flex gap-3 text-xs font-semibold tabular-nums">
-                        <span className="text-hijau-700">+{formatRupiah(masuk)}</span>
+                        <span className="text-utama-700">+{formatRupiah(masuk)}</span>
                         <span className="text-red-700">−{formatRupiah(keluar)}</span>
                       </span>
                     </summary>
@@ -271,14 +271,14 @@ export function KelolaKas({
                       {daftar.map((t) => (
                         <li
                           key={t.id}
-                          className={`flex items-center gap-3 px-3 py-2 text-sm ${sedangEdit?.id === t.id ? "bg-emas-50" : ""}`}
+                          className={`flex items-center gap-3 px-3 py-2 text-sm ${sedangEdit?.id === t.id ? "bg-aksen-50" : ""}`}
                         >
                           <span className="w-14 shrink-0 text-xs text-stone-500">
                             {formatTanggal(t.tanggal, { singkat: true }).replace(/ \d{4}$/, "")}
                           </span>
                           <span className="min-w-0 flex-1 break-words text-stone-800">{t.keterangan}</span>
                           <span
-                            className={`shrink-0 font-semibold tabular-nums ${t.jenis === "masuk" ? "text-hijau-700" : "text-red-700"}`}
+                            className={`shrink-0 font-semibold tabular-nums ${t.jenis === "masuk" ? "text-utama-700" : "text-red-700"}`}
                           >
                             {t.jenis === "masuk" ? "+" : "−"}
                             {formatRupiah(t.jumlah)}
@@ -289,7 +289,7 @@ export function KelolaKas({
                               onClick={() => mulaiEdit(t)}
                               aria-label="Ubah transaksi"
                               title="Ubah"
-                              className="rounded-lg p-1.5 text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                              className="rounded-lg p-1.5 text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
                             >
                               <IkonPensil className="size-3.5" />
                             </button>

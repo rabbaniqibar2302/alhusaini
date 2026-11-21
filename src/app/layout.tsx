@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Amiri, Plus_Jakarta_Sans } from "next/font/google";
+import type { CSSProperties } from "react";
 import { deskripsiSitus, namaDenganWilayah } from "@/lib/site";
+import { TEMA, variabelTema, warna } from "@/lib/tema";
 import { bacaIdentitas } from "@/server/identitas";
 import { urlSitus } from "@/server/situs";
+import { bacaTema } from "@/server/tampilan";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -43,15 +46,28 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
-  themeColor: "#0f3b2c",
-  width: "device-width",
-  initialScale: 1,
-};
+/** Warna bilah browser HP mengikuti tema (sama dengan header situs). */
+export async function generateViewport(): Promise<Viewport> {
+  const tema = await bacaTema();
+  return {
+    themeColor: warna(TEMA[tema], "utama", 950),
+    width: "device-width",
+    initialScale: 1,
+    // Navigasi bawah memakai env(safe-area-inset-bottom) di iPhone berponi.
+    viewportFit: "cover",
+  };
+}
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/** Tema warna pilihan pengurus mengisi variabel CSS warna di elemen <html>. */
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const tema = await bacaTema();
   return (
-    <html lang="id" className={`${jakarta.variable} ${amiri.variable} h-full`}>
+    <html
+      lang="id"
+      data-tema={tema}
+      style={variabelTema(tema) as CSSProperties}
+      className={`${jakarta.variable} ${amiri.variable} h-full`}
+    >
       <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );

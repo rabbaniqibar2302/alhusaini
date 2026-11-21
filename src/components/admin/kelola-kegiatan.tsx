@@ -130,7 +130,7 @@ function FormKegiatan({
       )}
       {!hasil.ok && <PesanHasil hasil={hasil} />}
       {sibuk && (
-        <p role="status" className="text-sm font-medium text-hijau-800">
+        <p role="status" className="text-sm font-medium text-utama-800">
           {sibuk}
         </p>
       )}
@@ -173,7 +173,7 @@ function TombolIkon({
       aria-label={label}
       title={label}
       className={`rounded-full bg-white/90 p-1.5 shadow ring-1 ring-black/10 disabled:opacity-50 ${
-        bahaya ? "text-red-700 hover:bg-red-50" : "text-emas-700 hover:bg-emas-50"
+        bahaya ? "text-red-700 hover:bg-red-50" : "text-aksen-700 hover:bg-aksen-50"
       }`}
     >
       {children}
@@ -190,7 +190,7 @@ function ThumbFoto({ idKegiatan, foto, sampul }: { idKegiatan: string; foto: Fot
       <div className="relative aspect-square overflow-hidden rounded-lg bg-stone-100 ring-1 ring-stone-200">
         <Image src={foto.url} alt="" fill sizes="120px" className="object-cover" />
         {sampul && (
-          <span className="absolute bottom-1 left-1 rounded-full bg-emas-400 px-1.5 py-0.5 text-[0.65rem] font-bold text-hijau-950">
+          <span className="absolute bottom-1 left-1 rounded-full bg-aksen-400 px-1.5 py-0.5 text-[0.65rem] font-bold text-utama-950">
             Sampul
           </span>
         )}
@@ -250,7 +250,7 @@ function FotoKegiatan({ item }: { item: KegiatanItem }) {
       )}
       {sisa > 0 ? (
         <details className="group rounded-xl bg-stone-50 px-3 py-2 ring-1 ring-stone-200">
-          <summary className="cursor-pointer text-sm font-semibold text-hijau-800">
+          <summary className="cursor-pointer text-sm font-semibold text-utama-800">
             Tambah foto ({item.foto.length}/{MAKS_FOTO_KEGIATAN})
           </summary>
           <div className="mt-3 space-y-3 pb-1">
@@ -263,7 +263,7 @@ function FotoKegiatan({ item }: { item: KegiatanItem }) {
               disabled={sibuk !== null}
             />
             {sibuk && (
-              <p role="status" className="text-sm font-medium text-hijau-800">
+              <p role="status" className="text-sm font-medium text-utama-800">
                 {sibuk}
               </p>
             )}
@@ -271,7 +271,7 @@ function FotoKegiatan({ item }: { item: KegiatanItem }) {
               type="button"
               onClick={unggah}
               disabled={sibuk !== null || foto.length === 0}
-              className="inline-flex items-center gap-2 rounded-xl bg-hijau-800 px-4 py-2 text-sm font-semibold text-white hover:bg-hijau-700 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-utama-800 px-4 py-2 text-sm font-semibold text-white hover:bg-utama-700 disabled:opacity-50"
             >
               <IkonUnggah className="size-4" /> Unggah {foto.length > 0 ? `${foto.length} foto` : "foto"}
             </button>
@@ -311,7 +311,7 @@ function KartuKegiatanAdmin({ item, hariIni }: { item: KegiatanItem; hariIni: st
         <>
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="font-semibold break-words text-hijau-900">{item.judul}</p>
+              <p className="font-semibold break-words text-utama-900">{item.judul}</p>
               <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
                 {formatTanggal(item.tanggal, { hari: true })} · {item.foto.length} foto
                 {item.tanggal > hariIni && <Lencana warna="biru">Akan datang</Lencana>}
@@ -324,7 +324,7 @@ function KartuKegiatanAdmin({ item, hariIni }: { item: KegiatanItem; hariIni: st
                   setPesan(HASIL_AWAL);
                   setUbah(true);
                 }}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
               >
                 <IkonPensil className="size-3.5" /> Edit
               </button>

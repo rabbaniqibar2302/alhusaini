@@ -19,6 +19,7 @@ import {
 import { POLA_PATHNAME_AUDIO, UKURAN_MAKS_AUDIO } from "./audio";
 import { JENIS_KAJIAN, POLA_JADWAL } from "./kajian";
 import { JENIS_SHOLAT_KHUSUS } from "./sholat-khusus";
+import { KUNCI_TEMA, TEMA_BAWAAN } from "./tema";
 import { HARI_PEKAN, JAM_REGEX } from "./time";
 
 /**
@@ -541,6 +542,18 @@ export const setelanTvSchema = z.object({
 
 export type SetelanTv = z.output<typeof setelanTvSchema>;
 
+/* ------------------------------ Tampilan ------------------------------ */
+
+export const tampilanInput = z.object({
+  tema: z.enum(KUNCI_TEMA, { error: "Pilih salah satu tema warna" }),
+});
+
+/** Saat dibaca: tema yang tidak dikenal (mis. sudah dihapus) kembali ke tema bawaan. */
+export const tampilanSchema = z.object({
+  tema: z.enum(KUNCI_TEMA).catch(TEMA_BAWAAN),
+});
+export type Tampilan = z.infer<typeof tampilanSchema>;
+
 /* --------------------------- Kumpulan konten --------------------------- */
 
 export const skemaKonten = {
@@ -566,6 +579,7 @@ export const skemaKonten = {
   setelanKas: setelanKasSchema,
   agenda: z.array(agendaItem).max(MAKS_AGENDA),
   infak: infakSchema,
+  tampilan: tampilanSchema,
 } as const;
 
 export type KunciKonten = keyof typeof skemaKonten;

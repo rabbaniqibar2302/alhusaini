@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { IkonBulan, IkonBulanSabit, IkonBuku, IkonJam, IkonMatahari, IkonMikrofon, IkonPin } from "@/components/ikon";
 import { KartuPenceramah, waktuTanggal } from "@/components/kartu-penceramah";
 import { INFO_KAJIAN, labelJamKajian, susunKajian, type JenisKajian } from "@/lib/kajian";
@@ -21,8 +21,17 @@ function DeretKartu({ label, children }: { label: string; children: ReactNode })
   );
 }
 
-function ItemDeret({ children }: { children: ReactNode }) {
-  return <li className="w-[72%] max-w-72 shrink-0 snap-start sm:w-auto sm:max-w-none">{children}</li>;
+/** `urutan`: kartu dalam satu deret muncul bergantian saat digulir. */
+function ItemDeret({ urutan, children }: { urutan: number; children: ReactNode }) {
+  return (
+    <li
+      data-muncul
+      style={{ "--urutan": urutan } as CSSProperties}
+      className="w-[72%] max-w-72 shrink-0 snap-start sm:w-auto sm:max-w-none"
+    >
+      {children}
+    </li>
+  );
 }
 
 /* ------------------------------ Khotib Jumat ------------------------------ */
@@ -55,12 +64,12 @@ export function JadwalKhotib({
         {mendatang.map((x, i) => {
           const foto = fotoUntuk(penceramah, x.khotib);
           return (
-            <ItemDeret key={x.id}>
+            <ItemDeret key={x.id} urutan={i}>
               <KartuPenceramah
                 nama={x.khotib}
                 peran="Khotib"
                 kategori={i === 0 ? "Jumat terdekat" : "Sholat Jumat"}
-                ikonKategori={<IkonMikrofon className="size-3.5 shrink-0 text-emas-300" />}
+                ikonKategori={<IkonMikrofon className="size-3.5 shrink-0 text-aksen-300" />}
                 foto={foto}
                 waktu={waktuTanggal(x.tanggal)}
                 hariIni={x.tanggal === hariIni}
@@ -106,17 +115,17 @@ export function JadwalSholatKhusus({
 }) {
   return (
     <DeretKartu label="Jadwal sholat Ied dan gerhana">
-      {items.map((x) => {
+      {items.map((x, i) => {
         const foto = fotoUntuk(penceramah, x.khotib);
         const Ikon = IKON_SHOLAT_KHUSUS[x.jenis];
         const ada = x.imam || x.lokasi || x.catatan;
         return (
-          <ItemDeret key={x.id}>
+          <ItemDeret key={x.id} urutan={i}>
             <KartuPenceramah
               nama={x.khotib}
               peran="Khotib"
               kategori={labelSholatKhusus(x)}
-              ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
+              ikonKategori={<Ikon className="size-3.5 shrink-0 text-aksen-300" />}
               foto={foto}
               waktu={waktuTanggal(x.tanggal)}
               hariIni={x.tanggal === hariIni}
@@ -132,7 +141,7 @@ export function JadwalSholatKhusus({
                     )}
                     {x.lokasi && (
                       <p className="flex items-start gap-1">
-                        <IkonPin className="mt-px size-3.5 shrink-0 text-emas-600" />
+                        <IkonPin className="mt-px size-3.5 shrink-0 text-aksen-600" />
                         <span className="font-semibold text-stone-700">{x.lokasi}</span>
                       </p>
                     )}
@@ -186,12 +195,12 @@ export function JadwalKajian({
         const info = INFO_KAJIAN[jenis];
         return (
           <section key={jenis} aria-labelledby={`kajian-${jenis}`}>
-            <header className="mb-4 flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-hijau-900 text-emas-300">
+            <header data-muncul className="mb-4 flex items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-utama-700 to-utama-950 text-aksen-300 shadow-md shadow-utama-950/20">
                 <Ikon className="size-5" />
               </span>
               <div>
-                <h3 id={`kajian-${jenis}`} className="text-lg font-bold text-hijau-900">
+                <h3 id={`kajian-${jenis}`} className="text-lg font-bold text-utama-900">
                   {info.judul}
                 </h3>
                 <p className="text-sm text-stone-500">{info.keterangan}</p>
@@ -202,15 +211,15 @@ export function JadwalKajian({
             ) : (
               <>
                 <DeretKartu label={`Jadwal ${info.judul}`}>
-                  {daftar.map((x) => {
+                  {daftar.map((x, i) => {
                     const foto = fotoUntuk(penceramah, x.ustadz);
                     return (
-                      <ItemDeret key={x.id}>
+                      <ItemDeret key={x.id} urutan={i}>
                         <KartuPenceramah
                           nama={x.ustadz}
                           peran="Pemateri"
                           kategori={info.singkat}
-                          ikonKategori={<Ikon className="size-3.5 shrink-0 text-emas-300" />}
+                          ikonKategori={<Ikon className="size-3.5 shrink-0 text-aksen-300" />}
                           foto={foto}
                           waktu={x.pola === "mingguan" ? { pola: "mingguan", hari: x.hari } : waktuTanggal(x.tanggal)}
                           hariIni={x.pola === "tanggal" && x.tanggal === hariIni}

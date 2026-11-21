@@ -133,7 +133,7 @@ function ItemFotoSejarah({ foto, indeks, total }: { foto: FotoSejarah; indeks: n
             <button
               type="button"
               onClick={() => setUbah(true)}
-              className={`${gayaTombolKecil} text-hijau-800 ring-hijau-200 hover:bg-hijau-50`}
+              className={`${gayaTombolKecil} text-utama-800 ring-utama-200 hover:bg-utama-50`}
             >
               <IkonPensil className="size-3.5" /> Keterangan
             </button>
@@ -194,7 +194,7 @@ export function KelolaFotoSejarah({ foto }: { foto: FotoSejarah[] }) {
             disabled={sibuk !== null}
           />
           {sibuk && (
-            <p role="status" className="text-sm font-medium text-hijau-800">
+            <p role="status" className="text-sm font-medium text-utama-800">
               {sibuk}
             </p>
           )}
@@ -202,7 +202,7 @@ export function KelolaFotoSejarah({ foto }: { foto: FotoSejarah[] }) {
             type="button"
             onClick={unggah}
             disabled={sibuk !== null || terpilih.length === 0}
-            className="inline-flex items-center gap-2 rounded-xl bg-hijau-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-hijau-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-utama-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-utama-700 disabled:opacity-50"
           >
             <IkonUnggah className="size-4" /> Unggah {terpilih.length > 0 ? `${terpilih.length} foto` : "foto"}
           </button>

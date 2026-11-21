@@ -177,7 +177,7 @@ export function KelolaPengumuman({ items, hariIni }: { items: PengumumanItem[]; 
               <li
                 key={x.id}
                 className={`flex flex-col gap-3 py-3 sm:flex-row sm:items-start sm:justify-between ${
-                  sedangEdit?.id === x.id ? "-mx-2 rounded-xl bg-emas-50 px-2" : ""
+                  sedangEdit?.id === x.id ? "-mx-2 rounded-xl bg-aksen-50 px-2" : ""
                 } ${pengumumanBerakhir(x, hariIni) ? "opacity-60" : ""}`}
               >
                 <div className="min-w-0">
@@ -197,7 +197,7 @@ export function KelolaPengumuman({ items, hariIni }: { items: PengumumanItem[]; 
                       setPesan(HASIL_AWAL);
                       document.getElementById("form-pengumuman")?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
                   >
                     <IkonPensil className="size-3.5" /> Edit
                   </button>

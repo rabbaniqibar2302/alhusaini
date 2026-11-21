@@ -344,3 +344,25 @@ export const IkonGrafik = (p: IkonProps) => (
     <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
   </Dasar>
 );
+
+export const IkonBeranda = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M3.5 10.5 12 3.5l8.5 7" />
+    <path d="M5.5 9v10.5a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1V9" />
+  </Dasar>
+);
+
+export const IkonMenu = (p: IkonProps) => (
+  <Dasar {...p}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="2" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="2" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="2" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="3.5" />
+  </Dasar>
+);
+
+export const IkonPanah = (p: IkonProps) => (
+  <Dasar {...p}>
+    <path d="M4.5 12h15M13.5 6l6 6-6 6" />
+  </Dasar>
+);

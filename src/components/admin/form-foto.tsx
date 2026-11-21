@@ -230,7 +230,7 @@ export function KartuItemGaleri({ item }: { item: ItemGaleriAdmin }) {
             <button
               type="button"
               onClick={() => setUbah(true)}
-              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
             >
               <IkonPensil className="size-3.5" /> Ubah keterangan
             </button>

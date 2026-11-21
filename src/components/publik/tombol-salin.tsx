@@ -20,7 +20,7 @@ export function TombolSalin({ teks, label }: { teks: string; label: string }) {
       onClick={salin}
       aria-label={label}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition ${
-        tersalin ? "bg-hijau-700 text-white ring-hijau-700" : "bg-white text-hijau-800 ring-hijau-200 hover:bg-hijau-50"
+        tersalin ? "bg-utama-700 text-white ring-utama-700" : "bg-white text-utama-800 ring-utama-200 hover:bg-utama-50"
       }`}
     >
       {tersalin ? <IkonCentang className="size-3.5" /> : <IkonSalin className="size-3.5" />}

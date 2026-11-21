@@ -25,7 +25,7 @@ export function FormInfak({ infak }: { infak: Infak }) {
   return (
     <form onSubmit={form.onSubmit} className="space-y-5" noValidate>
       <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold text-hijau-900">Rekening bank</legend>
+        <legend className="text-sm font-semibold text-utama-900">Rekening bank</legend>
         {baris.map((b, i) => (
           <div key={b.kunci} className="rounded-xl bg-stone-50 p-3 ring-1 ring-stone-200">
             <input type="hidden" name="idRekening" value={b.id} />
@@ -78,7 +78,7 @@ export function FormInfak({ infak }: { infak: Infak }) {
           <button
             type="button"
             onClick={() => setBaris((d) => [...d, barisBaru()])}
-            className="rounded-xl px-3 py-2 text-sm font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+            className="rounded-xl px-3 py-2 text-sm font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
           >
             + Tambah rekening
           </button>

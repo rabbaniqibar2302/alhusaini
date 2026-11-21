@@ -12,18 +12,18 @@ import { useFormAksi } from "./use-form-aksi";
 /** Tampilan seperti bagian atas halaman depan; ikut berubah sambil admin mengetik. */
 function Pratinjau({ x }: { x: Identitas }) {
   return (
-    <div className="relative overflow-hidden rounded-xl bg-hijau-950 px-5 py-6 text-white">
+    <div className="relative overflow-hidden rounded-xl bg-utama-950 px-5 py-6 text-white">
       <div className="pola-islami pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
       <div className="relative">
         {x.namaArab.trim() && (
-          <p lang="ar" dir="rtl" className="w-fit font-arab text-2xl text-emas-300">
+          <p lang="ar" dir="rtl" className="w-fit font-arab text-2xl text-aksen-300">
             {x.namaArab}
           </p>
         )}
         <p className="mt-1 text-2xl font-extrabold tracking-tight text-balance">{x.nama.trim() || "Nama masjid"}</p>
-        {x.wilayah.trim() && <p className="text-sm text-hijau-100">{x.wilayah}</p>}
-        <p className="mt-3 flex items-start gap-1.5 text-xs leading-relaxed text-hijau-50">
-          <IkonPin className="size-4 shrink-0 text-emas-300" />
+        {x.wilayah.trim() && <p className="text-sm text-utama-100">{x.wilayah}</p>}
+        <p className="mt-3 flex items-start gap-1.5 text-xs leading-relaxed text-utama-50">
+          <IkonPin className="size-4 shrink-0 text-aksen-300" />
           {x.alamat.trim() || "Alamat lengkap"}
         </p>
       </div>

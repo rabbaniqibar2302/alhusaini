@@ -8,10 +8,21 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 
 **Halaman depan (publik)**
 
-- Header dan footer memakai logo masjid yang diunggah admin (atau ikon bawaan).
-- Hero berisi foto masjid (atau ilustrasi bawaan), nama, alamat, dan tombol petunjuk arah.
+- Header dan footer memakai logo masjid yang diunggah admin (atau ikon bawaan). Warna seluruh situs mengikuti
+  **tema warna** pilihan admin (lihat [Tema warna](#tema-warna)).
+- **Navigasi HP yang mudah dijangkau jempol**: bilah navigasi di bawah layar berisi Beranda, Kajian, tombol tengah
+  menuju jadwal sholat (menampilkan jam sholat berikutnya, berdenyut 15 menit sebelum adzan), Infak (atau Agenda/
+  Kegiatan/Kontak bila belum ada infak), dan Menu. Menu membuka lembar dari bawah berisi semua bagian halaman serta
+  tombol WhatsApp, telepon, dan petunjuk arah; tutup dengan tombol Tutup, menggeser lembar ke bawah, mengetuk
+  latar, atau Esc. Di layar lebar, menu di header menandai bagian yang sedang dibaca.
+- Hero berisi foto masjid (atau ilustrasi bawaan yang ikut warna tema) yang membesar perlahan, kisi & cahaya
+  latar, lengkung mihrab yang tergambar, nama, kalimat dengan kata yang bergantian, alamat, dan tombol petunjuk
+  arah. Di atas nama tampil sorotan sholat Ied/gerhana terdekat (30 hari ke depan) atau tanggal Hijriah hari ini.
 - Jadwal sholat hari ini (Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, Isya) dari data Kemenag
-  melalui API myQuran untuk wilayah Jakarta Pusat. Sholat berikutnya disorot, lengkap dengan hitung mundur.
+  melalui API myQuran untuk wilayah Jakarta Pusat. Sholat berikutnya disorot, lengkap dengan hitung mundur dan
+  bilah kemajuan menuju adzan.
+- **Pita "Segera di masjid"** di bawah jadwal sholat: jadwal terdekat yang bergulir pelan (kajian 7 hari, Jumat
+  14 hari, agenda dan sholat Ied/gerhana 30 hari ke depan). Ketuk untuk menuju bagiannya; data contoh tidak ikut.
 - Pengumuman (yang ditandai admin untuk website).
 - **Sholat Ied & gerhana**: jadwal sholat Idul Fitri, Idul Adha, gerhana bulan, dan gerhana matahari dalam kartu
   penceramah (khotib, imam, tema khutbah, tanggal, jam, tempat, dan catatan untuk jamaah). Label sholat Ied memuat
@@ -35,7 +46,11 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 - Sejarah masjid: cuplikan di halaman depan dan halaman `/sejarah` berisi narasi lengkap beserta foto.
 - Legalitas: kartu bukti registrasi Kemenag (SIMAS) dan DMI beserta nomornya. Foto bisa diperbesar.
 - Galeri kegiatan ambulans masjid: grid foto, klik untuk memperbesar, geser untuk berpindah foto.
-- Footer berisi alamat, kontak, dan tautan Google Maps.
+- Footer berisi ajakan (tombol infak, hubungi pengurus, petunjuk arah), alamat, kontak, dan tautan Google Maps.
+- **Animasi**: bagian dan kartu muncul halus saat digulir, garis cahaya berputar di kartu jadwal sholat dan kartu
+  "hari ini", cahaya mengikuti kursor di kartu, digit hitung mundur berganti, dan saldo kas menghitung naik.
+  Semua animasi mati otomatis bila perangkat diatur *kurangi gerakan* (`prefers-reduced-motion`), dan seluruh
+  konten tetap tampil walau JavaScript tidak berjalan.
 
 **Layar TV masjid (`/tv`)** — lihat [Layar TV masjid](#layar-tv-masjid).
 
@@ -44,6 +59,7 @@ Tampilan berbahasa Indonesia, mobile-first, dengan nuansa hijau tua, putih, dan 
 - Hanya ada satu akun admin dan tidak ada halaman pendaftaran.
 - Identitas masjid: nama, nama Arab, wilayah, alamat lengkap, dan alamat singkat (lihat
   [Mengubah identitas masjid](#mengubah-identitas-masjid)), sehingga website ini bisa dipakai masjid lain.
+- Tampilan & Tema: pilih satu dari 8 tema warna dengan pratinjau langsung (lihat [Tema warna](#tema-warna)).
 - Tambah, edit, dan hapus jadwal khotib, ketiga kajian, serta sholat Ied & gerhana (menu *Sholat Ied & Gerhana*:
   pilih jenis sholat, tanggal, jam, khotib, imam, tema, tempat, dan catatan). Ada juga tombol untuk membersihkan
   jadwal yang sudah lewat.
@@ -162,6 +178,7 @@ Kunci Redis yang dipakai (nilai disimpan sebagai JSON):
 | `keuangan:kas` | transaksi kas (pemasukan & pengeluaran) |
 | `setting:kas` | saldo awal, periode laporan, tampil di website/TV |
 | `setting:infak` | rekening bank, QRIS, catatan infak |
+| `setting:tampilan` | tema warna situs |
 
 Kunci teknis: `sesi:*` (sesi admin aktif), `ratelimit:login:*`, `totp:terpakai:*`, `cache:jadwal-sholat:*`,
 dan `cadangan:*` (salinan otomatis bila data lama di Redis tidak lolos validasi saat akan ditimpa, disimpan 180 hari).
@@ -320,6 +337,33 @@ Catatan: `next/og` tidak bisa menyambung huruf Arab, jadi huruf Arab di materi/t
 (di website dan teks bagikan tetap utuh). Ligatur ﷺ dan ﷻ tetap tampil. Font Plus Jakarta Sans untuk poster
 (SIL Open Font License) ada di `src/server/poster/font/`.
 
+## Tema warna
+
+Admin memilih tema di *Panel admin → Tampilan & Tema*. Saat sebuah tema diklik, warna panel admin langsung
+berubah sebagai pratinjau; tekan *Terapkan tema* untuk memakainya. Tema berlaku untuk website, layar TV, poster
+story (tautan poster ikut berganti, jadi poster lama yang sudah tersimpan di cache tidak terpakai lagi), warna
+bilah browser di HP, dan panel admin.
+
+| Tema | Warna utama | Aksen |
+| --- | --- | --- |
+| Zamrud & Emas (bawaan) | hijau zamrud | emas |
+| Kiswah | hitam | emas |
+| Biru Samudra | biru tua | biru langit |
+| Tosca & Jingga | hijau kebiruan | jingga |
+| Marun | merah marun | emas mawar |
+| Lembayung | ungu | merah muda |
+| Kopi & Pasir | cokelat | warna pasir |
+| Abu Arang | abu-abu gelap | perak |
+
+Cara kerjanya: komponen hanya memakai token Tailwind `utama-*` dan `aksen-*` (tingkat 50–950) serta `krem`.
+Nilainya diisi variabel CSS (`--color-utama-500`, dst.) pada elemen `<html>` sesuai tema tersimpan. Semua tema
+didefinisikan di `src/lib/tema.ts`. Setiap tingkat punya kecerahan yang sama dengan tema bawaan, hanya rona dan
+kepekatannya yang berbeda, sehingga kontras teks tetap terjaga di semua tema (diperiksa oleh unit test).
+
+**Menambah tema:** tambahkan kunci baru ke `KUNCI_TEMA` dan isinya ke `TEMA` di `src/lib/tema.ts` dengan
+kecerahan per tingkat yang sama (lalu jalankan `npm test`). Bila tema bawaan diubah, nilai `@theme` di
+`src/app/globals.css` juga harus disamakan.
+
 ## Mengubah identitas masjid
 
 Nama, nama Arab, wilayah, alamat lengkap, dan alamat singkat diubah lewat *Panel admin → Identitas Masjid*.
@@ -350,7 +394,7 @@ WIB, jadi masjid di zona WITA/WIT butuh penyesuaian lebih lanjut.
 | --- | --- |
 | `npm run dev` | server pengembangan |
 | `npm run build` / `npm start` | build & jalankan versi produksi |
-| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, laporan kas, agenda, infak, poster story, sholat Ied & gerhana, validasi) |
+| `npm run lint` / `npm run typecheck` / `npm test` | ESLint, TypeScript, dan unit test logika (kalender, hitung mundur, parser jadwal sholat, jadwal kajian & migrasi data lama, fase layar TV, suara adzan, identitas masjid, pencocokan nama penceramah, laporan kas, agenda, infak, poster story, sholat Ied & gerhana, tema warna, pita "Segera", sholat berikutnya, validasi) |
 | `npm run hash-password` | membuat `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secret` | membuat `SESSION_SECRET` |
 | `npm run totp-setup` | membuat `ADMIN_TOTP_SECRET` + QR untuk Google Authenticator |
@@ -364,7 +408,7 @@ src/
   components/publik/   komponen halaman publik
   components/tv/       layar TV masjid
   components/admin/    form & komponen panel admin
-  lib/                 kode bersama (skema zod, waktu WIB, kalender Hijriah, hitung mundur, kajian, fase layar TV)
+  lib/                 kode bersama (skema zod, tema warna, waktu WIB, kalender Hijriah, hitung mundur, kajian, fase layar TV)
   server/              kode khusus server (Redis, auth, rate limit, upload, jadwal sholat, poster story, server action)
   proxy.ts             proteksi /admin + CSRF (pengganti middleware di Next.js 16)
 scripts/               hash password, secret, TOTP, seed

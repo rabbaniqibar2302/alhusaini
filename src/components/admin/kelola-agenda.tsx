@@ -198,11 +198,11 @@ export function KelolaAgenda({ items, hariIni }: { items: AgendaItem[]; hariIni:
               return (
                 <li
                   key={x.id}
-                  className={`flex gap-3 py-3 ${sedangEdit?.id === x.id ? "-mx-2 rounded-xl bg-emas-50 px-2" : ""} ${
+                  className={`flex gap-3 py-3 ${sedangEdit?.id === x.id ? "-mx-2 rounded-xl bg-aksen-50 px-2" : ""} ${
                     lewat ? "opacity-60" : ""
                   }`}
                 >
-                  <div className="relative grid h-24 w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-lg bg-hijau-900 text-emas-300">
+                  <div className="relative grid h-24 w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-lg bg-utama-900 text-aksen-300">
                     {x.poster ? (
                       <Image src={x.poster.url} alt="" fill sizes="72px" className="object-cover" />
                     ) : (
@@ -210,7 +210,7 @@ export function KelolaAgenda({ items, hariIni }: { items: AgendaItem[]; hariIni:
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-center gap-1.5 font-semibold text-hijau-900">
+                    <p className="flex flex-wrap items-center gap-1.5 font-semibold text-utama-900">
                       {x.judul}
                       {lewat && <Lencana warna="abu">Sudah lewat</Lencana>}
                       {!x.poster && <Lencana>Tanpa poster</Lencana>}
@@ -224,7 +224,7 @@ export function KelolaAgenda({ items, hariIni }: { items: AgendaItem[]; hariIni:
                       <button
                         type="button"
                         onClick={() => mulaiEdit(x)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
                       >
                         <IkonPensil className="size-3.5" /> Edit
                       </button>

@@ -111,7 +111,7 @@ function SlotAdzan({
 
   return (
     <div className="rounded-xl bg-stone-50 p-4 ring-1 ring-stone-200">
-      <p className="font-semibold text-hijau-900">{judul}</p>
+      <p className="font-semibold text-utama-900">{judul}</p>
       <p className="text-xs text-stone-500">{keterangan}</p>
 
       {audio ? (
@@ -146,7 +146,7 @@ function SlotAdzan({
           onChange={saatPilih}
           disabled={tahap !== null}
           aria-describedby={`${id}-info`}
-          className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-hijau-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-hijau-700 disabled:opacity-60"
+          className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-utama-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-utama-700 disabled:opacity-60"
         />
         <p id={`${id}-info`} className={`text-xs ${galat ? "text-red-700" : "text-stone-500"}`}>
           {galat || "MP3 (disarankan), M4A, atau OGG, maksimal 15 MB."}
@@ -159,14 +159,14 @@ function SlotAdzan({
             <audio controls src={pilihan.pratinjau} className="w-full" />
             {tahap !== null && (
               <div role="progressbar" aria-label="Mengunggah" className="h-2 overflow-hidden rounded-full bg-stone-200">
-                <div className="h-full w-full animate-pulse bg-hijau-600" />
+                <div className="h-full w-full animate-pulse bg-utama-600" />
               </div>
             )}
             <button
               type="button"
               onClick={unggah}
               disabled={tahap !== null}
-              className="inline-flex items-center gap-2 rounded-xl bg-hijau-800 px-4 py-2 text-sm font-semibold text-white hover:bg-hijau-700 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-utama-800 px-4 py-2 text-sm font-semibold text-white hover:bg-utama-700 disabled:opacity-60"
             >
               {tahap === null ? (
                 <IkonUnggah className="size-4" />

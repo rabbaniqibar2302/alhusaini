@@ -40,7 +40,7 @@ export default async function Halaman() {
             href="/tv"
             target="_blank"
             rel="noopener"
-            className="inline-flex items-center gap-2 rounded-xl bg-hijau-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-hijau-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-utama-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-utama-700"
           >
             <IkonTv className="size-4" /> Buka layar TV <IkonTautanLuar className="size-4" />
           </a>
@@ -64,12 +64,12 @@ export default async function Halaman() {
               box dinyalakan ulang.
             </li>
           </ol>
-          <p className="mt-4 rounded-xl bg-emas-50 px-3 py-2.5 text-xs text-emas-900 ring-1 ring-emas-200">
+          <p className="mt-4 rounded-xl bg-aksen-50 px-3 py-2.5 text-xs text-aksen-900 ring-1 ring-aksen-200">
             Tips TV box Android: aplikasi browser kios seperti <span className="font-semibold">Fully Kiosk Browser</span>{" "}
             bisa diatur agar suara langsung boleh berbunyi (opsi autoplay) dan membuka layar TV otomatis saat TV box
             menyala.
           </p>
-          <p className="mt-4 rounded-xl bg-hijau-50 px-3 py-2.5 text-xs text-hijau-800 ring-1 ring-hijau-100">
+          <p className="mt-4 rounded-xl bg-utama-50 px-3 py-2.5 text-xs text-utama-800 ring-1 ring-utama-100">
             Layar TV memperbarui datanya sendiri setiap 5 menit dan menyesuaikan jam dengan server, jadi tidak perlu
             dimuat ulang setelah admin mengubah jadwal atau pengumuman.
           </p>

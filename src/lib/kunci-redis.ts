@@ -24,4 +24,5 @@ export const KUNCI_REDIS: Record<KunciKonten, string> = {
   setelanKas: "setting:kas",
   agenda: "konten:agenda",
   infak: "setting:infak",
+  tampilan: "setting:tampilan",
 };

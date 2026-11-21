@@ -6,7 +6,7 @@ export default function GalatAdmin({ reset }: { error: Error & { digest?: string
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-stone-200">
-        <h1 className="text-lg font-bold text-hijau-900">Terjadi kesalahan</h1>
+        <h1 className="text-lg font-bold text-utama-900">Terjadi kesalahan</h1>
         <p className="mt-2 text-sm text-stone-600">
           Permintaan tidak dapat diproses. Sesi Anda mungkin telah berakhir, atau server sedang mengalami gangguan.
         </p>
@@ -14,13 +14,13 @@ export default function GalatAdmin({ reset }: { error: Error & { digest?: string
           <button
             type="button"
             onClick={reset}
-            className="rounded-xl bg-hijau-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-hijau-700"
+            className="rounded-xl bg-utama-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-utama-700"
           >
             Coba lagi
           </button>
           <Link
             href="/admin/login"
-            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-hijau-900 ring-1 ring-stone-300 hover:bg-stone-50"
+            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-utama-900 ring-1 ring-stone-300 hover:bg-stone-50"
           >
             Login ulang
           </Link>

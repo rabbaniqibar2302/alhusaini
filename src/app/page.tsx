@@ -30,6 +30,7 @@ import { JadwalSholatLangsung } from "@/components/publik/jadwal-sholat-langsung
 import { LaporanKas } from "@/components/publik/laporan-kas";
 import { KartuLegalitas } from "@/components/publik/legalitas";
 import { DaftarPengumuman } from "@/components/publik/pengumuman";
+import { PitaSegera } from "@/components/publik/pita-segera";
 import { NarasiSejarah, cuplikanSejarah, fotoSejarahTampil } from "@/components/publik/sejarah";
 import { agendaMendatang } from "@/lib/agenda";
 import { ACARA, kejadianBerikutnya } from "@/lib/countdown";
@@ -40,6 +41,7 @@ import { petaFotoPenceramah } from "@/lib/penceramah";
 import { pengumumanAktif } from "@/lib/pengumuman";
 import { konteksPoster } from "@/lib/poster";
 import { KUNCI_ACARA } from "@/lib/schemas";
+import { itemSegera, sorotanSholatKhusus } from "@/lib/segera";
 import { formatTanggal, tambahHari, tanggalWIB } from "@/lib/time";
 import { getJadwalSholat } from "@/server/jadwal-sholat";
 import { bacaKontenPublik, bagianTambahan, kegiatanTampil, sholatKhususTampil } from "@/server/konten-publik";
@@ -62,7 +64,7 @@ function TautanLanjut({ href, children }: { href: string; children: ReactNode })
   return (
     <Link
       href={href}
-      className="mt-6 inline-flex items-center gap-2 rounded-full bg-hijau-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-hijau-700"
+      className="kilau mt-6 inline-flex items-center gap-2 rounded-full bg-utama-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-utama-950/15 transition hover:-translate-y-0.5 hover:bg-utama-700"
     >
       {children} <IkonBuka className="size-4" />
     </Link>
@@ -122,7 +124,7 @@ export default async function Beranda() {
   }));
 
   const fotoPenceramah = petaFotoPenceramah(konten.penceramah);
-  const poster = konteksPoster(identitas, konten.logo, urlSitus().origin);
+  const poster = konteksPoster(identitas, konten.logo, urlSitus().origin, konten.tampilan.tema);
   const tambahan = bagianTambahan(konten, hariIni);
   const agenda = agendaMendatang(konten.agenda, hariIni).slice(0, AGENDA_DI_BERANDA);
   const sholatKhusus = sholatKhususTampil(konten, hariIni);
@@ -239,7 +241,7 @@ export default async function Beranda() {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-6 inline-flex items-center gap-2 rounded-full bg-hijau-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-hijau-700"
+              className="mb-6 inline-flex items-center gap-2 rounded-full bg-utama-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-utama-700"
             >
               <IkonWhatsApp className="size-5" /> Hubungi layanan ambulans
             </a>
@@ -248,7 +250,7 @@ export default async function Beranda() {
             <>
               <GaleriFoto items={galeri} />
               {konten.galeri.some((g) => g.contoh) && (
-                <p className="mt-4 flex items-center gap-1.5 text-xs text-emas-700 italic">
+                <p className="mt-4 flex items-center gap-1.5 text-xs text-aksen-700 italic">
                   <IkonInfo className="size-3.5" /> Gambar contoh — akan diganti dengan dokumentasi kegiatan asli.
                 </p>
               )}
@@ -298,23 +300,38 @@ export default async function Beranda() {
     },
   ];
   const bagian = daftarBagian.filter((b): b is IsiBagian => Boolean(b));
+  const segera = itemSegera(konten, hariIni);
 
   return (
     <>
-      <HeaderSitus identitas={identitas} logo={konten.logo} ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah, ...tambahan }} />
+      <HeaderSitus
+        identitas={identitas}
+        logo={konten.logo}
+        kontak={konten.kontak}
+        jadwal={[sholatHariIni, sholatBesok]}
+        ada={{ kegiatan: kegiatan.length > 0, sejarah: adaSejarah, ...tambahan }}
+      />
       <main className="flex-1">
         {databaseGagal && (
-          <p role="status" className="bg-emas-100 px-4 py-2 text-center text-sm text-emas-900">
+          <p role="status" className="bg-aksen-100 px-4 py-2 text-center text-sm text-aksen-900">
             Sebagian informasi sedang tidak dapat dimuat. Silakan muat ulang halaman beberapa saat lagi.
           </p>
         )}
-        <Hero foto={konten.hero} identitas={identitas} />
+        <Hero
+          foto={konten.hero}
+          identitas={identitas}
+          sorotan={sorotanSholatKhusus(konten.sholatKhusus, hariIni)}
+          tanggalHijriah={hijriah[hariIni]}
+        />
 
         <section id="jadwal-sholat" aria-label="Jadwal sholat hari ini" className="bg-white">
-          <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 pb-12 sm:-mt-12 sm:pb-16">
+          <div
+            className={`relative z-10 mx-auto -mt-10 max-w-6xl px-4 sm:-mt-14 ${segera.length > 0 ? "pb-8 sm:pb-10" : "pb-12 sm:pb-16"}`}
+          >
             <JadwalSholatLangsung hari={[sholatHariIni, sholatBesok]} hijriah={hijriah} />
           </div>
         </section>
+        <PitaSegera items={segera} hariIni={hariIni} />
 
         {bagian.map((b, i) => (
           <Bagian
@@ -330,7 +347,13 @@ export default async function Beranda() {
           </Bagian>
         ))}
       </main>
-      <FooterSitus identitas={identitas} kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
+      <FooterSitus
+        identitas={identitas}
+        kontak={konten.kontak}
+        tahun={Number(hariIni.slice(0, 4))}
+        logo={konten.logo}
+        infak={tambahan.infak}
+      />
     </>
   );
 }

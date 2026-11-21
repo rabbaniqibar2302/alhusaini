@@ -10,15 +10,15 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <>
-      <header className="bg-hijau-950 text-white">
+      <header className="bg-utama-950 text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-emas-400 text-hijau-950">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-aksen-400 text-utama-950">
               <IkonMasjid className="size-5" />
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-bold">Panel Admin</span>
-              <span className="block truncate text-xs text-hijau-100">
+              <span className="block truncate text-xs text-utama-100">
                 {nama} · {sesi.username}
               </span>
             </span>
@@ -28,7 +28,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
               href="/"
               target="_blank"
               rel="noopener"
-              className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-hijau-50 ring-1 ring-white/20 hover:bg-white/10 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-utama-50 ring-1 ring-white/20 hover:bg-white/10 sm:inline-flex"
             >
               <IkonTautanLuar className="size-4" /> Lihat situs
             </a>

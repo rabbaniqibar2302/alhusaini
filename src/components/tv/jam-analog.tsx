@@ -14,8 +14,8 @@ export function JamAnalog({ sekarang, className = "" }: { sekarang: number | nul
 
   return (
     <svg viewBox="0 0 200 200" className={className} aria-hidden="true">
-      <circle cx="100" cy="100" r="97" fill="#072219" stroke="#dcaa31" strokeWidth="5" />
-      <circle cx="100" cy="100" r="88" fill="#0f3b2c" />
+      <circle cx="100" cy="100" r="97" className="fill-utama-950 stroke-aksen-400" strokeWidth="5" />
+      <circle cx="100" cy="100" r="88" className="fill-utama-900" />
       {TITIK.map((i) => {
         const besar = i % 5 === 0;
         return (
@@ -25,7 +25,7 @@ export function JamAnalog({ sekarang, className = "" }: { sekarang: number | nul
             y1={besar ? 18 : 16}
             x2="100"
             y2={besar ? 31 : 22}
-            stroke={besar ? "#e6c155" : "#7fc6a4"}
+            className={besar ? "stroke-aksen-300" : "stroke-utama-300"}
             strokeWidth={besar ? 4 : 1.5}
             strokeLinecap="round"
             transform={`rotate(${i * 6} 100 100)`}
@@ -59,15 +59,15 @@ export function JamAnalog({ sekarang, className = "" }: { sekarang: number | nul
             y1="124"
             x2="100"
             y2="26"
-            stroke="#e6c155"
+            className="stroke-aksen-300"
             strokeWidth="2.5"
             strokeLinecap="round"
             transform={`rotate(${sudutDetik} 100 100)`}
           />
         </>
       )}
-      <circle cx="100" cy="100" r="7" fill="#e6c155" />
-      <circle cx="100" cy="100" r="3" fill="#072219" />
+      <circle cx="100" cy="100" r="7" className="fill-aksen-300" />
+      <circle cx="100" cy="100" r="3" className="fill-utama-950" />
     </svg>
   );
 }

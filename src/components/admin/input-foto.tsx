@@ -101,7 +101,7 @@ export function InputFoto({
           onChange={saatPilih}
           aria-invalid={pesanGalat ? true : undefined}
           aria-describedby={`${id}-info`}
-          className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-hijau-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-hijau-700"
+          className="block w-full text-sm text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-utama-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-utama-700"
         />
       </div>
       <p id={`${id}-info`} className={`mt-1 text-xs ${pesanGalat ? "text-red-700" : "text-stone-500"}`}>

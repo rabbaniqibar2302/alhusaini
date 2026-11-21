@@ -3,6 +3,7 @@ import Image from "next/image";
 import { FormFotoMasjid, FormLogo, TombolHapusFotoMasjid, TombolHapusLogo } from "@/components/admin/form-foto";
 import { JudulHalaman } from "@/components/admin/judul-halaman";
 import { Kartu } from "@/components/admin/ui";
+import { IlustrasiMasjid } from "@/components/ilustrasi-masjid";
 import { LogoMasjid } from "@/components/logo-masjid";
 import { wajibAdminHalaman } from "@/server/auth/penjaga";
 import { bacaKonten } from "@/server/store";
@@ -20,13 +21,13 @@ export default async function HalamanFotoMasjid() {
         judul="Logo & Foto Masjid"
         deskripsi="Logo tampil di header, footer, dan layar TV. Foto utama tampil di bagian atas halaman depan dan layar TV."
       />
-      <h2 className="mb-3 text-lg font-bold text-hijau-900">Logo masjid</h2>
+      <h2 className="mb-3 text-lg font-bold text-utama-900">Logo masjid</h2>
       <div className="mb-8 grid items-start gap-6 lg:grid-cols-2">
         <Kartu judul="Logo saat ini">
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col items-center gap-2 rounded-xl bg-hijau-950 p-5">
+            <div className="flex flex-col items-center gap-2 rounded-xl bg-utama-950 p-5">
               <LogoMasjid logo={logo} className="size-20" ikonClassName="size-10" sizes="160px" />
-              <span className="text-xs text-hijau-100">Di atas latar gelap</span>
+              <span className="text-xs text-utama-100">Di atas latar gelap</span>
             </div>
             <div className="flex flex-col items-center gap-2 rounded-xl bg-krem p-5 ring-1 ring-stone-200">
               <LogoMasjid logo={logo} className="size-20" ikonClassName="size-10" sizes="160px" />
@@ -48,18 +49,21 @@ export default async function HalamanFotoMasjid() {
         </Kartu>
       </div>
 
-      <h2 className="mb-3 text-lg font-bold text-hijau-900">Foto utama masjid</h2>
+      <h2 className="mb-3 text-lg font-bold text-utama-900">Foto utama masjid</h2>
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Kartu judul="Foto saat ini">
-          <div className="relative aspect-video overflow-hidden rounded-xl bg-hijau-950 ring-1 ring-stone-200">
-            <Image
-              src={foto?.url ?? "/images/masjid-ilustrasi.svg"}
-              alt="Foto masjid saat ini"
-              fill
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              unoptimized={!foto}
-              className="object-cover"
-            />
+          <div className="relative aspect-video overflow-hidden rounded-xl bg-utama-950 ring-1 ring-stone-200">
+            {foto ? (
+              <Image
+                src={foto.url}
+                alt="Foto masjid saat ini"
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <IlustrasiMasjid id="ilustrasi-admin" />
+            )}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-stone-600">

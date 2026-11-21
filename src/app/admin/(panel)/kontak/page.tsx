@@ -25,7 +25,7 @@ export default async function HalamanKontak() {
           deskripsi={
             <>
               Diubah di menu{" "}
-              <Link href="/admin/identitas" className="font-semibold text-hijau-800 underline-offset-2 hover:underline">
+              <Link href="/admin/identitas" className="font-semibold text-utama-800 underline-offset-2 hover:underline">
                 Identitas Masjid
               </Link>
               .

@@ -48,8 +48,8 @@ function PilihWaktu({
         {PILIHAN_POLA.map(([nilai, label]) => (
           <label
             key={nilai}
-            className={`cursor-pointer rounded-lg px-2 py-2 text-center text-sm font-medium transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-emas-400 ${
-              pola === nilai ? "bg-white text-hijau-900 shadow-sm ring-1 ring-stone-200" : "text-stone-600 hover:text-stone-900"
+            className={`cursor-pointer rounded-lg px-2 py-2 text-center text-sm font-medium transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-aksen-400 ${
+              pola === nilai ? "bg-white text-utama-900 shadow-sm ring-1 ring-stone-200" : "text-stone-600 hover:text-stone-900"
             }`}
           >
             <input
@@ -198,7 +198,7 @@ function FormJadwal({
         ))}
       </datalist>
       {peringatan && (
-        <p className="flex items-center gap-1.5 text-xs text-emas-700">
+        <p className="flex items-center gap-1.5 text-xs text-aksen-700">
           <IkonPeringatan className="size-4" /> {peringatan} Pastikan tanggalnya benar.
         </p>
       )}
@@ -351,7 +351,7 @@ export function KelolaJadwal({
                 <li
                   key={item.id}
                   className={`flex flex-col gap-3 py-3 sm:flex-row sm:items-start sm:justify-between ${
-                    sedangEdit?.id === item.id ? "-mx-2 rounded-xl bg-emas-50 px-2" : ""
+                    sedangEdit?.id === item.id ? "-mx-2 rounded-xl bg-aksen-50 px-2" : ""
                   } ${lewat ? "opacity-60" : ""}`}
                 >
                   <div className="flex min-w-0 gap-3">
@@ -363,7 +363,7 @@ export function KelolaJadwal({
                       className="size-12 shrink-0 rounded-full ring-1 ring-stone-200"
                     />
                     <div className="min-w-0">
-                      <p className="flex flex-wrap items-center gap-1.5 font-semibold text-hijau-900">
+                      <p className="flex flex-wrap items-center gap-1.5 font-semibold text-utama-900">
                         {r.judul}
                         {item.contoh && <Lencana>Contoh</Lencana>}
                         {item.pola === "mingguan" && <Lencana warna="hijau">Rutin</Lencana>}
@@ -383,7 +383,7 @@ export function KelolaJadwal({
                     <button
                       type="button"
                       onClick={() => mulaiEdit(item)}
-                      className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                      className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
                     >
                       <IkonPensil className="size-3.5" /> Edit
                     </button>

@@ -40,7 +40,7 @@ export function AreaTeks({
           setPanjang(e.currentTarget.value.length);
           onChange?.(e);
         }}
-        className="mt-1 block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-base leading-relaxed text-stone-900 ring-1 ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-hijau-600 focus:outline-none aria-[invalid=true]:ring-red-400 sm:text-sm"
+        className="mt-1 block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-base leading-relaxed text-stone-900 ring-1 ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-utama-600 focus:outline-none aria-[invalid=true]:ring-red-400 sm:text-sm"
         {...props}
       />
       <p id={`${id}-info`} className="mt-1 flex justify-between gap-3 text-xs">

@@ -45,6 +45,7 @@ export const MENU_ADMIN = [
     grup: "Pengaturan",
     item: [
       { href: "/admin/identitas", label: "Identitas Masjid" },
+      { href: "/admin/tampilan", label: "Tampilan & Tema" },
       { href: "/admin/tv", label: "Layar TV" },
       { href: "/admin/kontak", label: "Kontak" },
     ],
@@ -71,8 +72,8 @@ export function NavAdmin() {
                       aria-current={aktif ? "page" : undefined}
                       className={`block rounded-xl px-3 py-2 text-sm font-medium transition ${
                         aktif
-                          ? "bg-hijau-800 text-white"
-                          : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-hijau-50 lg:bg-transparent lg:ring-0"
+                          ? "bg-utama-800 text-white"
+                          : "bg-white text-stone-700 ring-1 ring-stone-200 hover:bg-utama-50 lg:bg-transparent lg:ring-0"
                       }`}
                     >
                       {m.label}

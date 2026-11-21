@@ -7,8 +7,9 @@ import { HeaderSitus } from "@/components/publik/header-situs";
 import { JudulHalamanPublik } from "@/components/publik/judul-halaman-publik";
 import { NarasiSejarah, fotoSejarahTampil, paragrafSejarah } from "@/components/publik/sejarah";
 import { alamatPendek, namaDenganWilayah } from "@/lib/site";
-import { tanggalWIB } from "@/lib/time";
+import { tambahHari, tanggalWIB } from "@/lib/time";
 import { bacaIdentitas } from "@/server/identitas";
+import { getJadwalSholat } from "@/server/jadwal-sholat";
 import { bacaKontenPublik, bagianTambahan } from "@/server/konten-publik";
 import { TAG_KONTEN } from "@/server/store";
 
@@ -25,7 +26,12 @@ export default async function HalamanSejarah() {
   cacheTag(TAG_KONTEN);
 
   const hariIni = tanggalWIB();
-  const { konten, gagal } = await bacaKontenPublik(hariIni);
+  // Jadwal sholat untuk tombol sholat di navigasi bawah HP.
+  const [{ konten, gagal }, sholatHariIni, sholatBesok] = await Promise.all([
+    bacaKontenPublik(hariIni),
+    getJadwalSholat(hariIni),
+    getJadwalSholat(tambahHari(hariIni, 1)),
+  ]);
   if (gagal) cacheLife("minutes");
   else cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
 
@@ -38,6 +44,9 @@ export default async function HalamanSejarah() {
       <HeaderSitus
         identitas={identitas}
         logo={konten.logo}
+        kontak={konten.kontak}
+        jadwal={[sholatHariIni, sholatBesok]}
+        aktifTetap="sejarah"
         ada={{
           kegiatan: konten.kegiatan.length > 0,
           sejarah: paragraf.length > 0 || foto.length > 0,
@@ -60,7 +69,7 @@ export default async function HalamanSejarah() {
               )}
               {foto.length > 0 && (
                 <section aria-labelledby="judul-foto-sejarah">
-                  <h2 id="judul-foto-sejarah" className="mb-4 text-xl font-bold text-hijau-900">
+                  <h2 id="judul-foto-sejarah" className="mb-4 text-xl font-bold text-utama-900">
                     Dokumentasi Foto
                   </h2>
                   <GaleriFoto items={foto} />
@@ -70,7 +79,13 @@ export default async function HalamanSejarah() {
           )}
         </div>
       </main>
-      <FooterSitus identitas={identitas} kontak={konten.kontak} tahun={Number(hariIni.slice(0, 4))} logo={konten.logo} />
+      <FooterSitus
+        identitas={identitas}
+        kontak={konten.kontak}
+        tahun={Number(hariIni.slice(0, 4))}
+        logo={konten.logo}
+        infak={bagianTambahan(konten, hariIni).infak}
+      />
     </>
   );
 }

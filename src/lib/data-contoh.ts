@@ -3,6 +3,7 @@ import { SETELAN_KAS_BAWAAN } from "./kas";
 import { SETELAN_TV_BAWAAN } from "./layar-tv";
 import type { KajianItem, Konten } from "./schemas";
 import { IDENTITAS_BAWAAN } from "./site";
+import { TEMA_BAWAAN } from "./tema";
 import { tanggalBerikutnya } from "./time";
 
 /**
@@ -146,5 +147,6 @@ export function dataContoh(hariIni: string): Konten {
     agenda: [],
     sholatKhusus: [],
     infak: INFAK_KOSONG,
+    tampilan: { tema: TEMA_BAWAAN },
   };
 }

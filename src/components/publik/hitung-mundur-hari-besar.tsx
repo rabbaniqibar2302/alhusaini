@@ -1,9 +1,11 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { IkonBulanSabit } from "@/components/ikon";
 import { useSekarang } from "@/hooks/use-sekarang";
 import type { KunciAcara } from "@/lib/schemas";
 import { epochWIB, formatTanggal } from "@/lib/time";
+import { AngkaBerganti } from "./angka-berganti";
 
 export type DataHariBesar = {
   kunci: KunciAcara;
@@ -25,7 +27,7 @@ function pecahDurasi(ms: number) {
   };
 }
 
-function KartuHariBesar({ data, sekarang }: { data: DataHariBesar; sekarang: number | null }) {
+function KartuHariBesar({ data, sekarang, urutan }: { data: DataHariBesar; sekarang: number | null; urutan: number }) {
   // Pilih kejadian pertama yang harinya belum berakhir (data server bisa sedikit usang).
   const k =
     sekarang === null
@@ -44,29 +46,36 @@ function KartuHariBesar({ data, sekarang }: { data: DataHariBesar; sekarang: num
   ];
 
   return (
-    <article className="flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80">
-      <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-emas-600 uppercase">
+    <article
+      data-muncul
+      style={{ "--urutan": urutan } as CSSProperties}
+      className="flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80"
+    >
+      <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-aksen-600 uppercase">
         <IkonBulanSabit className="size-4" />
         {data.label} {k.tahunHijriah} H
       </p>
-      <h3 className="mt-1 text-lg font-bold text-hijau-900">{data.judul}</h3>
+      <h3 className="mt-1 text-lg font-bold text-utama-900">{data.judul}</h3>
       <p className="text-sm text-stone-600">{formatTanggal(k.tanggal, { hari: true })}</p>
 
       {sedangBerlangsung ? (
-        <div className="mt-4 flex flex-1 items-center justify-center rounded-xl bg-hijau-50 p-4 text-center ring-1 ring-hijau-100">
-          <p className="font-semibold text-hijau-800">
+        <div className="mt-4 flex flex-1 items-center justify-center rounded-xl bg-utama-50 p-4 text-center ring-1 ring-utama-100">
+          <p className="font-semibold text-utama-800">
             Hari ini {data.label} {k.tahunHijriah} H
-            <span className="mt-1 block font-arab text-xl text-emas-600">{data.ucapan}</span>
+            <span className="mt-1 block font-arab text-xl text-aksen-600">{data.ucapan}</span>
           </p>
         </div>
       ) : (
         <div role="timer" className="mt-4 grid grid-cols-4 gap-2" aria-label={`Hitung mundur menuju ${data.judul}`}>
           {kotak.map(([label, nilai]) => (
-            <div key={label} className="rounded-xl bg-hijau-900 px-1 py-2.5 text-center text-white">
+            <div
+              key={label}
+              className="rounded-xl bg-linear-to-b from-utama-800 to-utama-950 px-1 py-2.5 text-center text-white shadow-sm"
+            >
               <span className="angka-tabular block text-2xl font-bold sm:text-3xl">
-                {nilai === undefined ? "–" : String(nilai).padStart(label === "Hari" ? 1 : 2, "0")}
+                {nilai === undefined ? "–" : <AngkaBerganti teks={String(nilai).padStart(label === "Hari" ? 1 : 2, "0")} />}
               </span>
-              <span className="block text-[0.7rem] text-hijau-100">{label}</span>
+              <span className="block text-[0.7rem] text-utama-100">{label}</span>
             </div>
           ))}
         </div>
@@ -74,7 +83,7 @@ function KartuHariBesar({ data, sekarang }: { data: DataHariBesar; sekarang: num
 
       <p className="mt-3 text-xs text-stone-500">
         {k.sumber === "penetapan" ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-hijau-50 px-2 py-0.5 font-medium text-hijau-700 ring-1 ring-hijau-100">
+          <span className="inline-flex items-center gap-1 rounded-full bg-utama-50 px-2 py-0.5 font-medium text-utama-700 ring-1 ring-utama-100">
             Sesuai penetapan pemerintah{k.catatan ? ` — ${k.catatan}` : ""}
           </span>
         ) : (
@@ -89,8 +98,8 @@ export function HitungMundurHariBesar({ acara }: { acara: DataHariBesar[] }) {
   const sekarang = useSekarang();
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      {acara.map((a) => (
-        <KartuHariBesar key={a.kunci} data={a} sekarang={sekarang} />
+      {acara.map((a, i) => (
+        <KartuHariBesar key={a.kunci} data={a} sekarang={sekarang} urutan={i} />
       ))}
     </div>
   );

@@ -77,6 +77,11 @@ export function namaHari(iso: string): string {
   return NAMA_HARI[hariKe(iso)];
 }
 
+/** "Sen", "Sel", …, "Sab"; "Ahad" tidak disingkat supaya tidak terbaca "Aha". */
+export function singkatanHari(hari: string): string {
+  return hari === "Ahad" ? hari : hari.slice(0, 3);
+}
+
 /** "16 Oktober 2026" atau "Jumat, 16 Oktober 2026" */
 export function formatTanggal(iso: string, opts: { hari?: boolean; singkat?: boolean } = {}): string {
   const [y, m, d] = parseIso(iso);

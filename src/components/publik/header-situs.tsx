@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { LogoMasjid, type LogoTampil } from "@/components/logo-masjid";
-import type { Identitas } from "@/lib/schemas";
+import { tautanWhatsApp } from "@/lib/kontak";
+import type { Identitas, Kontak } from "@/lib/schemas";
+import { urlMaps } from "@/lib/site";
+import type { JadwalHarian } from "@/lib/tipe-jadwal-sholat";
+import { NavDesktop, NavigasiBawah, type AksiCepat, type TautanNav } from "./navigasi-situs";
+import { PenggerakAnimasi } from "./penggerak-animasi";
 
 export type BagianOpsional = {
   /** Label menu, mis. "Sholat Ied"; null/kosong bila tidak ada jadwal. */
@@ -12,59 +17,89 @@ export type BagianOpsional = {
   kas?: boolean;
 };
 
-function navigasi(ada: BagianOpsional): [string, string][] {
-  const daftar: [string, string, boolean?][] = [
-    ["/#jadwal-sholat", "Jadwal Sholat"],
-    ["/#sholat-khusus", ada.sholatKhusus ?? "", Boolean(ada.sholatKhusus)],
-    ["/#agenda", "Agenda", ada.agenda === true],
-    ["/#hari-besar", "Hari Besar"],
-    ["/#khotib", "Khotib Jumat"],
-    ["/#kajian", "Kajian"],
-    ["/#kegiatan", "Kegiatan", ada.kegiatan],
-    ["/#infak", "Infak", ada.infak === true],
-    ["/#kas", "Laporan Kas", ada.kas === true],
-    ["/#ambulans", "Ambulans"],
-    ["/#sejarah", "Sejarah", ada.sejarah],
-    ["/#legalitas", "Legalitas"],
-    ["/#kontak", "Kontak"],
+/** Bagian halaman depan yang tampil, berurutan seperti di halaman. */
+function daftarBagian(ada: BagianOpsional): TautanNav[] {
+  const daftar: [TautanNav, boolean?][] = [
+    [{ id: "jadwal-sholat", label: "Jadwal Sholat", ikon: "sholat" }],
+    [{ id: "sholat-khusus", label: ada.sholatKhusus ?? "", ikon: "sholatKhusus" }, Boolean(ada.sholatKhusus)],
+    [{ id: "agenda", label: "Agenda", ikon: "agenda" }, ada.agenda === true],
+    [{ id: "hari-besar", label: "Hari Besar", ikon: "hariBesar" }],
+    [{ id: "khotib", label: "Khotib Jumat", ikon: "khotib" }],
+    [{ id: "kajian", label: "Kajian", ikon: "kajian" }],
+    [{ id: "kegiatan", label: "Kegiatan", ikon: "kegiatan" }, ada.kegiatan],
+    [{ id: "infak", label: "Infak", ikon: "infak" }, ada.infak === true],
+    [{ id: "kas", label: "Laporan Kas", ikon: "kas" }, ada.kas === true],
+    [{ id: "ambulans", label: "Ambulans", ikon: "ambulans" }],
+    [{ id: "sejarah", label: "Sejarah", ikon: "sejarah" }, ada.sejarah],
+    [{ id: "legalitas", label: "Legalitas", ikon: "legalitas" }],
+    [{ id: "kontak", label: "Kontak", ikon: "kontak" }],
   ];
-  return daftar.filter(([, , tampil]) => tampil !== false).map(([href, label]) => [href, label]);
+  return daftar.filter(([, tampil]) => tampil !== false).map(([t]) => t);
 }
 
+/** Tab kanan navigasi HP: yang paling sering dicari setelah jadwal. */
+function tabKanan(bagian: TautanNav[]): TautanNav {
+  for (const id of ["infak", "agenda", "kegiatan"]) {
+    const t = bagian.find((b) => b.id === id);
+    if (t) return t;
+  }
+  return { id: "kontak", label: "Kontak", ikon: "kontak" };
+}
+
+function aksiCepat(identitas: Pick<Identitas, "nama" | "alamat" | "alamatSingkat">, kontak: Kontak | undefined): AksiCepat[] {
+  const aksi: AksiCepat[] = [];
+  if (kontak?.whatsapp) aksi.push({ label: "WhatsApp", href: tautanWhatsApp(kontak.whatsapp), ikon: "whatsapp" });
+  if (kontak?.telepon) aksi.push({ label: "Telepon", href: `tel:${kontak.telepon.replace(/[^0-9+]/g, "")}`, ikon: "telepon" });
+  aksi.push({ label: "Petunjuk arah", href: urlMaps(identitas), ikon: "peta" });
+  return aksi;
+}
+
+/**
+ * Header situs publik. Layar lebar: nama masjid + menu bagian (menandai bagian
+ * yang sedang dibaca). HP: header ringkas di atas, navigasi di bawah layar.
+ */
 export function HeaderSitus({
   identitas,
   logo,
   ada = {},
+  kontak,
+  jadwal = null,
+  aktifTetap,
 }: {
-  identitas: Pick<Identitas, "nama" | "wilayah">;
+  identitas: Pick<Identitas, "nama" | "wilayah" | "alamat" | "alamatSingkat">;
   logo: LogoTampil | null;
   ada?: BagianOpsional;
+  kontak?: Kontak;
+  /** Jadwal sholat hari ini & besok, untuk tombol sholat di navigasi HP. */
+  jadwal?: JadwalHarian[] | null;
+  /** Halaman selain beranda yang mewakili satu bagian, mis. "kegiatan". */
+  aktifTetap?: string;
 }) {
+  const bagian = daftarBagian(ada);
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-hijau-950/95 text-white backdrop-blur supports-[backdrop-filter]:bg-hijau-950/85">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pt-3 pb-2 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-3">
-        <Link href="/#beranda" className="flex shrink-0 items-center gap-2.5">
-          <LogoMasjid logo={logo} nama={identitas.nama} priority />
-          <span className="leading-tight">
-            <span className="block font-bold">{identitas.nama}</span>
-            {identitas.wilayah && <span className="block text-xs text-hijau-100">{identitas.wilayah}</span>}
-          </span>
-        </Link>
-        <nav aria-label="Navigasi bagian halaman" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0">
-          <ul className="flex gap-1.5 text-sm whitespace-nowrap lg:gap-1">
-            {navigasi(ada).map(([href, label]) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="inline-block rounded-full px-3 py-1.5 text-hijau-50 ring-1 ring-white/15 transition hover:bg-white/10 hover:text-white lg:px-2.5 lg:ring-0"
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-utama-950/95 text-white backdrop-blur-xl supports-[backdrop-filter]:bg-utama-950/90">
+        <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-6 px-4 lg:h-16">
+          <Link href="/#beranda" className="flex min-w-0 shrink-0 items-center gap-2.5">
+            <LogoMasjid logo={logo} nama={identitas.nama} priority />
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate font-bold">{identitas.nama}</span>
+              {identitas.wilayah && <span className="block truncate text-xs text-utama-100">{identitas.wilayah}</span>}
+            </span>
+          </Link>
+          <NavDesktop tautan={bagian} />
+        </div>
+      </header>
+      <NavigasiBawah
+        tab={[{ id: "beranda", label: "Beranda", ikon: "beranda" }, { id: "kajian", label: "Kajian", ikon: "kajian" }, tabKanan(bagian)]}
+        menu={bagian}
+        aksi={aksiCepat(identitas, kontak)}
+        nama={identitas.nama}
+        logo={logo}
+        jadwal={jadwal}
+        aktifTetap={aktifTetap}
+      />
+      <PenggerakAnimasi />
+    </>
   );
 }

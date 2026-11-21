@@ -67,7 +67,7 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
         type="button"
         onClick={buka}
         aria-label={poster.label}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-hijau-50 px-3 py-2 text-sm font-semibold text-hijau-800 ring-1 ring-hijau-100 transition hover:bg-hijau-100"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-utama-50 px-3 py-2 text-sm font-semibold text-utama-800 ring-1 ring-utama-100 transition hover:bg-utama-100"
       >
         <IkonBagikan className="size-4" /> Bagikan poster
       </button>
@@ -83,7 +83,7 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
         <div className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 id={idJudul} className="font-bold text-hijau-900">
+              <h2 id={idJudul} className="font-bold text-utama-900">
                 {poster.judul}
               </h2>
               <p className="text-xs text-stone-500">Ukuran story 9:16, siap untuk status WhatsApp.</p>
@@ -98,7 +98,7 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
             </button>
           </div>
 
-          <div className="relative mx-auto mt-3 aspect-[9/16] h-[min(58dvh,34rem)] overflow-hidden rounded-2xl bg-hijau-950 ring-1 ring-stone-200">
+          <div className="relative mx-auto mt-3 aspect-[9/16] h-[min(58dvh,34rem)] overflow-hidden rounded-2xl bg-utama-950 ring-1 ring-stone-200">
             {status.tahap === "siap" ? (
               <Image src={status.url} alt={poster.alt} fill unoptimized className="object-contain" />
             ) : status.tahap === "gagal" ? (
@@ -108,16 +108,16 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
                   <button
                     type="button"
                     onClick={() => void muat()}
-                    className="mt-3 rounded-full bg-white px-4 py-1.5 font-semibold text-hijau-900 hover:bg-emas-100"
+                    className="mt-3 rounded-full bg-white px-4 py-1.5 font-semibold text-utama-900 hover:bg-aksen-100"
                   >
                     Coba lagi
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="grid size-full place-items-center text-sm text-emas-200" role="status">
+              <div className="grid size-full place-items-center text-sm text-aksen-200" role="status">
                 <div className="text-center">
-                  <span className="mx-auto block size-8 animate-spin rounded-full border-2 border-emas-300 border-t-transparent" />
+                  <span className="mx-auto block size-8 animate-spin rounded-full border-2 border-aksen-300 border-t-transparent" />
                   <p className="mt-3">Menyiapkan poster…</p>
                 </div>
               </div>
@@ -130,7 +130,7 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
                 type="button"
                 onClick={bagikan}
                 disabled={status.tahap !== "siap"}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-hijau-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-hijau-700 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-utama-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-utama-700 disabled:opacity-50"
               >
                 <IkonBagikan className="size-4" /> Bagikan ke WhatsApp, dll.
               </button>
@@ -141,8 +141,8 @@ export function TombolPoster({ poster }: { poster: TautanPoster }) {
                 download={poster.namaBerkas}
                 className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   bisaBagikan
-                    ? "text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
-                    : "bg-hijau-800 text-white shadow-sm hover:bg-hijau-700"
+                    ? "text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
+                    : "bg-utama-800 text-white shadow-sm hover:bg-utama-700"
                 }`}
               >
                 <IkonUnduh className="size-4" /> Unduh gambar

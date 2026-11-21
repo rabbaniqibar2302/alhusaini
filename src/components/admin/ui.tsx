@@ -18,7 +18,7 @@ export function Kartu({
       {(judul || aksi) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
           <div>
-            {judul && <h2 className="text-lg font-bold text-hijau-900">{judul}</h2>}
+            {judul && <h2 className="text-lg font-bold text-utama-900">{judul}</h2>}
             {deskripsi && <div className="mt-0.5 text-sm text-stone-600">{deskripsi}</div>}
           </div>
           {aksi}
@@ -35,7 +35,7 @@ export function PesanHasil({ hasil }: { hasil: HasilAksi }) {
     <p
       role={hasil.ok ? "status" : "alert"}
       className={`flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm ring-1 ${
-        hasil.ok ? "bg-hijau-50 text-hijau-800 ring-hijau-200" : "bg-red-50 text-red-800 ring-red-200"
+        hasil.ok ? "bg-utama-50 text-utama-800 ring-utama-200" : "bg-red-50 text-red-800 ring-red-200"
       }`}
     >
       {hasil.ok ? (
@@ -60,9 +60,9 @@ export function TombolKirim({
   className?: string;
 }) {
   const gaya = {
-    utama: "bg-hijau-800 text-white hover:bg-hijau-700",
+    utama: "bg-utama-800 text-white hover:bg-utama-700",
     bahaya: "bg-red-600 text-white hover:bg-red-700",
-    sekunder: "bg-white text-hijau-900 ring-1 ring-stone-300 hover:bg-stone-50",
+    sekunder: "bg-white text-utama-900 ring-1 ring-stone-300 hover:bg-stone-50",
   }[varian];
   return (
     <button
@@ -80,7 +80,7 @@ export function TombolKirim({
 }
 
 const gayaInput =
-  "mt-1 block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-base text-stone-900 ring-1 ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-hijau-600 focus:outline-none aria-[invalid=true]:ring-red-400 sm:text-sm";
+  "mt-1 block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-base text-stone-900 ring-1 ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-utama-600 focus:outline-none aria-[invalid=true]:ring-red-400 sm:text-sm";
 
 function PesanGalat({ id, galat }: { id: string; galat?: string[] }) {
   if (!galat?.length) return null;
@@ -195,7 +195,7 @@ export function Centang({
         type="checkbox"
         defaultChecked={defaultChecked}
         aria-describedby={petunjuk ? `${id}-petunjuk` : undefined}
-        className="mt-0.5 size-5 shrink-0 rounded border-stone-300 accent-hijau-700"
+        className="mt-0.5 size-5 shrink-0 rounded border-stone-300 accent-utama-700"
       />
       <label htmlFor={id} className="text-sm text-stone-700">
         <span className="font-medium">{label}</span>
@@ -217,9 +217,9 @@ export function Lencana({
   warna?: "emas" | "abu" | "hijau" | "biru";
 }) {
   const gaya = {
-    emas: "bg-emas-100 text-emas-800 ring-emas-200",
+    emas: "bg-aksen-100 text-aksen-800 ring-aksen-200",
     abu: "bg-stone-100 text-stone-600 ring-stone-200",
-    hijau: "bg-hijau-50 text-hijau-700 ring-hijau-200",
+    hijau: "bg-utama-50 text-utama-700 ring-utama-200",
     biru: "bg-sky-50 text-sky-800 ring-sky-200",
   }[warna];
   return (

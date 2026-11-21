@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { IkonDokumen, IkonPerisai } from "@/components/ikon";
 import type { Legalitas } from "@/lib/schemas";
 import { FotoDiperbesar } from "./galeri-foto";
@@ -20,11 +21,13 @@ const DOKUMEN = [
 export function KartuLegalitas({ data }: { data: Legalitas }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      {DOKUMEN.map((d) => {
+      {DOKUMEN.map((d, i) => {
         const dok = data[d.kunci];
         return (
           <article
             key={d.kunci}
+            data-muncul
+            style={{ "--urutan": i } as CSSProperties}
             className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200/80 sm:flex-row sm:p-5"
           >
             {dok.foto ? (
@@ -46,14 +49,14 @@ export function KartuLegalitas({ data }: { data: Legalitas }) {
               </div>
             )}
             <div className="flex flex-col">
-              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-emas-600 uppercase">
+              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-aksen-600 uppercase">
                 <IkonPerisai className="size-4" /> Terdaftar resmi
               </p>
-              <h3 className="mt-1 text-lg font-bold text-hijau-900">{d.judul}</h3>
+              <h3 className="mt-1 text-lg font-bold text-utama-900">{d.judul}</h3>
               <p className="text-sm text-stone-600">{d.keterangan}</p>
-              <div className="mt-3 rounded-xl bg-hijau-50 px-3 py-2 ring-1 ring-hijau-100">
+              <div className="mt-3 rounded-xl bg-utama-50 px-3 py-2 ring-1 ring-utama-100">
                 <p className="text-xs text-stone-500">{d.labelNomor}</p>
-                <p className="font-mono text-base font-semibold break-all text-hijau-900">
+                <p className="font-mono text-base font-semibold break-all text-utama-900">
                   {dok.nomor || <span className="font-sans text-sm font-normal text-stone-500">Belum diisi</span>}
                 </p>
               </div>

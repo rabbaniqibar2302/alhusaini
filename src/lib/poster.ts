@@ -4,6 +4,7 @@ import type { FotoPenceramah } from "./penceramah";
 import type { AgendaItem, Identitas, KajianItem, KhotibItem, SholatKhususItem } from "./schemas";
 import { INFO_SHOLAT_KHUSUS, labelSholatKhusus } from "./sholat-khusus";
 import { alamatPendek } from "./site";
+import { TEMA_BAWAAN, type KunciTema } from "./tema";
 import { formatTanggal } from "./time";
 
 /**
@@ -76,6 +77,8 @@ export type IsiPoster = {
   logo: string | null;
   /** Origin situs, mis. "https://masjid.example.com". */
   situs: string;
+  /** Tema warna situs; ikut menentukan versi (tautan) poster. */
+  tema: KunciTema;
   namaBerkas: string;
 };
 
@@ -83,19 +86,26 @@ export type KonteksPoster = {
   identitas: Pick<Identitas, "nama" | "wilayah" | "alamat" | "alamatSingkat">;
   logo: string | null;
   situs: string;
+  tema: KunciTema;
 };
 
 export function konteksPoster(
   identitas: KonteksPoster["identitas"],
   logo: { url: string } | null,
   situs: string,
+  tema: KunciTema = TEMA_BAWAAN,
 ): KonteksPoster {
   const { nama, wilayah, alamat, alamatSingkat } = identitas;
-  return { identitas: { nama, wilayah, alamat, alamatSingkat }, logo: logo?.url ?? null, situs };
+  return { identitas: { nama, wilayah, alamat, alamatSingkat }, logo: logo?.url ?? null, situs, tema };
 }
 
 function dariKonteks(k: KonteksPoster) {
-  return { masjid: { nama: k.identitas.nama, wilayah: k.identitas.wilayah }, logo: k.logo, situs: k.situs };
+  return {
+    masjid: { nama: k.identitas.nama, wilayah: k.identitas.wilayah },
+    logo: k.logo,
+    situs: k.situs,
+    tema: k.tema,
+  };
 }
 
 function barisMasjid(k: KonteksPoster): BarisPoster {

@@ -32,7 +32,7 @@ export function FormPengaturanTv({ setelan }: { setelan: SetelanTv }) {
   return (
     <form onSubmit={form.onSubmit} className="space-y-6" noValidate>
       <fieldset>
-        <legend className="text-sm font-semibold text-hijau-900">Putar suara adzan pada waktu</legend>
+        <legend className="text-sm font-semibold text-utama-900">Putar suara adzan pada waktu</legend>
         <p className="mt-0.5 text-xs text-stone-500">
           Matikan waktu yang adzannya dikumandangkan langsung oleh muadzin, supaya tidak bersamaan. Jumat = Dzuhur hari
           Jumat (adzan biasanya dikumandangkan saat khotib naik mimbar).
@@ -55,14 +55,14 @@ export function FormPengaturanTv({ setelan }: { setelan: SetelanTv }) {
             step={10}
             defaultValue={setelan.volumeAdzan}
             onChange={(e) => setVolume(Number(e.currentTarget.value))}
-            className="mt-2 w-full accent-hijau-700"
+            className="mt-2 w-full accent-utama-700"
           />
           {galat.volumeAdzan && <p className="mt-1 text-xs text-red-700">{galat.volumeAdzan[0]}</p>}
         </div>
       </fieldset>
 
       <fieldset>
-        <legend className="text-sm font-semibold text-hijau-900">Jeda adzan ke iqomah (menit)</legend>
+        <legend className="text-sm font-semibold text-utama-900">Jeda adzan ke iqomah (menit)</legend>
         <p className="mt-0.5 text-xs text-stone-500">
           Setelah masuk waktu sholat, layar menampilkan hitung mundur iqomah. Isi 0 untuk tidak menampilkannya.
         </p>
@@ -84,7 +84,7 @@ export function FormPengaturanTv({ setelan }: { setelan: SetelanTv }) {
       </fieldset>
 
       <fieldset className="grid gap-4 sm:grid-cols-3">
-        <legend className="mb-3 text-sm font-semibold text-hijau-900">Layar saat sholat & tampilan</legend>
+        <legend className="mb-3 text-sm font-semibold text-utama-900">Layar saat sholat & tampilan</legend>
         <Bidang
           label="Layar sholat (menit)"
           name="durasiSholat"

@@ -176,15 +176,15 @@ function JamDigital({ sekarang, kecil = false }: { sekarang: number | null; keci
   return (
     <p className={`leading-none font-bold tabular-nums ${kecil ? "text-[2.6rem]" : "text-[5rem]"}`}>
       {jm}
-      <span className={`text-emas-300 ${kecil ? "text-[1.6rem]" : "text-[2.5rem]"}`}>:{dt}</span>
+      <span className={`text-aksen-300 ${kecil ? "text-[1.6rem]" : "text-[2.5rem]"}`}>:{dt}</span>
     </p>
   );
 }
 
 function AdzanBerkumandang({ label, gelap = false }: { label: string; gelap?: boolean }) {
   return (
-    <p className={`mb-6 flex items-center gap-3 text-[2.4rem] font-semibold ${gelap ? "text-white/70" : "text-hijau-50"}`}>
-      <IkonSuara className="size-[2.6rem] animate-pulse text-emas-300" /> Adzan {label} sedang berkumandang
+    <p className={`mb-6 flex items-center gap-3 text-[2.4rem] font-semibold ${gelap ? "text-white/70" : "text-utama-50"}`}>
+      <IkonSuara className="size-[2.6rem] animate-pulse text-aksen-300" /> Adzan {label} sedang berkumandang
     </p>
   );
 }
@@ -227,7 +227,7 @@ function IsianBerjalan({ durasi, berjalan }: { durasi: number; berjalan: number 
   return (
     <div
       ref={ref}
-      className="size-full origin-left bg-emas-400"
+      className="size-full origin-left bg-aksen-400"
       style={{ transform: `scaleX(${Math.min(1, mulaiDari / durasi)})` }}
     />
   );
@@ -256,7 +256,7 @@ function IndikatorTampilan({
     <div aria-hidden="true" className="absolute inset-x-12 bottom-5 flex gap-3">
       {Array.from({ length: jumlah }, (_, i) => (
         <div key={i} className="h-2 flex-1 overflow-hidden rounded-full bg-white/20">
-          {i < aktif && <div className="size-full bg-emas-400" />}
+          {i < aktif && <div className="size-full bg-aksen-400" />}
           {i === aktif && <IsianBerjalan key={putaran} durasi={durasi} berjalan={berjalan} />}
         </div>
       ))}
@@ -281,7 +281,7 @@ function LayarFase({
   const gelap = fase.jenis !== "iqomah";
   return (
     <div
-      className={`absolute inset-0 z-20 flex flex-col p-10 ${gelap ? "bg-black text-white/80" : "pola-islami bg-hijau-950 text-white"}`}
+      className={`absolute inset-0 z-20 flex flex-col p-10 ${gelap ? "bg-black text-white/80" : "pola-islami bg-utama-950 text-white"}`}
     >
       <div className={`flex items-center justify-between ${gelap ? "opacity-50" : ""}`}>
         <div className="flex items-center gap-4">
@@ -294,12 +294,12 @@ function LayarFase({
         {fase.jenis === "iqomah" && (
           <>
             {adzan && <AdzanBerkumandang label={adzan} />}
-            <p className="text-[3rem] font-semibold text-emas-300">Waktu Sholat {fase.sholat.label} · {fase.sholat.jam}</p>
+            <p className="text-[3rem] font-semibold text-aksen-300">Waktu Sholat {fase.sholat.label} · {fase.sholat.jam}</p>
             <p className="mt-4 text-[4.4rem] font-extrabold tracking-[0.35em]">IQOMAH</p>
-            <p className="mt-2 text-[17rem] leading-none font-extrabold text-emas-200 tabular-nums">
+            <p className="mt-2 text-[17rem] leading-none font-extrabold text-aksen-200 tabular-nums">
               {formatHitungMundur(fase.selesai - sekarang, true)}
             </p>
-            <p className="mt-10 text-[2.4rem] text-hijau-50">Luruskan dan rapatkan shaf. Mohon nonaktifkan HP.</p>
+            <p className="mt-10 text-[2.4rem] text-utama-50">Luruskan dan rapatkan shaf. Mohon nonaktifkan HP.</p>
           </>
         )}
         {fase.jenis === "sholat" && (
@@ -311,7 +311,7 @@ function LayarFase({
         {fase.jenis === "jumat" && (
           <>
             {adzan && <AdzanBerkumandang label={adzan} gelap />}
-            <p className="text-[2.4rem] font-semibold tracking-[0.3em] text-emas-300/80 uppercase">Sholat Jumat</p>
+            <p className="text-[2.4rem] font-semibold tracking-[0.3em] text-aksen-300/80 uppercase">Sholat Jumat</p>
             <p className="mt-4 text-[4.2rem] font-bold">Khutbah sedang berlangsung</p>
             <p className="mt-6 text-[2.2rem] text-white/50">Harap tenang, tidak berbicara, dan nonaktifkan HP</p>
           </>
@@ -379,7 +379,7 @@ export function LayarTv({ data }: { data: DataTv }) {
     <p
       lang="ar"
       dir="rtl"
-      className={`min-w-0 shrink-4 truncate font-arab leading-normal text-emas-300 ${
+      className={`min-w-0 shrink-4 truncate font-arab leading-normal text-aksen-300 ${
         tataNama.bertumpuk ? "text-[2rem]" : "text-[2.5rem]"
       }`}
     >
@@ -399,7 +399,7 @@ export function LayarTv({ data }: { data: DataTv }) {
         interaksi ? "" : "cursor-none"
       }`}
     >
-      <div className="pola-islami relative flex h-[67.5rem] w-[120rem] flex-col overflow-hidden bg-hijau-950">
+      <div className="pola-islami relative flex h-[67.5rem] w-[120rem] flex-col overflow-hidden bg-utama-950">
         <div className="flex min-h-0 flex-1">
           {/* Kiri: identitas masjid + tampilan bergantian */}
           <div className="flex min-w-0 flex-1 flex-col p-8 pr-7">
@@ -424,8 +424,8 @@ export function LayarTv({ data }: { data: DataTv }) {
                 </div>
                 <div className={`flex items-baseline gap-5 ${tataNama.bertumpuk ? "mt-1" : "mt-3"}`}>
                   {tataNama.bertumpuk && namaArab}
-                  <p className="flex min-w-0 flex-1 items-center gap-2 text-[1.45rem] text-hijau-100">
-                    <IkonPin className="size-[1.6rem] shrink-0 text-emas-300" />
+                  <p className="flex min-w-0 flex-1 items-center gap-2 text-[1.45rem] text-utama-100">
+                    <IkonPin className="size-[1.6rem] shrink-0 text-aksen-300" />
                     <span className="truncate">{identitas.alamat}</span>
                   </p>
                 </div>
@@ -433,14 +433,14 @@ export function LayarTv({ data }: { data: DataTv }) {
               {fase?.jenis === "normal" && sisaMenuju !== null && (
                 <div
                   className={`shrink-0 rounded-[1.4rem] px-7 py-3 text-right ring-1 ${
-                    menjelang ? "animate-pulse bg-emas-400 text-hijau-950 ring-emas-200" : "bg-hijau-900 ring-white/15"
+                    menjelang ? "animate-pulse bg-aksen-400 text-utama-950 ring-aksen-200" : "bg-utama-900 ring-white/15"
                   }`}
                 >
-                  <p className={`text-[1.45rem] ${menjelang ? "font-semibold" : "text-hijau-100"}`}>
+                  <p className={`text-[1.45rem] ${menjelang ? "font-semibold" : "text-utama-100"}`}>
                     Menuju adzan <span className="font-bold">{fase.berikut.label}</span> · {fase.berikut.jam}
                   </p>
                   <p
-                    className={`text-[3.3rem] leading-tight font-extrabold tabular-nums ${menjelang ? "" : "text-emas-300"}`}
+                    className={`text-[3.3rem] leading-tight font-extrabold tabular-nums ${menjelang ? "" : "text-aksen-300"}`}
                   >
                     −{formatHitungMundur(sisaMenuju)}
                   </p>
@@ -448,7 +448,7 @@ export function LayarTv({ data }: { data: DataTv }) {
               )}
             </header>
 
-            <div className="relative mt-6 min-h-0 flex-1 overflow-hidden rounded-[2rem] bg-hijau-900 ring-1 ring-white/10">
+            <div className="relative mt-6 min-h-0 flex-1 overflow-hidden rounded-[2rem] bg-utama-900 ring-1 ring-white/10">
               {slide.map((s, i) => (
                 <div
                   key={s.kunci}
@@ -469,36 +469,36 @@ export function LayarTv({ data }: { data: DataTv }) {
               )}
 
               {fase?.jenis === "normal" && suara.adzanBerkumandang && (
-                <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-hijau-950 text-center">
-                  <IkonSuara className="size-[6rem] animate-pulse text-emas-300" />
+                <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-utama-950 text-center">
+                  <IkonSuara className="size-[6rem] animate-pulse text-aksen-300" />
                   <p className="mt-4 text-[4rem] font-extrabold">Adzan {suara.adzanBerkumandang}</p>
-                  <p className="mt-2 text-[2.1rem] text-hijau-50">sedang berkumandang</p>
+                  <p className="mt-2 text-[2.1rem] text-utama-50">sedang berkumandang</p>
                 </div>
               )}
               {fase?.jenis === "normal" && !suara.adzanBerkumandang && sisaMenuju !== null && sisaMenuju <= 5 * 60_000 && (
-                <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-hijau-950 text-center">
-                  <p className="text-[2.6rem] font-semibold text-emas-300">Sebentar lagi adzan {fase.berikut.label}</p>
-                  <p className="mt-2 text-[13rem] leading-none font-extrabold text-emas-200 tabular-nums">
+                <div className="pola-islami absolute inset-0 z-10 flex flex-col items-center justify-center bg-utama-950 text-center">
+                  <p className="text-[2.6rem] font-semibold text-aksen-300">Sebentar lagi adzan {fase.berikut.label}</p>
+                  <p className="mt-2 text-[13rem] leading-none font-extrabold text-aksen-200 tabular-nums">
                     {formatHitungMundur(sisaMenuju, true)}
                   </p>
-                  <p className="mt-6 text-[2.1rem] text-hijau-50">Mari bersiap menunaikan sholat berjamaah</p>
+                  <p className="mt-6 text-[2.1rem] text-utama-50">Mari bersiap menunaikan sholat berjamaah</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Kanan: jam, tanggal, dan jadwal sholat */}
-          <aside className="flex w-[36rem] shrink-0 flex-col border-l border-white/10 bg-hijau-900/85">
+          <aside className="flex w-[36rem] shrink-0 flex-col border-l border-white/10 bg-utama-900/85">
             <div className="px-8 pt-7 pb-5 text-center">
               <div className="flex items-center justify-center gap-6">
                 <JamAnalog sekarang={sekarang} className="size-[11.5rem] shrink-0" />
                 <div className="text-left">
                   <JamDigital sekarang={sekarang} />
-                  <p className="mt-2 text-[1.4rem] tracking-[0.3em] text-hijau-100">WIB</p>
+                  <p className="mt-2 text-[1.4rem] tracking-[0.3em] text-utama-100">WIB</p>
                 </div>
               </div>
               <p className="mt-5 text-[1.9rem] leading-tight font-semibold">{formatTanggal(tanggal, { hari: true })}</p>
-              <p className="mt-1 text-[1.65rem] text-emas-300">{hijriah}</p>
+              <p className="mt-1 text-[1.65rem] text-aksen-300">{hijriah}</p>
             </div>
             <ul className="flex flex-1 flex-col">
               {waktu.map(({ kunci, label, Ikon }) => {
@@ -510,10 +510,10 @@ export function LayarTv({ data }: { data: DataTv }) {
                   <li
                     key={kunci}
                     className={`flex flex-1 items-center gap-5 border-t px-8 transition-colors ${
-                      aktif ? "border-emas-300 bg-emas-400 text-hijau-950" : "border-white/10"
+                      aktif ? "border-aksen-300 bg-aksen-400 text-utama-950" : "border-white/10"
                     } ${lewat ? "opacity-50" : ""}`}
                   >
-                    <Ikon className={`size-[2.6rem] shrink-0 ${aktif ? "" : sholat ? "text-emas-300" : "text-hijau-200"}`} />
+                    <Ikon className={`size-[2.6rem] shrink-0 ${aktif ? "" : sholat ? "text-aksen-300" : "text-utama-200"}`} />
                     <span className={`flex-1 text-[2.1rem] ${sholat ? "font-semibold" : ""}`}>
                       {kunci === "dzuhur" && jumat ? "Jumat" : label}
                     </span>
@@ -522,7 +522,7 @@ export function LayarTv({ data }: { data: DataTv }) {
                 );
               })}
             </ul>
-            <p className="border-t border-white/10 px-8 py-2.5 text-center text-[1.15rem] text-hijau-100">
+            <p className="border-t border-white/10 px-8 py-2.5 text-center text-[1.15rem] text-utama-100">
               {jadwal.sumber === "kemenag" ? "Sumber: Kemenag RI (myQuran)" : "Perkiraan perhitungan metode Kemenag"} ·{" "}
               {LOKASI_SHOLAT.kota}
             </p>
@@ -530,8 +530,8 @@ export function LayarTv({ data }: { data: DataTv }) {
         </div>
 
         {/* Bawah: teks berjalan */}
-        <div className="flex h-[5.5rem] shrink-0 items-center bg-emas-400 text-hijau-950">
-          <div className="flex h-full shrink-0 items-center gap-3 bg-hijau-800 px-8 text-[1.7rem] font-extrabold tracking-wider text-emas-300">
+        <div className="flex h-[5.5rem] shrink-0 items-center bg-aksen-400 text-utama-950">
+          <div className="flex h-full shrink-0 items-center gap-3 bg-utama-800 px-8 text-[1.7rem] font-extrabold tracking-wider text-aksen-300">
             <IkonPengumuman className="size-[2.2rem]" /> INFO
           </div>
           <div className="relative h-full min-w-0 flex-1 overflow-hidden">
@@ -561,7 +561,7 @@ export function LayarTv({ data }: { data: DataTv }) {
         {suara.perluIzin && (
           <p
             role="status"
-            className="absolute bottom-[7rem] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full bg-emas-400 px-8 py-3.5 text-[1.6rem] font-semibold whitespace-nowrap text-hijau-950 shadow-2xl ring-4 ring-emas-200/60"
+            className="absolute bottom-[7rem] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full bg-aksen-400 px-8 py-3.5 text-[1.6rem] font-semibold whitespace-nowrap text-utama-950 shadow-2xl ring-4 ring-aksen-200/60"
           >
             <IkonSuaraMati className="size-[2.2rem] shrink-0" />
             Suara adzan belum aktif — klik layar atau tekan tombol OK pada remote (Enter pada keyboard)

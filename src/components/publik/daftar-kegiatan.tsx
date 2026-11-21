@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { IkonFoto, IkonKalender, IkonPerbesar } from "@/components/ikon";
 import { PenampilFoto, type ItemFoto } from "./penampil-foto";
 
@@ -18,7 +18,7 @@ function Sampul({ item, onBuka, besar }: { item: KegiatanTampil; onBuka: (i: num
   const sampul = item.foto[0];
   if (!sampul) {
     return (
-      <div className="pola-islami grid aspect-[4/3] place-items-center bg-hijau-900 text-emas-300">
+      <div className="pola-islami grid aspect-[4/3] place-items-center bg-utama-900 text-aksen-300">
         <IkonKalender className="size-10" />
       </div>
     );
@@ -27,7 +27,7 @@ function Sampul({ item, onBuka, besar }: { item: KegiatanTampil; onBuka: (i: num
     <button
       type="button"
       onClick={() => onBuka(0)}
-      className="group relative block aspect-[4/3] w-full overflow-hidden bg-hijau-50"
+      className="group relative block aspect-[4/3] w-full overflow-hidden bg-utama-50"
       aria-label={`Lihat foto kegiatan: ${item.judul}`}
     >
       <Image
@@ -54,7 +54,7 @@ function Sampul({ item, onBuka, besar }: { item: KegiatanTampil; onBuka: (i: num
 
 function Tanggal({ item }: { item: KegiatanTampil }) {
   return (
-    <p className="flex flex-wrap items-center gap-2 text-xs font-medium text-emas-700">
+    <p className="flex flex-wrap items-center gap-2 text-xs font-medium text-aksen-700">
       <IkonKalender className="size-4" />
       {item.tanggalTampil}
       {item.akanDatang && (
@@ -79,7 +79,7 @@ export function DaftarKegiatan({ items, lengkap = false }: { items: KegiatanTamp
       {lengkap ? (
         <ul className="space-y-6">
           {items.map((item, k) => (
-            <li key={item.id}>
+            <li key={item.id} data-muncul>
               <article
                 id={`kegiatan-${item.id}`}
                 className="grid scroll-mt-32 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80 md:grid-cols-[2fr_3fr]"
@@ -87,7 +87,7 @@ export function DaftarKegiatan({ items, lengkap = false }: { items: KegiatanTamp
                 <Sampul item={item} besar onBuka={(f) => setBuka({ kegiatan: k, foto: f })} />
                 <div className="p-5">
                   <Tanggal item={item} />
-                  <h2 className="mt-1.5 text-xl font-bold text-hijau-900">{item.judul}</h2>
+                  <h2 className="mt-1.5 text-xl font-bold text-utama-900">{item.judul}</h2>
                   {item.keterangan && (
                     <p className="mt-2 leading-relaxed whitespace-pre-line text-stone-700">{item.keterangan}</p>
                   )}
@@ -98,7 +98,7 @@ export function DaftarKegiatan({ items, lengkap = false }: { items: KegiatanTamp
                           <button
                             type="button"
                             onClick={() => setBuka({ kegiatan: k, foto: i })}
-                            className="relative block aspect-square w-full overflow-hidden rounded-lg bg-stone-100 ring-1 ring-stone-200 transition hover:ring-hijau-400"
+                            className="relative block aspect-square w-full overflow-hidden rounded-lg bg-stone-100 ring-1 ring-stone-200 transition hover:ring-utama-400"
                             aria-label={`Foto ${i + 1} dari ${item.foto.length}: ${item.judul}`}
                           >
                             <Image src={f.url} alt="" fill sizes="96px" className="object-cover" />
@@ -115,12 +115,15 @@ export function DaftarKegiatan({ items, lengkap = false }: { items: KegiatanTamp
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, k) => (
-            <li key={item.id}>
-              <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80">
+            <li key={item.id} data-muncul style={{ "--urutan": k % 3 } as CSSProperties}>
+              <article
+                data-sorot
+                className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-utama-950/10"
+              >
                 <Sampul item={item} onBuka={(f) => setBuka({ kegiatan: k, foto: f })} />
                 <div className="flex-1 p-4">
                   <Tanggal item={item} />
-                  <h3 className="mt-1.5 font-bold text-hijau-900">{item.judul}</h3>
+                  <h3 className="mt-1.5 font-bold text-utama-900">{item.judul}</h3>
                   {item.keterangan && (
                     <p className="mt-1.5 line-clamp-3 text-sm whitespace-pre-line text-stone-600">{item.keterangan}</p>
                   )}

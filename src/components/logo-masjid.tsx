@@ -23,7 +23,7 @@ export function LogoMasjid({
 }) {
   if (!logo) {
     return (
-      <span className={`grid shrink-0 place-items-center rounded-full bg-emas-400 text-hijau-950 ${className}`}>
+      <span className={`grid shrink-0 place-items-center rounded-full bg-aksen-400 text-utama-950 ${className}`}>
         <IkonMasjid className={ikonClassName} />
       </span>
     );

@@ -25,7 +25,7 @@ export function GaleriFoto({
               onClick={() => setIndeks(i)}
               className="group block w-full overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-stone-200/80 transition hover:shadow-md"
             >
-              <span className="relative block aspect-[4/3] overflow-hidden bg-hijau-50">
+              <span className="relative block aspect-[4/3] overflow-hidden bg-utama-50">
                 <Image
                   src={item.url}
                   alt={item.alt}

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { IkonJam, IkonKalender, IkonPin } from "@/components/ikon";
 import { hitungMundurAgenda, labelTanggalAgenda } from "@/lib/agenda";
 import { posterAgenda, tautanPoster, type KonteksPoster } from "@/lib/poster";
@@ -12,11 +13,11 @@ const BATAS_RINGKAS = 180;
 function TanpaPoster({ tanggal }: { tanggal: string }) {
   const [, bulan, tgl] = tanggal.split("-").map(Number);
   return (
-    <div className="pola-islami grid size-full place-items-center bg-linear-to-b from-hijau-700 to-hijau-950 text-center text-white">
+    <div className="pola-islami grid size-full place-items-center bg-linear-to-b from-utama-700 to-utama-950 text-center text-white">
       <div>
-        <IkonKalender className="mx-auto size-8 text-emas-300" />
+        <IkonKalender className="mx-auto size-8 text-aksen-300" />
         <p className="mt-2 text-5xl leading-none font-extrabold">{tgl}</p>
-        <p className="mt-1 text-sm font-semibold tracking-[0.2em] text-emas-200 uppercase">{NAMA_BULAN[bulan - 1]}</p>
+        <p className="mt-1 text-sm font-semibold tracking-[0.2em] text-aksen-200 uppercase">{NAMA_BULAN[bulan - 1]}</p>
       </div>
     </div>
   );
@@ -28,11 +29,12 @@ function KartuAgenda({ item, hariIni, poster }: { item: AgendaItem; hariIni: str
   const panjang = item.keterangan.length > BATAS_RINGKAS;
   return (
     <article
-      className={`flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-sm ring-1 ${
-        dekat ? "ring-2 ring-emas-400" : "ring-stone-200/80"
+      data-sorot
+      className={`relative flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-sm ring-1 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-utama-950/10 ${
+        dekat ? "sinar-tepi ring-2 ring-aksen-400 [--tebal-sinar:2.5px]" : "ring-stone-200/80"
       }`}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-hijau-950">
+      <div className="relative aspect-[4/5] overflow-hidden bg-utama-950">
         {item.poster ? (
           <>
             {/* Latar buram dari poster yang sama, supaya poster utuh tidak dikelilingi ruang kosong. */}
@@ -49,28 +51,28 @@ function KartuAgenda({ item, hariIni, poster }: { item: AgendaItem; hariIni: str
         )}
         <p
           className={`pointer-events-none absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-bold shadow ${
-            dekat ? "bg-emas-400 text-hijau-950" : "bg-white/95 text-hijau-900"
+            dekat ? "bg-aksen-400 text-utama-950" : "bg-white/95 text-utama-900"
           }`}
         >
           {mundur}
         </p>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-lg leading-snug font-bold text-hijau-900">{item.judul}</h3>
+        <h3 className="text-lg leading-snug font-bold text-utama-900">{item.judul}</h3>
         <ul className="mt-2 space-y-1 text-sm text-stone-600">
           <li className="flex items-center gap-2">
-            <IkonKalender className="size-4 shrink-0 text-emas-600" />
+            <IkonKalender className="size-4 shrink-0 text-aksen-600" />
             {labelTanggalAgenda(item)}
           </li>
           {item.jam && (
             <li className="flex items-center gap-2">
-              <IkonJam className="size-4 shrink-0 text-emas-600" />
+              <IkonJam className="size-4 shrink-0 text-aksen-600" />
               Pukul {item.jam} WIB
             </li>
           )}
           {item.lokasi && (
             <li className="flex items-start gap-2">
-              <IkonPin className="mt-0.5 size-4 shrink-0 text-emas-600" />
+              <IkonPin className="mt-0.5 size-4 shrink-0 text-aksen-600" />
               {item.lokasi}
             </li>
           )}
@@ -80,8 +82,8 @@ function KartuAgenda({ item, hariIni, poster }: { item: AgendaItem; hariIni: str
             <details className="group mt-3 text-sm text-stone-700">
               <summary className="cursor-pointer list-none">
                 <span className="line-clamp-3 whitespace-pre-line group-open:hidden">{item.keterangan}</span>
-                <span className="mt-1 inline-block font-semibold text-hijau-800 group-open:hidden">Baca selengkapnya</span>
-                <span className="hidden font-semibold text-hijau-800 group-open:inline">Tutup</span>
+                <span className="mt-1 inline-block font-semibold text-utama-800 group-open:hidden">Baca selengkapnya</span>
+                <span className="hidden font-semibold text-utama-800 group-open:inline">Tutup</span>
               </summary>
               <p className="mt-1 whitespace-pre-line">{item.keterangan}</p>
             </details>
@@ -109,8 +111,8 @@ export function DaftarAgenda({
 }) {
   return (
     <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((x) => (
-        <li key={x.id}>
+      {items.map((x, i) => (
+        <li key={x.id} data-muncul style={{ "--urutan": i % 3 } as CSSProperties}>
           <KartuAgenda item={x} hariIni={hariIni} poster={poster} />
         </li>
       ))}

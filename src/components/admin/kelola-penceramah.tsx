@@ -142,7 +142,7 @@ export function KelolaPenceramah({ orang }: { orang: OrangPenceramah[] }) {
                   className="aspect-[4/5] rounded-xl"
                 />
                 <div className="flex flex-1 flex-col gap-1.5 px-1.5 pt-2 pb-1">
-                  <p className="line-clamp-2 text-sm leading-snug font-semibold text-hijau-900">{o.nama}</p>
+                  <p className="line-clamp-2 text-sm leading-snug font-semibold text-utama-900">{o.nama}</p>
                   <p className="text-[0.7rem] leading-snug text-stone-500">
                     {o.jadwal.length > 0 ? o.jadwal.join(" · ") : "Tidak ada di jadwal saat ini"}
                   </p>
@@ -157,7 +157,7 @@ export function KelolaPenceramah({ orang }: { orang: OrangPenceramah[] }) {
                     <button
                       type="button"
                       onClick={() => pilih(o)}
-                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-hijau-800 ring-1 ring-hijau-200 hover:bg-hijau-50"
+                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-utama-800 ring-1 ring-utama-200 hover:bg-utama-50"
                     >
                       <IkonUnggah className="size-3.5" /> {o.foto ? "Ganti" : "Unggah"}
                     </button>
